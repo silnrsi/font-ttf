@@ -1,6 +1,6 @@
 package Font::TTF::PSNames;
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::PSNames - Utilities for Postscript glyph name processing
 
@@ -4361,8 +4361,6 @@ sub lookup
     if (defined $names{$val})
     {
         return $names{$val} if ($noalt || $names{$val} !~ m/^(?:afii|SF)/o);
-#        return $names{$val} if ($noalt);
-#        return $doubles{$val} || $names{$val};
     }
     if ($num > 0xFFFF)
     { return "u$val"; }
@@ -4374,17 +4372,18 @@ sub lookup
 
 =head2 parse ( $glyphname )
 
-Parse an Adobe-conformant glyph name, generating a Unicode character string equivalent to the glyph (or
-glyph components, should the name represent a ligature). In scalar context, returns just the Unicode string
-(or undef if the glyph name is non-conformant). In list context, the first item is the Unicode string (or undef),
-subsequent items, if any, are the extensions present on the glyph name. The '.' that precedes each extension
-is not included.
+Parse an Adobe-conformant glyph name, generating a Unicode codepoint sequence equivalent to the glyph (or
+glyph components, should the name represent a ligature). In scalar context, returns a reference to an
+array of Unicodes (decimal). Array is empty if the glyph name is non-conformant.
+In list context, the first item returned is the same array reference as above. The second item
+is a reference to an array containing the extensions (if any) present on the glyph name. 
+The '.' that precedes each extension is not included.
 
 =cut
 
 sub parse
 {
-	my ($gname, @extensions, $res);
+	my ($gname, @USVs, @extensions);
 	($gname, @extensions) = split('\.', $_[0]);
 	# if name originally started with . (e.g., .null) then $gname will now be '' ... need to fix that up:
 	$gname = '.' . shift(@extensions) if $gname eq '';
@@ -4394,30 +4393,21 @@ sub parse
 		{
 			if ($gname =~ /^u[0-9a-fA-F]{4,6}$/)
 			{
-				$res .= pack('U', hex(substr($gname, 1)));
+				push @USVs, hex(substr($gname, 1));
 			}
 			elsif ($gname =~ /^uni([0-9a-fA-F]{4,4})+$/)
 			{
-				foreach ($gname =~ /([0-9a-fA-F]{4,4})/g)
-				{
-					$res .= pack('U', hex($_));
-				}
+				push @USVs, map {hex($_)} ($gname =~ /([0-9a-fA-F]{4,4})/g)
 			}
 			elsif (exists $agl{$gname})
 			{
-				$res .= $agl{$gname};
-			}
-			else
-			{
-				goto nothing;
+				push @USVs, unpack ('U*', $agl{$gname});
 			}
 		}
-		unshift @extensions, $res;
-		return wantarray ? @extensions : $res;
 	}
-nothing: 
-	unshift @extensions, undef;
-	return wantarray ? @extensions : undef;
+	return \@USVs unless wantarray;
+	my @res = (\@USVs, \@extensions);
+	return @res;	
 }
 
 #Code used to parse Adobe's agl file and generate text for %agl initialization:
