@@ -442,7 +442,7 @@ sub out
         }
         $dir{$k} = pack("A4NNN", $k, $csum, $oldloc, $len);
         $msum += $csum + unpack("%32N*", $dir{$k});
-        if ($msum > 0xffffffff) { $msum -= 0xffffffff; $msum--; }
+        while ($msum > 0xffffffff) { $msum -= 0xffffffff; $msum--; }
         $fh->seek($loc, 0);
     }
 
