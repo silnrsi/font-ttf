@@ -9,7 +9,9 @@ Font::TTF::PSNames - Utilities for Postscript glyph name processing
 =cut
 
 use strict;
-use vars qw(%names %agl);
+use vars qw(%names %agl @EXPORT_OK);
+use Exporter qw( import );
+@EXPORT_OK = qw( parse lookup);
 
 # Adobe Glyph List for New Fonts	
 # from http://partners.adobe.com/asn/tech/type/aglfn13.txt
@@ -4344,24 +4346,28 @@ map { $agl{$names{$_}} = pack('U',hex ($_))} (keys %names);
 
 # %doubles = (map{$_ => "uni$_"} qw(0394 03A9 0162 2215 00AD 02C9 03BC 2219 00A0 0163));
 
-=head2 lookup ( $usv [, $noAlt ])
+=head2 lookup ( $usv [, $noAlt [, $noUni] ])
 
 return the Adobe-recommended glyph name for a specific Unicode codepoint (integer). By default
 returns C<uniXXXX> names rather than C<afiiNNNNN> or C<SFnnnnnn> names
 
 If C<$noAlt> is true, C<afii> and C<SF> names are returned rather than C<uniXXXX>.
 
+if C<$noUni> is true, returns undef if it would have to resort to C<uniXXXX> or C<uXXXXXX> 
+style names. Essentially this represents a straight lookup in the Adobe-recommended list.
+
 =cut
 
 sub lookup
 {
-    my ($num, $noalt) = @_;
+    my ($num, $noalt, $noUni) = @_;
     my ($val) = sprintf("%04X", $num);
 
     if (defined $names{$val})
     {
         return $names{$val} if ($noalt || $names{$val} !~ m/^(?:afii|SF)/o);
     }
+    return undef if $noUni;
     if ($num > 0xFFFF)
     { return "u$val"; }
     elsif ($num)
