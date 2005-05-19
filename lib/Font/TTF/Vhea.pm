@@ -2,7 +2,7 @@ package Font::TTF::Vhea;
 
 =head1 NAME
 
-TTF:Vhea - Vertical Header table
+Font::TTF::Vhea - Vertical Header table
 
 =head1 DESCRIPTION
 

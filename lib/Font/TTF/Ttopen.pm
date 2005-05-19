@@ -2,7 +2,7 @@ package Font::TTF::Ttopen;
 
 =head1 NAME
 
-Font::TTF::ttopen - Opentype superclass for standard Opentype lookup based tables
+Font::TTF::Ttopen - Opentype superclass for standard Opentype lookup based tables
 (GSUB and GPOS)
 
 =head1 DESCRIPTION

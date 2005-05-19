@@ -2,7 +2,7 @@ package Font::TTF::GDEF;
 
 =head1 NAME
 
-Font::TTF::Gdef - Opentype GDEF table support
+Font::TTF::GDEF - Opentype GDEF table support
 
 =head1 DESCRIPTION
 

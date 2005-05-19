@@ -2,7 +2,7 @@ package Font::TTF::Hhea;
 
 =head1 NAME
 
-TTF:Hhea - Horizontal Header table
+Font::TTF::Hhea - Horizontal Header table
 
 =head1 DESCRIPTION
 

@@ -1,7 +1,7 @@
 
 =head1 TITLE
 
-Manual.pod - Information regarding the whole module set
+Font::TTF::Manual - Information regarding the whole module set
 
 =head1 INTRODUCTION
 

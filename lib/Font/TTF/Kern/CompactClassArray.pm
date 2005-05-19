@@ -2,7 +2,7 @@ package Font::TTF::Kern::CompactClassArray;
 
 =head1 NAME
 
-Font::TTF::AAT::Kern::CompactClassArray
+Font::TTF::Kern::CompactClassArray
 
 =head1 METHODS
 

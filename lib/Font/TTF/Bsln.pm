@@ -2,7 +2,7 @@ package Font::TTF::Bsln;
 
 =head1 NAME
 
-Font::TTF::AAT::Bsln - Baseline table in a font
+Font::TTF::Bsln - Baseline table in a font
 
 =head1 DESCRIPTION
 

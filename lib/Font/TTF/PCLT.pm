@@ -2,7 +2,7 @@ package Font::TTF::PCLT;
 
 =head1 NAME
 
-Font::TTF::Pclt - PCLT TrueType font table
+Font::TTF::PCLT - PCLT TrueType font table
 
 =head1 DESCRIPTION
 

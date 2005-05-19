@@ -2,7 +2,7 @@ package Font::TTF::Fdsc;
 
 =head1 NAME
 
-Font::TTF::AAT::Fdsc - Font Descriptors table in a font
+Font::TTF::Fdsc - Font Descriptors table in a font
 
 =head1 DESCRIPTION
 
