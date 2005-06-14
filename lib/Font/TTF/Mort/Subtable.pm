@@ -11,6 +11,7 @@ Font::TTF::Mort::Subtable
 use strict;
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
+use IO::File;
 
 require Font::TTF::Mort::Rearrangement;
 require Font::TTF::Mort::Contextual;

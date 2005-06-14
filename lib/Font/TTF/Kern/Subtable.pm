@@ -11,6 +11,7 @@ Font::TTF::Kern::Subtable
 use strict;
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
+use IO::File;
 
 require Font::TTF::Kern::OrderedList;
 require Font::TTF::Kern::StateTable;

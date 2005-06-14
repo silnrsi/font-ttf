@@ -10,6 +10,7 @@ use strict;
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
 use Font::TTF::Mort::Subtable;
+use IO::File;
 
 =head2 $t->new
 

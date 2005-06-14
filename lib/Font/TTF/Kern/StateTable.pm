@@ -13,6 +13,7 @@ use vars qw(@ISA);
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
 use Font::TTF::Kern::Subtable;
+use IO::File;
 
 @ISA = qw(Font::TTF::Kern::Subtable);
 

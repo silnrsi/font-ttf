@@ -119,6 +119,7 @@ use strict;
 use vars qw(@ISA);
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
+use IO::File;
 
 @ISA = qw(Font::TTF::Table);
 
