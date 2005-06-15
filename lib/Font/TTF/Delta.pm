@@ -2,7 +2,7 @@ package Font::TTF::Delta;
 
 =head1 TITLE
 
-SIL::TTF::Delta - Opentype Device tables
+Font::TTF::Delta - Opentype Device tables
 
 =head1 DESCRIPTION
 
