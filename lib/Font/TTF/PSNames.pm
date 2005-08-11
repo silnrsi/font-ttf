@@ -4,6 +4,12 @@ package Font::TTF::PSNames;
 
 Font::TTF::PSNames - Utilities for Postscript glyph name processing
 
+=head1 SYNOPSIS
+
+  use Font::TTF::PSNames qw(parse lookup);
+  $name = lookup($uni);
+  $uni = parse($name);
+
 =head1 METHODS
 
 =cut
