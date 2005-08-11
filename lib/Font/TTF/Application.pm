@@ -29,6 +29,7 @@ Converts a reference to an options hash into $opt_x option variables
 
 sub opts_vars
 {
+    no strict 'refs';
     my ($opts) = @_;
     my ($k);
 
