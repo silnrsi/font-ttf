@@ -31,9 +31,10 @@ sub opts_vars
 {
     no strict 'refs';
     my ($opts) = @_;
-    my ($k);
+    my ($k, $p);
 
+    $p = caller;
     foreach $k (grep {length($_) == 1} keys %{$opts})
-    { ${"opt_$k"} = $opts->{$k}; }
+    { ${"$p::opt_$k"} = $opts->{$k}; }
 }
 
