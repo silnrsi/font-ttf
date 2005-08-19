@@ -423,21 +423,38 @@ sub XML_element
     $self;
 }
 
-=head2 @map = $t->reverse([$num])
+=head2 @map = $t->reverse(%opt)
 
-Returns a reverse map of the table of given number or the Unicode
-cmap. I.e. given a glyph gives the Unicode value for it.
+Returns a reverse map of the Unicode cmap. I.e. given a glyph gives the Unicode value for it. Options are:
+
+=over 4
+
+=item tnum
+
+Table number to use rather than the default Unicode table
+
+=item array
+
+Returns each element of reverse as an array since a glyph may be mapped by more
+than one Unicode value. The arrays are unsorted.
+
+=back
 
 =cut
 
 sub reverse
 {
-    my ($self, $tnum) = @_;
-    my ($table) = defined $tnum ? $self->{'Tables'}[$tnum] : $self->find_ms;
+    my ($self, %opt) = @_;
+    my ($table) = defined $opt{'tnum'} ? $self->{'Tables'}[$opt{'tnum'}] : $self->find_ms;
     my (@res, $code, $gid);
 
     while (($code, $gid) = each(%{$table->{'val'}}))
-    { $res[$gid] = $code unless (defined $res[$gid] && $res[$gid] > 0 && $res[$gid] < $code); }
+    {
+        if ($opt{'array'})
+        { push (@{$res[$gid]}, $code); }
+        else
+        { $res[$gid] = $code unless (defined $res[$gid] && $res[$gid] > 0 && $res[$gid] < $code); }
+    }
     @res;
 }
 

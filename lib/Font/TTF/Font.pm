@@ -118,7 +118,8 @@ use Symbol();
 
 require 5.004;
 
-$VERSION = 0.35;    # MJPH       4-MAY-2004     Various fixes to OpenType stuff, separate off scripts
+$VERSION = 0.36;    # MJPH      19-AUG-2005     Change cmap::reverse api to be opts based
+# $VERSION = 0.35;    # MJPH       4-MAY-2004     Various fixes to OpenType stuff, separate off scripts
 # $VERSION = 0.34;    # MJPH      22-MAY-2003     Update PSNames to latest AGL
 # $VERSION = 0.33;    # MJPH       9-OCT-2002     Support CFF OpenType (just by version=='OTTO'?!)
 # $VERSION = 0.32;    # MJPH       2-OCT-2002     Bug fixes to TTFBuilder, new methods and some
