@@ -112,7 +112,8 @@ sub read
     ($num, $stroff) = unpack("x2nn", $dat);
     for ($i = 0; $i < $num; $i++)
     {
-        $fh->read($dat, 12);
+        use bytes;              # hack to fix bugs in 5.8.7
+        read($fh, $dat, 12);
         ($pid, $eid, $lid, $nid, $len, $off) = unpack("n6", $dat);
         $here = $fh->tell();
         $fh->seek($self->{' OFFSET'} + $stroff + $off, 0);
