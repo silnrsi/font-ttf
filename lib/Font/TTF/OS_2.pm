@@ -68,7 +68,7 @@ Panose variable has been broken down into its elements.
 =cut
 
 use strict;
-use vars qw(@ISA @fields @lens @field_info);
+use vars qw(@ISA @fields @lens @field_info @weights);
 use Font::TTF::Table;
 
 @ISA = qw(Font::TTF::Table);
@@ -120,6 +120,8 @@ use Font::TTF::Table;
     'defaultChar' => 'S',
     'breakChar' => 'S',
     'maxLookups' => 's');
+
+@weights = qw(64 14 27 35 100 20 14 42 63 3 6 35 20 56 56 17 4 49 56 71 31 10 18 3 18 2 166);
 
 use Font::TTF::Utils;
 
@@ -248,14 +250,15 @@ be the negative of Descender.
 sub update
 {
     my ($self) = @_;
-    my ($map, @keys, $table);
+    my ($map, @keys, $table, $i, $avg, $hmtx);
 
     return undef unless ($self->SUPER::update);
 
     $self->{' PARENT'}{'cmap'}->update;
     $map = $self->{' PARENT'}{'cmap'}->find_ms || return undef;
+    $hmtx = $self->{' PARENT'}{'hmtx'}->read;
 
-    @keys = sort {$a <=> $b} keys %{$map->{'val'}};
+    @keys = sort {$a <=> $b} grep {$_ < 0x10000} keys %{$map->{'val'}};
 
     $self->{'usFirstCharIndex'} = $keys[0];
     $self->{'usLastCharIndex'} = $keys[-1];
@@ -285,7 +288,21 @@ sub update
         $self->{'sTypoDescender'} = $table->{'Descender'} = -$self->{'usWinDescent'};
         $self->{'sTypoLineGap'} = $table->{'Linegap'} = 0;
     }
-    
+
+    for ($i = 0; $i < 26; $i++)
+    { $avg += $hmtx->{'advance'}[$map->{'val'}{$i + 0x0061}] * $weights[$i]; }
+    $avg += $hmtx->{'advance'}[$map->{'val'}{0x0020}] * $weights[-1];
+    $self->{'xAvgCharWidth'} = $avg / 1000;
+
+    foreach $i (keys %{$map->{'val'}})
+    {
+        if ($i >= 0x10000)
+        {
+            $self->{'ulUnicodeRange2'} |= 0x2000000;
+            last;
+        }
+    }
+
     $self->{'Version'} = 1 if (defined $self->{'ulCodePageRange1'} && $self->{'Version'} < 1);
     $self->{'Version'} = 2 if (defined $self->{'maxLookups'} && $self->{'Version'} < 2);
     

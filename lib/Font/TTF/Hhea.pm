@@ -101,8 +101,7 @@ sub out
 
 =head2 $t->update
 
-Updates various parameters in the hhea table from the hmtx table, assuming
-the C<hmtx> table is dirty.
+Updates various parameters in the hhea table from the hmtx table.
 
 =cut
 
@@ -116,14 +115,12 @@ sub update
 
     return undef unless ($self->SUPER::update);
     return undef unless (defined $hmtx && defined $self->{' PARENT'}{'loca'});
-    
-    $res = $hmtx->read->update;
-    $res |= $self->{' PARENT'}{'loca'}->read->update;
+
+    $hmtx->read->update;
+    $self->{' PARENT'}{'loca'}->read->update;
     $glyphs = $self->{' PARENT'}{'loca'}{'glyphs'};
     $num = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
 
-    return undef unless ($res);
-    
     for ($i = 0; $i < $num; $i++)
     {
         $aw = $hmtx->{'advance'}[$i];
