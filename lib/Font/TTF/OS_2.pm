@@ -270,7 +270,7 @@ sub update
     {
         $self->{'sTypoAscender'} = $table->{'Ascender'};
         $self->{'sTypoDescender'} = $table->{'Descender'};
-        $self->{'sTypoLineGap'} = $table->{'Linegap'};
+        $self->{'sTypoLineGap'} = $table->{'LineGap'};
         $self->{'usWinAscent'} = $self->{'sTypoAscender'} + $self->{'sTypoLineGap'};
         $self->{'usWinDescent'} = -$self->{'sTypoDescender'};
     }
@@ -278,7 +278,7 @@ sub update
     {
         $table->{'Ascender'} = $self->{'sTypoAscender'};
         $table->{'Descender'} = $self->{'sTypoDescender'};
-        $table->{'Linegap'} = $self->{'sTypoLineGap'};
+        $table->{'LineGap'} = $self->{'sTypoLineGap'};
         $self->{'usWinAscent'} = $self->{'sTypoAscender'} + $self->{'sTypoLineGap'};
         $self->{'usWinDescent'} = -$self->{'sTypoDescender'};
     } 
@@ -286,7 +286,7 @@ sub update
     {
         $self->{'sTypoAscender'} = $table->{'Ascender'} = $self->{'usWinAscent'};
         $self->{'sTypoDescender'} = $table->{'Descender'} = -$self->{'usWinDescent'};
-        $self->{'sTypoLineGap'} = $table->{'Linegap'} = 0;
+        $self->{'sTypoLineGap'} = $table->{'LineGap'} = 0;
     }
 
     for ($i = 0; $i < 26; $i++)
