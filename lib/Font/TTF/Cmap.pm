@@ -278,7 +278,10 @@ sub out
     for ($i = 0; $i < $self->{'Num'}; $i++)
     {
         $s = $self->{'Tables'}[$i];
-        @keys = sort {$a <=> $b} keys %{$s->{'val'}};
+        if ($s->{'Format'} < 8)
+        { @keys = sort {$a <=> $b} grep { $_ <= 0xFFFF} keys %{$s->{'val'}}; }
+        else
+        { @keys = sort {$a <=> $b} keys %{$s->{'val'}}; }
         $s->{' outloc'} = $fh->tell();
         if ($s->{'Format'} < 8)
         { $fh->print(pack("n3", $s->{'Format'}, 0, $s->{'Ver'})); }       # come back for length
