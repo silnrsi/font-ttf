@@ -1039,16 +1039,16 @@ sub out_context
     } elsif ($type == 6 && $fmt == 3)
     {
         $r = $lookup->{'RULES'}[0][0];
-        $out .= pack('n2', $fmt, $#{$r->{'PRE'}} + 1);
+        $out .= pack('n2', $fmt, scalar @{$r->{'PRE'}});
         foreach $t (@{$r->{'PRE'}})
         { $out .= Font::TTF::Ttopen::ref_cache($t, $ctables, length($out)); }
-        $out .= pack('n', $#{$r->{'MATCH'}} + 1);
+        $out .= pack('n', scalar @{$r->{'MATCH'}});
         foreach $t (@{$r->{'MATCH'}})
         { $out .= Font::TTF::Ttopen::ref_cache($t, $ctables, length($out)); }
-        $out .= pack('n', $#{$r->{'POST'}} + 1);
+        $out .= pack('n', scalar @{$r->{'POST'}});
         foreach $t (@{$r->{'POST'}})
         { $out .= Font::TTF::Ttopen::ref_cache($t, $ctables, length($out)); }
-        $out .= pack('n', $#{$r->{'ACTION'}} + 1);
+        $out .= pack('n', scalar @{$r->{'ACTION'}});
         foreach $t (@{$r->{'ACTION'}})
         { $out .= pack('n2', @$t); }
     }

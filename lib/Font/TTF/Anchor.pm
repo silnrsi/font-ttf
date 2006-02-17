@@ -1,6 +1,6 @@
 package Font::TTF::Anchor;
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::Anchor - Anchor points for GPOS tables
 

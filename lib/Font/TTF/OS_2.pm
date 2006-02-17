@@ -266,7 +266,11 @@ sub update
     $table = $self->{' PARENT'}{'hhea'}->read;
     
     # try any way we can to get some real numbers passed around!
-    if ($table->{'Ascender'} != 0 || $table->{'Descender'} != 0)
+    if (($self->{'fsSelection'} & 128) != 0)
+    {
+        # assume the user knows what they are doing and has sensible values already
+    }
+    elsif ($table->{'Ascender'} != 0 || $table->{'Descender'} != 0)
     {
         $self->{'sTypoAscender'} = $table->{'Ascender'};
         $self->{'sTypoDescender'} = $table->{'Descender'};

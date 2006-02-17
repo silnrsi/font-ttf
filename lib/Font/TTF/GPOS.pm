@@ -1,6 +1,6 @@
 package Font::TTF::GPOS;
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::GPOS - Support for Opentype GPOS tables in conjunction with TTOpen
 

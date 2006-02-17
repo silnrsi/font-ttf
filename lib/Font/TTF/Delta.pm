@@ -1,6 +1,6 @@
 package Font::TTF::Delta;
 
-=head1 TITLE
+=head1 NAME 
 
 Font::TTF::Delta - Opentype Device tables
 

@@ -1,6 +1,6 @@
 package Font::TTF::Coverage;
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::Coverage - Opentype coverage and class definition objects
 

@@ -1,5 +1,5 @@
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::Manual - Information regarding the whole module set
 
