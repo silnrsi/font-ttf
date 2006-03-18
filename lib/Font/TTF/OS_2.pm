@@ -119,7 +119,9 @@ use Font::TTF::Table;
     'CapHeight' => 's',
     'defaultChar' => 'S',
     'breakChar' => 'S',
-    'maxLookups' => 's');
+    'maxLookups' => 's',
+    '' => '',            # i.e. v4 is basically same as v3
+    );
 
 @weights = qw(64 14 27 35 100 20 14 42 63 3 6 35 20 56 56 17 4 49 56 71 31 10 18 3 18 2 166);
 
@@ -130,7 +132,7 @@ sub init
     my ($k, $v, $c, $n, $i, $t, $j);
 
     $n = 0;
-    @lens = (76, 84, 94);
+    @lens = (76, 84, 94, 94);
     for ($j = 0; $j < $#field_info; $j += 2)
     {
         if ($field_info[$j] eq '')
@@ -140,7 +142,7 @@ sub init
         }
         ($k, $v, $c) = TTF_Init_Fields($field_info[$j], $c, $field_info[$j+1]);
         next unless defined $k && $k ne "";
-        for ($i = $n; $i < 3; $i++)
+        for ($i = $n; $i < 4; $i++)
         { $fields[$i]{$k} = $v; }
     }
 }
@@ -163,7 +165,7 @@ sub read
     $self->{' INFILE'}->read($dat, 2);
     $ver = unpack("n", $dat);
     $self->{'Version'} = $ver;
-    if ($ver < 3)
+    if ($ver < 4)
     {
         $self->{' INFILE'}->read($dat, $lens[$ver]);
         TTF_Read_Fields($self, $dat, $fields[$ver]);
