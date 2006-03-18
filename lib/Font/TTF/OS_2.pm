@@ -295,10 +295,25 @@ sub update
         $self->{'sTypoLineGap'} = $table->{'LineGap'} = 0;
     }
 
-    for ($i = 0; $i < 26; $i++)
-    { $avg += $hmtx->{'advance'}[$map->{'val'}{$i + 0x0061}] * $weights[$i]; }
-    $avg += $hmtx->{'advance'}[$map->{'val'}{0x0020}] * $weights[-1];
-    $self->{'xAvgCharWidth'} = $avg / 1000;
+    if ($self->{'Version'} < 3)
+    {
+        for ($i = 0; $i < 26; $i++)
+        { $avg += $hmtx->{'advance'}[$map->{'val'}{$i + 0x0061}] * $weights[$i]; }
+        $avg += $hmtx->{'advance'}[$map->{'val'}{0x0020}] * $weights[-1];
+        $self->{'xAvgCharWidth'} = $avg / 1000;
+    }
+    elsif ($self->{'Version'} > 2)
+    {
+        $i = 0; $avg = 0;
+        foreach (@{$hmtx->{'advance'}})
+        {
+            next unless ($_);
+            $i++;
+            $avg += $_;
+        }
+        $avg /= $i if ($i);
+        $self->{'xAvgCharWidth'} = $avg;
+    }
 
     foreach $i (keys %{$map->{'val'}})
     {
