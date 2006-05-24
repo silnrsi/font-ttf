@@ -1039,6 +1039,7 @@ sub out_context
     } elsif ($type == 6 && $fmt == 3)
     {
         $r = $lookup->{'RULES'}[0][0];
+		no strict 'refs';	# temp fix - more code needed (probably "if" statements in the event 'PRE' or 'POST' are empty)
         $out .= pack('n2', $fmt, scalar @{$r->{'PRE'}});
         foreach $t (@{$r->{'PRE'}})
         { $out .= pack('n', Font::TTF::Ttopen::ref_cache($t, $ctables, length($out))); }
