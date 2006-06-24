@@ -60,7 +60,7 @@ No other variables than those in table and those in the standard:
     breakChar
     maxLookups
 
-Notice that versions 0, 1 & 2 of the table are supported. Notice also that the
+Notice that versions 0, 1, 2 & 3 of the table are supported. Notice also that the
 Panose variable has been broken down into its elements.
 
 =head1 METHODS
@@ -120,7 +120,7 @@ use Font::TTF::Table;
     'defaultChar' => 'S',
     'breakChar' => 'S',
     'maxLookups' => 's',
-    '' => '',            # i.e. v4 is basically same as v3
+    '' => '',            # i.e. v3 is basically same as v2
     );
 
 @weights = qw(64 14 27 35 100 20 14 42 63 3 6 35 20 56 56 17 4 49 56 71 31 10 18 3 18 2 166);

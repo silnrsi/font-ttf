@@ -317,7 +317,7 @@ sub empty
 
 Releases ALL of the memory used by this table, and all of its component/child
 objects.  This method is called automatically by
-'C<Font::TTF::Font-E<GT>release>' (so you don't have to call it yourself).
+'C<Font::TTF::Font-E<gt>release>' (so you don't have to call it yourself).
 
 B<NOTE>, that it is important that this method get called at some point prior
 to the actual destruction of the object.  Internally, we track things in a

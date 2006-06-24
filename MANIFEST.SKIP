@@ -11,3 +11,7 @@ exes/
 ^#
 \.svn/
 Makefile
+\.par$
+-stamp$
+debian/
+pm_to_blib

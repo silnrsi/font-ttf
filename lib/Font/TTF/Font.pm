@@ -615,21 +615,23 @@ Dirties all the tables in the font
 sub dirty
 { $_[0]->tables_do(sub { $_[0]->dirty; }); $_[0]; }
 
-=head2 $f->tables_do(&func)
+=head2 $f->tables_do(&func [, tables])
 
 Calls &func for each table in the font. Calls the table in alphabetical sort
 order as per the order in the directory:
 
     &func($table, $name);
 
+May optionally take a list of table names in which case func is called
+for each of them in the given order.
 =cut
 
 sub tables_do
 {
-    my ($self, $func) = @_;
+    my ($self, $func, @tables) = @_;
     my ($t);
 
-    foreach $t (sort grep {length($_) == 4} keys %$self)
+    foreach $t (@tables ? @tables : sort grep {length($_) == 4} keys %$self)
     { &$func($self->{$t}, $t); }
     $self;
 }
