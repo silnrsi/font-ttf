@@ -71,7 +71,7 @@ sub _read
     }
     
     $i--;
-    while ($i++ < $numg)
+    while (++$i < $numg)
     {
         $fh->read($dat, 2);
         $self->{$tAdv}[$i] = $self->{$tAdv}[$numh - 1];

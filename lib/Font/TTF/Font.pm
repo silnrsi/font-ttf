@@ -38,6 +38,8 @@ those for which no special code exists, the table type C<table> is used, which
 defaults to L<Font::TTF::Table>. The current tables which are supported are:
 
     table       Font::TTF::Table      - for unknown tables
+    EBDT        Font::TTF::EBDT
+    EBLC        Font::TTF::EBLC
     GDEF        Font::TTF::GDEF
     GPOS        Font::TTF::GPOS
     GSUB        Font::TTF::GSUB
@@ -69,7 +71,9 @@ defaults to L<Font::TTF::Table>. The current tables which are supported are:
 
 Links are:
 
-L<Font::TTF::Table> L<Font::TTF::GDEF> L<Font::TTF::GPOS> L<Font::TTF::GSUB> L<Font::TTF::LTSH>
+L<Font::TTF::Table> 
+L<Font::TTF::EBDT> L<Font::TTF::EBLC>
+L<Font::TTF::GDEF> L<Font::TTF::GPOS> L<Font::TTF::GSUB> L<Font::TTF::LTSH>
 L<Font::TTF::OS_2> L<Font::TTF::PCLT> L<Font::TTF::Bsln> L<Font::TTF::Cmap> L<Font::TTF::Cvt_>
 L<Font::TTF::Fdsc> L<Font::TTF::Feat> L<Font::TTF::Fmtx> L<Font::TTF::Fpgm> L<Font::TTF::Glyf>
 L<Font::TTF::Hdmx> L<Font::TTF::Head> L<Font::TTF::Hhea> L<Font::TTF::Hmtx> L<Font::TTF::Kern>
@@ -162,6 +166,8 @@ $VERSION = 0.37;    # MJPH       7-OCT-2005     Force hhea update if dirty, give
 
 %tables = (
         'table' => 'Font::TTF::Table',
+        'EBDT' => 'Font::TTF::EBDT',
+        'EBLC' => 'Font::TTF::EBLC',
         'GDEF' => 'Font::TTF::GDEF',
         'GPOS' => 'Font::TTF::GPOS',
         'GSUB' => 'Font::TTF::GSUB',

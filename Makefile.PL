@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker;
 
-@theselibs = grep {-f } glob("lib/Font/TTF/*");
+@theselibs = (grep {-f } glob("lib/Font/TTF/*"), "lib/Font/TTF.pm");
 
 # incantation to enable MY::pm_to_blib later on
 if ($^O eq 'MSWin32')
