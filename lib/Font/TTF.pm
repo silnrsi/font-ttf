@@ -1,6 +1,7 @@
 package Font::TTF;
 
-$VERSION = 0.39;
+$VERSION = '0.40';    # MJPH    31-JUL-2006      Add EBDT, EBLC tables
+# $VERSION = 0.39;
 
 1;
 
