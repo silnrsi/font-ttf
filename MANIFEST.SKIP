@@ -10,7 +10,7 @@ exes/
 \.cvsignore
 ^#
 \.svn/
-Makefile
+Makefile$
 \.par$
 -stamp$
 debian/
