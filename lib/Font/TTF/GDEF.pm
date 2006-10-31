@@ -116,12 +116,15 @@ sub read
 
     $self->SUPER::read or return $self;
     $bloc = $fh->tell();
-    $fh->read($dat, 10);
-    ($self->{'Version'}, $goff, $aoff, $loff) = TTF_Unpack('fS3', $dat);
     if ($new_gdef)
     {
         $fh->read($dat, 12);
         ($self->{'Version'}, $goff, $aoff, $loff, $moff) = TTF_Unpack('fS4', $dat);
+    }
+    else
+    {
+        $fh->read($dat, 10);
+        ($self->{'Version'}, $goff, $aoff, $loff) = TTF_Unpack('fS3', $dat);
     }
 
     if ($goff > 0)

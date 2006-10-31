@@ -318,7 +318,7 @@ sub read_sub
     } elsif ($type == 4 || $type == 5 || $type == 6)
     {
         my (@offs, $mloc, $thisloc, $ncomp, $k);
-        
+
         $lookup->{'MATCH'} = [$lookup->{'COVERAGE'}];
         $lookup->{'COVERAGE'} = $self->read_cover($count, $loc, $lookup, $fh, 1);
         $fh->read($dat, 6);
@@ -427,8 +427,37 @@ sub out_sub
         }
         if ($fmt == 1)
         {
-            $out = pack('n5', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
-                            $vfmt, $vfmt2, $#{$lookup->{'RULES'}} + 1);
+            # start PairPosFormat1 subtable
+            $out = pack('n5', 
+                        $fmt, 
+                        Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
+                        $vfmt, 
+                        $vfmt2, 
+                        $#{$lookup->{'RULES'}} + 1); # PairSetCount
+            my $off = 0;
+            $off += length($out);
+            $off += 2 * ($#{$lookup->{'RULES'}} + 1); # there will be PairSetCount offsets here
+            my $pairsets = '';
+            foreach $r (@{$lookup->{'RULES'}}) # foreach PairSet table
+            {
+                # write offset to this PairSet at end of PairPosFormat1 table
+                $out .= pack('n', $off);
+
+                # generate PairSet itself (using $off as eventual offset within PairPos subtable)
+                my $pairset = pack('n', $#{$r} + 1); # PairValueCount
+                foreach $t (@$r) # foreach PairValueRecord
+                {
+                    $pairset .= pack('n', $t->{'MATCH'}[0]); # SecondGlyph - MATCH has only one entry
+                    $pairset .= 
+                        $self->out_value($t->{'ACTION'}[0], $vfmt,  $ctables, $off + length($pairset));
+                    $pairset .= 
+                        $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, $off + length($pairset));
+                }
+                $off += length($pairset);
+                $pairsets .= $pairset;
+            }
+            $out .= $pairsets;
+            die "internal error: PairPos size not as calculated" if (length($out) != $off);
         } else
         {
             $out = pack('n8', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
@@ -436,15 +465,14 @@ sub out_sub
                             Font::TTF::Ttopen::ref_cache($lookup->{'CLASS'}, $ctables, 1),
                             Font::TTF::Ttopen::ref_cache($lookup->{'MATCH'}[0], $ctables, 1),
                             $#{$lookup->{'RULES'}} + 1, $#{$lookup->{'RULES'}[0]} + 1);
-        }
-        foreach $r (@{$lookup->{'RULES'}})
-        {
-            $out .= $#{$r} + 1 if ($fmt == 1);
-            foreach $t (@$r)
+
+            foreach $r (@{$lookup->{'RULES'}})
             {
-                $out .= pack('n', $t->{'MATCH'}[0]) if ($fmt == 1);
-                $out .= $self->out_value($t->{'ACTION'}[0], $vfmt, $ctables, length($out))
-                     .  $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, length($out) + 2);
+                foreach $t (@$r)
+                {
+                    $out .= $self->out_value($t->{'ACTION'}[0], $vfmt, $ctables, length($out));
+                    $out .= $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, length($out));
+                }
             }
         }
     } elsif ($type == 3 && $fmt == 1)

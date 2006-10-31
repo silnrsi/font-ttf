@@ -413,9 +413,10 @@ sub read
     	($l->{'TYPE'}, $l->{'FLAG'}, $nSub) = unpack("n3", $dat);
     	$fh->read($dat, $nSub * 2);
     	$j = 0;
-    	map { $l->{'SUB'}[$j]{' OFFSET'} = $_; } unpack("n*", $dat);
+        my @offsets = unpack("n*", $dat);
     	for ($j = 0; $j < $nSub; $j++)
     	{
+            $l->{'SUB'}[$j]{' OFFSET'} = $offsets[$j];
     	    $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
 	        $self->read_sub($fh, $l, $j);
 	    }
