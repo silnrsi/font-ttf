@@ -682,7 +682,9 @@ sub update_bbox
 =head2 $g->maxInfo
 
 Returns lots of information about a glyph so that the C<maxp> table can update
-itself.
+itself. Returns array containing contributions of this glyph to maxPoints, maxContours, 
+maxCompositePoints, maxCompositeContours, maxSizeOfInstructions, maxComponentElements, 
+and maxComponentDepth.
 
 =cut
 
@@ -693,14 +695,13 @@ sub maxInfo
 
     $self->read_dat;            # make sure we've read some data
     $res[4] = length($self->{'hints'}) if defined $self->{'hints'};
+    $res[6] = 1;
     if ($self->{'numberOfContours'} > 0)
     {
-        $res[2] = $res[0] = $self->{'numPoints'};
-        $res[3] = $res[1] = $self->{'numberOfContours'};
-        $res[6] = 1;
+        $res[0] = $self->{'numPoints'};
+        $res[1] = $self->{'numberOfContours'};
     } elsif ($self->{'numberOfContours'} < 0)
     {
-        $res[6] = 1;
         for ($i = 0; $i <= $#{$self->{'comps'}}; $i++)
         {
             my $otherg = 
