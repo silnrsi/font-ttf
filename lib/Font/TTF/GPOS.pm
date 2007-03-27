@@ -255,8 +255,8 @@ sub read_sub
         $fh->read($dat, 2);
         $mcount = unpack('n', $dat);
         for ($i = 0; $i < $mcount; $i++)
-        { push (@{$lookup->{'RULES'}}, [{'ACTION'} =>
-                                    [$self->read_value($count, $loc, $lookup, $fh)]]); }
+        { push (@{$lookup->{'RULES'}}, [{'ACTION' =>
+                                    [$self->read_value($count, $loc, $lookup, $fh)]}]); }
         $self->{'ACTION_TYPE'} = 'v';
     } elsif ($type == 2 && $fmt == 1)
     {

@@ -127,7 +127,7 @@ sub out
     my ($shipout) = ($state ? sub {$out .= $_[0];} : sub {$fh->print($_[0]);});
     my (@gids) = sort {$a <=> $b} keys %{$self->{'val'}};
 
-    $fmt = 1; $grp = 1;
+    $fmt = 1; $grp = 1; $eff = 0;
     for ($i = 1; $i <= $#gids; $i++)
     {
         if ($self->{'val'}{$gids[$i]} < $self->{'val'}{$gids[$i-1]} && $self->{'cover'})

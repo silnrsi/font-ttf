@@ -1,6 +1,9 @@
 package Font::TTF;
 
-$VERSION = '0.40';    # MJPH    31-JUL-2006      Add EBDT, EBLC tables
+$VERSION = '0.41';    # MJPH    27-MAR-2007      Remove warnings from font copy
+                                                 Bug fixes in Ttopen, GDEF
+                                                 Remove redundant head and maxp ->reads
+# $VERSION = '0.40';    # MJPH    31-JUL-2006      Add EBDT, EBLC tables
 # $VERSION = 0.39;
 
 1;

@@ -471,6 +471,7 @@ sub out
         {
             my (@jobs, $start, $current, $curr_glyf, $map);
             
+            $current = 0; $curr_glyf = 0;
             $map = "\000" x 8192;
             foreach $j (@keys)
             {

@@ -213,6 +213,7 @@ sub TTF_Pack
     my ($fmt, @obj) = @_;
     my ($type, $i, $arrlen, $dat, $res, $frac);
 
+    $dat = '';
     while ($fmt =~ s/^([flsc])(\d+|\*)?//oi)
     {
         $type = $1;
@@ -222,7 +223,7 @@ sub TTF_Pack
     
         for ($i = 0; $i < $arrlen; $i++)
         {
-            $res = shift(@obj);
+            $res = shift(@obj) || 0;
             if ($type eq "f")
             {
                 $frac = int(($res - int($res)) * 65536);

@@ -133,7 +133,7 @@ sub read
         $self->{'GLYPH'} = Font::TTF::Coverage->new(0)->read($fh);
     }
 
-    if ($new_gdef && $moff > 0)
+    if ($new_gdef && $moff > 0 && $moff < $self->{' LENGTH'})
     {
         $fh->seek($moff + $boff, 0);
         $self->{'MARKS'} = Font::TTF::Coverage->new(0)->read($fh);
