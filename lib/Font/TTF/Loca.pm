@@ -71,8 +71,8 @@ sub read
 {
     my ($self) = @_;
     my ($fh) = $self->{' INFILE'};
-    my ($locFmt) = $self->{' PARENT'}{'head'}->read->{'indexToLocFormat'};
-    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}->read->{'numGlyphs'};
+    my ($locFmt) = $self->{' PARENT'}{'head'}{'indexToLocFormat'};
+    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
     my ($glyfLoc) = $self->{' PARENT'}{'glyf'}{' OFFSET'};
     my ($dat, $last, $i, $loc);
 
@@ -112,8 +112,8 @@ table was attempted to be output.
 sub out
 {
     my ($self, $fh) = @_;
-    my ($locFmt) = $self->{' PARENT'}{'head'}->read->{'indexToLocFormat'};
-    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}->read->{'numGlyphs'};
+    my ($locFmt) = $self->{' PARENT'}{'head'}{'indexToLocFormat'};
+    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
     my ($count, $i, $offset, $g);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});

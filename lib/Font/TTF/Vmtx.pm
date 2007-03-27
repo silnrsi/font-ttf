@@ -51,7 +51,7 @@ sub read
     my ($numh, $numg);
 
     $numh = $self->{' PARENT'}{'vhea'}->read->{'numberOfVMetrics'};
-    $numg = $self->{' PARENT'}{'maxp'}->read->{'numGlyphs'};
+    $numg = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
     $self->_read($numg, $numh, "advance", "top");
 }
 

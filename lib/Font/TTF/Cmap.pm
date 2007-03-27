@@ -74,8 +74,6 @@ use Font::TTF::Utils;
 Reads the cmap into memory. Format 4 subtables read the whole subtable and
 fill in the segmented array accordingly.
 
-Format 2 subtables are not read at all.
-
 =cut
 
 sub read
@@ -107,7 +105,7 @@ sub read
         $s->{'Format'} = $form;
         if ($form == 0)
         {
-            my ($j) = 0;
+            my $j = 0;
 
             $fh->read($dat, 4);
             ($len, $s->{'Ver'}) = unpack('n2', $dat);
@@ -121,9 +119,47 @@ sub read
             ($len, $s->{'Ver'}, $start, $ecount) = unpack('n4', $dat);
             $fh->read($dat, $ecount << 1);
             $s->{'val'} = {map {$start++; ($_ ? ($start - 1, $_) : ())} unpack("n*", $dat)};
-        } elsif ($form == 2)
+        } elsif ($form == 2)        # Contributed by Huw Rogers
         {
-# no idea what to do here yet
+            $fh->read($dat, 4);
+            ($len, $s->{'Ver'}) = unpack('n2', $dat);
+            $fh->read($dat, 512);
+            my ($j, $k, $l, $m, $n, @subHeaderKeys, @subHeaders, $subHeader);
+            $n = 1;
+            for ($j = 0; $j < 256; $j++) {
+                my $k = unpack('@'.($j<<1).'n', $dat)>>3;
+                $n = $k + 1 if $k >= $n;
+                $subHeaders[$subHeaderKeys[$j] = $k] ||= [ ];
+            }
+            $fh->read($dat, $n<<3); # read subHeaders[]
+            for ($k = 0; $k < $n; $k++) {
+                $subHeader = $subHeaders[$k];
+                $l = $k<<3;
+                @$subHeader = unpack('@'.$l.'n4', $dat);
+                $subHeader->[2] = unpack('s', pack('S', $subHeader->[2]))
+                    if $subHeader->[2] & 0x8000; # idDelta
+                $subHeader->[3] =
+                    ($subHeader->[3] - (($n - $k)<<3) + 6)>>1; # idRangeOffset
+            }
+            $fh->read($dat, $len - ($n<<3) - 518); # glyphIndexArray[]
+            for ($j = 0; $j < 256; $j++) {
+                $k = $subHeaderKeys[$j];
+                $subHeader = $subHeaders[$k];
+                unless ($k) {
+                    $l = $j - $subHeader->[0];
+                    if ($l >= 0 && $l < $subHeader->[1]) {
+                        $m = unpack('@'.(($l + $subHeader->[3])<<1).'n', $dat);
+                        $m += $subHeader->[2] if $m;
+                        $s->{'val'}{$j} = $m;
+                    }
+                } else {
+                    for ($l = 0; $l < $subHeader->[1]; $l++) {
+                        $m = unpack('@'.(($l + $subHeader->[3])<<1).'n', $dat);
+                        $m += $subHeader->[2] if $m;
+                        $s->{'val'}{($j<<8) + $l + $subHeader->[0]} = $m;
+                    }
+                }
+            }
         } elsif ($form == 4)
         {
             $fh->read($dat, 12);
@@ -144,7 +180,7 @@ sub read
                     else
                     { $id = unpack("n", substr($dat, ($j << 1) + $num * 6 +
                                         2 + ($k - $start) * 2 + $range, 2)) + $delta; }
-		            $id -= 65536 if $id >= 65536;
+                            $id -= 65536 if $id >= 65536;
                     $s->{'val'}{$k} = $id if ($id);
                 }
             }
@@ -295,8 +331,85 @@ sub out
         {
             $fh->print(pack("n2", $keys[0], $keys[-1] - $keys[0] + 1));
             $fh->print(pack("n*", @{$s->{'val'}}{$keys[0] .. $keys[-1]}));
-        } elsif ($s->{'Format'} == 2)
+        } elsif ($s->{'Format'} == 2)       # Contributed by Huw Rogers
         {
+            my ($g, $k, $h, $l, $m, $n);
+            my (@subHeaderKeys, @subHeaders, $subHeader, @glyphIndexArray);
+            $n = 0;
+            @subHeaderKeys = (-1) x 256;
+            for $j (@keys) {
+                next unless defined($g = $s->{'val'}{$j});
+                $h = int($j>>8);
+                $l = ($j & 0xff);
+                if (($k = $subHeaderKeys[$h]) < 0) {
+                    $subHeader = [ $l, 1, 0, 0, [ $g ] ];
+                    $subHeaders[$k = $n++] = $subHeader;
+                    $subHeaderKeys[$h] = $k;
+                } else {
+                    $subHeader = $subHeaders[$k];
+                    $m = ($l - $subHeader->[0] + 1) - $subHeader->[1];
+                    $subHeader->[1] += $m;
+                    push @{$subHeader->[4]}, (0) x ($m - 1), $g - $subHeader->[2];
+                }
+            }
+            @subHeaderKeys = map { $_ < 0 ? 0 : $_ } @subHeaderKeys;
+            $subHeader = $subHeaders[0];
+            $subHeader->[3] = 0;
+            push @glyphIndexArray, @{$subHeader->[4]};
+            splice(@$subHeader, 4);
+            {
+                my @subHeaders_ = sort {@{$a->[4]} <=> @{$b->[4]}} @subHeaders[1..$#subHeaders];
+                my ($f, $d, $r, $subHeader_);
+                for ($k = 0; $k < @subHeaders_; $k++) {
+                    $subHeader = $subHeaders_[$k];
+                    $f = $r = shift @{$subHeader->[4]};
+                    $subHeader->[5] = join(':',
+                        map {
+                            $d = $_ - $r;
+                            $r = $_;
+                            $d < 0 ?
+                                sprintf('-%04x', -$d) :
+                                sprintf('+%04x', $d)
+                        } @{$subHeader->[4]});
+                    unshift @{$subHeader->[4]}, $f;
+                }
+                for ($k = 0; $k < @subHeaders_; $k++) {
+                    $subHeader = $subHeaders_[$k];
+                    next unless $subHeader->[4];
+                    $subHeader->[3] = @glyphIndexArray;
+                    push @glyphIndexArray, @{$subHeader->[4]};
+                    for ($l = $k + 1; $l < @subHeaders_; $l++) {
+                        $subHeader_ = $subHeaders_[$l];
+                        next unless $subHeader_->[4];
+                        $d = $subHeader_->[5];
+                        if ($subHeader->[5] =~ /\Q$d\E/) {
+                            my $o = length($`)/6;               #`
+                            $subHeader_->[2] +=
+                                $subHeader_->[4]->[$o] - $subHeader->[4]->[0];
+                            $subHeader_->[3] = $subHeader->[3] + $o;
+                            splice(@$subHeader_, 4);
+                        }
+                    }
+                    splice(@$subHeader, 4);
+                }
+            }
+            $fh->print(pack('n*', map { $_<<3 } @subHeaderKeys));
+            for ($j = 0; $j < 256; $j++) {
+                $k = $subHeaderKeys[$j];
+                $subHeader = $subHeaders[$k];
+            }
+            for ($k = 0; $k < $n; $k++) {
+                $subHeader = $subHeaders[$k];
+                $fh->print(pack('n4',
+                    $subHeader->[0],
+                    $subHeader->[1],
+                    $subHeader->[2] < 0 ?
+                        unpack('S', pack('s', $subHeader->[2])) :
+                        $subHeader->[2],
+                    ($subHeader->[3]<<1) + (($n - $k)<<3) - 6
+                ));
+            }
+            $fh->print(pack('n*', @glyphIndexArray));
         } elsif ($s->{'Format'} == 4)
         {
             my ($num, $sRange, $eSel, $eShift, @starts, @ends, $doff);

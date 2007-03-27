@@ -323,7 +323,7 @@ sub read
 	    push (@{$l->{'FEAT_TAGS'}}, $tag);
     }
 
-    foreach $tag (grep {length($_) == 4} keys %$l)
+    foreach $tag (grep {m/^.{4}(?:\s_\d+)?$/o} keys %$l)
     {
 	    $fh->seek($moff + $l->{$tag}{' OFFSET'}, 0);
     	$fh->read($dat, 4);
@@ -364,7 +364,7 @@ sub read
     	    ($lTag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
     	    $off += $l->{$tag}{' OFFSET'};
     	    $l->{$tag}{$lTag}{' OFFSET'} = $off;
-            foreach (@{$l->{$tag}{'LANG_TAGS'}})
+            foreach (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
             { $l->{$tag}{$lTag}{' REFTAG'} = $_ if ($l->{$tag}{$_}{' OFFSET'} == $off
                                                    && !$l->{$tag}{$_}{' REFTAG'}); }
     	    push (@{$l->{$tag}{'LANG_TAGS'}}, $lTag);
@@ -467,7 +467,7 @@ sub out
 
 # First sort the features
     $i = 0;
-    $self->{'FEATURES'}{'FEAT_TAGS'} = [sort grep {length($_) == 4 || m/\s_\d+$/o} %{$self->{'FEATURES'}}]
+    $self->{'FEATURES'}{'FEAT_TAGS'} = [sort grep {m/^.{4}(?:\s_\d+)?$/o} %{$self->{'FEATURES'}}]
             if (!defined $self->{'FEATURES'}{'FEAT_TAGS'});
     foreach $t (@{$self->{'FEATURES'}{'FEAT_TAGS'}})
     { $self->{'FEATURES'}{$t}{'INDEX'} = $i++; }

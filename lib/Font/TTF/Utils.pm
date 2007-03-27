@@ -578,7 +578,7 @@ sub make_circle
     $glyph->{'numPoints'} = $#{$glyph->{'x'}} + 1;
     $glyph->update;
     $numg = $font->{'maxp'}{'numGlyphs'};
-    $font->{'maxp'}->read->{'numGlyphs'}++;
+    $font->{'maxp'}{'numGlyphs'}++;
 
     $font->{'hmtx'}{'advance'}[$numg] = int($xorg + $R + $r + $sb + .5);
     $font->{'hmtx'}{'lsb'}[$numg] = int($xorg - $R - $r + .5);

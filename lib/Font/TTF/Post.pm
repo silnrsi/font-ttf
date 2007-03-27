@@ -129,7 +129,7 @@ sub read
     my ($dat, $dat1, $i, $off, $c, $maxoff, $form, $angle, $numGlyphs);
     my ($fh) = $self->{' INFILE'};
 
-    $numGlyphs = $self->{' PARENT'}{'maxp'}->read->{'numGlyphs'};
+    $numGlyphs = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
     $self->SUPER::read or return $self;
     init unless ($fields{'FormatType'});
     $fh->read($dat, 32);
