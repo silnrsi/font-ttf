@@ -231,7 +231,8 @@ sub out
 
     if (int($self->{'FormatType'} + .5) == 2)
     {
-        my (@ind, $count);
+        my (@ind);
+        my ($count) = 0;
         
         $fh->print(pack("n", $num));
         for ($i = 0; $i < $num; $i++)

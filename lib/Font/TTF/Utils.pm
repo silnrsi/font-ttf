@@ -435,12 +435,12 @@ Converts a binary string of hinting code into a textual representation
     {
         my ($dat) = @_;
         my ($len) = length($dat);
-        my ($res, $i);
-        my ($text, $num, $size);
+        my ($res, $i, $text, $size, $num);
 
         for ($i = 0; $i < $len; $i++)
         {
             ($text, $num, $size) = @{$hints[ord(substr($dat, $i, 1))]};
+            $num = 0 unless (defined $num);
             $text = sprintf("UNK[%02X]", ord(substr($dat, $i, 1))) unless defined $text;
             $res .= $text;
             if ($num != 0)

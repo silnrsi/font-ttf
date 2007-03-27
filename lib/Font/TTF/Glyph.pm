@@ -274,7 +274,7 @@ sub read_dat
     my ($self) = @_;
     my ($dat, $num, $max, $i, $flag, $len, $val, $val1, $fp);
 
-    return $self if $self->{' read'} > 1;
+    return $self if (defined $self->{' read'} && $self->{' read'} > 1);
     $self->read unless $self->{' read'};
     $dat = $self->{' DAT'};
     $fp = 10;
@@ -467,7 +467,7 @@ sub XML_element
         my ($dat);
         $fh->print("$depth<hints>\n");
 #        Font::TTF::Utils::XML_hexdump($context, $depth . $context->{'indent'}, $self->{'hints'});
-        $dat = Font::TTF::Utils::XML_binhint($self->{'hints'});
+        $dat = Font::TTF::Utils::XML_binhint($self->{'hints'}) || "";
         $dat =~ s/\n(?!$)/\n$depth$context->{'indent'}/mg;
         $fh->print("$depth$context->{'indent'}$dat");
         $fh->print("$depth</hints>\n");

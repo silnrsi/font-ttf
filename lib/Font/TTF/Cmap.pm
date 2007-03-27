@@ -419,7 +419,7 @@ sub out
             $newseg = 1; $num = 0;
             for ($j = 0; $j <= $#keys && $keys[$j] <= 0xFFFF; $j++)
             {
-                $v = $s->{'val'}{$keys[$j]};
+                $v = $s->{'val'}{$keys[$j]} || 0;
                 if ($newseg)
                 {
                     $delta = $v;
@@ -465,7 +465,7 @@ sub out
             for ($j = 0; $j < $num; $j++)
             {
                 next if ($range[$j] == 0);
-                $fh->print(pack("n*", @{$s->{'val'}}{$starts[$j] .. $ends[$j]}));
+                $fh->print(pack("n*", map {$_ || 0} @{$s->{'val'}}{$starts[$j] .. $ends[$j]}));
             }
         } elsif ($s->{'Format'} == 8 || $s->{'Format'} == 12)
         {
