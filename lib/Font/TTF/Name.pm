@@ -22,8 +22,6 @@ possible. The method C<is_utf8> can be used to find out if a string in a particu
 platform and encoding will be returned as UTF8. Unicode strings are always
 converted if utf8 is requested. Otherwise, strings are stored according to platform:
 
-    ***WARNING NON-UTF8 is deprecated and utf8 strings has become the default***
-
 You now have to set <$Font::TTF::Name::utf8> to 0 to get the old behaviour.
 
 =over 4
@@ -66,7 +64,7 @@ An array of arrays, etc.
 =cut
 
 use strict;
-use vars qw(@ISA $VERSION @apple_encs @apple_encodings $utf8 $cp_1252 @cp_1252);
+use vars qw(@ISA $VERSION @apple_encs @apple_encodings $utf8 $cp_1252 @cp_1252 %win_langs %langs_win %langs_mac @ms_langids @mac_langs);
 use Font::TTF::Table;
 use Font::TTF::Utils;
 @ISA = qw(Font::TTF::Table);
@@ -82,13 +80,35 @@ $utf8 = 1;
         {
             $apple_encodings[0][$i] = [unpack("n*", Compress::Zlib::uncompress(unpack("u", $apple_encs[$i])))]
                 if (defined $apple_encs[$i]);
+            foreach (0 .. 127)
+            { $apple_encodings[0][$i][$_] = $_; }
             $count = 0;
-            $apple_encodings[1][$i] = {map({$_ => $count++} @{$apple_encodings[0][$i]})};
+            $apple_encodings[1][$i] = {map {$_ => $count++} @{$apple_encodings[0][$i]}};
         }
         $cp_1252[0] = [unpack("n*", Compress::Zlib::uncompress(unpack("u", $cp_1252)))];
         $count = 0;
         $cp_1252[1] = {map({$_ => $count++} @{$cp_1252[0]})};
     }
+    for ($i = 0; $i < $#ms_langids; $i++)
+    {
+        if (defined $ms_langids[$i][1])
+        {
+            my ($j);
+            for ($j = 0; $j < $#{$ms_langids[$i][1]}; $j++)
+            {
+                my ($v) = $ms_langids[$i][1][$j];
+                if ($v =~ m/^-/o)
+                { $win_langs{(($j + 1) << 10) + $i} = $ms_langids[$i][0] . $v; }
+                else
+                { $win_langs{(($j + 1) << 10) + $i} = $v; }
+            }
+        }
+        else
+        { $win_langs{$i + 0x400} = $ms_langids[$i][0]; }
+    }
+    %langs_win = map {$win_langs{$_} => $_} keys %win_langs;
+    $i = 0;
+    %langs_mac = map {$_ => $i++} @mac_langs;
 }
     
 
@@ -163,11 +183,11 @@ sub out
                     {
                         if ($pid == 1 && defined $apple_encodings[1][$eid])
                         { $str_trans = pack("C*",
-                                map({$apple_encodings[1][$eid]{$_} || "?"} unpack("n*",
+                                map({$apple_encodings[1][$eid]{$_} || 0x3F} unpack("n*",
                                 TTF_utf8_word($str_trans)))); }
                         elsif ($pid == 2 && $eid == 2 && defined @cp_1252)
                         { $str_trans = pack("C*",
-                                map({$cp_1252[1][$eid]{$_} || "?"} unpack("n*",
+                                map({$cp_1252[1][$eid]{$_} || 0x3F} unpack("n*",
                                 TTF_utf8_word($str_trans)))); }
                         elsif ($pid == 2 && $eid == 0)
                         { $str_trans =~ s/[\xc0-\xff][\x80-\xbf]+/?/og; }
@@ -227,8 +247,9 @@ sub XML_element
             {
                 foreach $lid (sort {$a <=> $b} keys %{$self->{'strings'}[$nid][$pid][$eid]})
                 {
+                    my ($lang) = $self->get_lang($pid, $lid) || $lid;
                     $fh->printf("%s<string id='%s' platform='%s' encoding='%s' language='%s'>\n%s%s%s\n%s</string>\n",
-                            $depth, $nid, $pid, $eid, $lid, $depth,
+                            $depth, $nid, $pid, $eid, $lang, $depth,
                             $context->{'indent'}, $self->{'strings'}[$nid][$pid][$eid]{$lid}, $depth);
                 }
             }
@@ -252,7 +273,8 @@ sub XML_end
 
     if ($tag eq 'string')
     {
-        $self->{'strings'}[$attrs{'id'}][$attrs{'platform'}][$attrs{'encoding'}]{$attrs{'language'}}
+        my ($lid) = $self->find_name($attrs{'platform'}, $attrs{'language'}) || $attrs{'language'};
+        $self->{'strings'}[$attrs{'id'}][$attrs{'platform'}][$attrs{'encoding'}]{$lid}
             = $context->{'text'};
         return $context;
     }
@@ -309,7 +331,92 @@ sub find_name
     }
     return '';
 }
-    
+
+
+=head2 set_name($nid, $str, $lang)
+
+Sets the given name id string to $str for all platforms and encodings that
+this module can handle. If $lang is set, it is interpretted as a language
+tag and if the particular language of a string is found to match, then
+that string is changed, otherwise no change occurs.
+
+Notice that this function does not add any names to the table.
+
+=cut
+
+sub set_name
+{
+    my ($self, $nid, $str, $lang) = @_;
+    my ($pid, $eid, $lid);
+
+    foreach $pid (0 .. $#{$self->{'strings'}[$nid]})
+    {
+        foreach $eid (0 .. $#{$self->{'strings'}[$nid][$pid]})
+        {
+            foreach $lid (keys %{$self->{'strings'}[$nid][$pid][$eid]})
+            {
+                next unless (!defined $lang || $self->match_lang($pid, $lid, $lang));
+                $self->{'strings'}[$nid][$pid][$eid]{$lid} = $str;
+            }
+        }
+    }
+    return $self;
+}
+
+=head2 Font::TTF::Name->match_lang($pid, $lid, $lang)
+
+Compares the language associated to the string of given platform and language
+with the given language tag. If the language matches the tag (i.e. is equal
+or more defined than the given language tag) returns true. This is calculated
+by finding whether the associated language tag starts with the given language
+tag.
+
+=cut
+
+sub match_lang
+{
+    my ($self, $pid, $lid, $lang) = @_;
+    my ($langid) = $self->get_lang($pid, $lid);
+
+    return ($lid == $lang) if ($lang != 0 || $lang eq '0');
+    return !index(lc($langid), lc($lang));
+}
+
+=head2 Font::TTF::Name->get_lang($pid, $lid)
+
+Returns the language tag associated with a particular platform and language id
+
+=cut
+
+sub get_lang
+{
+    my ($self, $pid, $lid) = @_;
+
+    if ($pid == 3)
+    { return $win_langs{$lid}; }
+    elsif ($pid == 1)
+    { return $mac_langs[$lid]; }
+    return '';
+}
+
+
+=head2 Font::TTF::Name->find_lang($pid, $lang)
+
+Looks up the language name and returns a lang id if one exists
+
+=cut
+
+sub find_lang
+{
+    my ($self, $pid, $lang) = @_;
+
+    if ($pid == 3)
+    { return $langs_win{$lang}; }
+    elsif ($pid == 1)
+    { return $langs_mac{$lang}; }
+    return undef;
+}
+
 
 BEGIN {
 @apple_encs = (
@@ -449,6 +556,187 @@ M7'3)95=<=<UU-]QTRVUWW'7/?0\\],AC3SSUS',OO/3*:V^\]<Y['WSTR6=?
 1?/7-=S_\],MO?_S]!Y==>0@`
 EOT
 );
+#'
+
+@ms_langids = ( [],
+    ['ar', ["-SA", "-IQ", "-EG", "-LY", "-DZ", "-MA", "-TN", 
+            "-OM", "-YE", "-SY", "-JO", "-LB", "-KW", "-AE",
+            "-BH", "-QA"]],
+    ['bg-BG'],
+    ['ca-ES'],
+    ['zh', ['-TW', 'CN', '-HK', '-SG', '-MO']],
+    ["cs-CZ"],
+    ["da-DK"],
+    ["de", ["-DE", "-CH", "-AT", "-LU", "-LI"]],
+    ["el-GR"],
+    ["en", ["-US", "-UK", "-AU", "-CA", "-NZ", "-IE", "-ZA",
+            "-JM", "029", "-BZ", "-TT", "-ZW", "-PH", "-ID",
+            "-HK", "-IN", "-MY", "-SG"]],
+    ["es", ["-ES", "-MX", "-ES", "-GT", "-CR", "-PA", "-DO",
+            "-VE", "-CO", "-PE", "-AR", "-EC", "-CL", "-UY",
+            "-PY", "-BO", "-SV", "-HN", "-NI", "-PR", "-US"]],
+    ["fi-FI"],
+    ["fr", ["-FR", "-BE", "-CA", "-CH", "-LU", "-MC", "",
+            "-RE", "-CG", "-SN", "-CM", "-CI", "-ML", "-MA",
+            "-HT"]],
+    ["he-IL"],
+    ["hu-HU"],
+    ["is-IS"],
+# 0010
+    ["it", ["-IT", "-CH"]],
+    ["ja-JP"],
+    ["ko-KR"],
+    ["nl", ["-NL", "-BE"]],
+    ["no", ["-bok-NO", "-nyn-NO"]],
+    ["pl-PL"],
+    ["pt", ["-BR", "-PT"]],
+    ["rm-CH"],
+    ["ro", ["-RO", "_MD"]],
+    ["ru-RU"],
+    ["hr", ["-HR", "-Latn-CS", "Cyrl-CS", "-BA", "", "-Latn-BA", "-Cyrl-BA"]],
+    ["sk-SK"],
+    ["sq-AL"],
+    ["sv", ["-SE", "-FI"]],
+    ["th-TH"],
+    ["tr-TR"],
+# 0020
+    ["ur", ["-PK", "tr-IN"]],
+    ["id-ID"],
+    ["uk-UA"],
+    ["be-BY"],
+    ["sl-SL"],
+    ["et-EE"],
+    ["lv-LV"],
+    ["lt-LT"],
+    ["tg-Cyrl-TJ"],
+    ["fa-IR"],
+    ["vi-VN"],
+    ["hy-AM"],
+    ["az", ["-Latn-AZ", "-Cyrl-AZ"]],
+    ["eu-ES"],
+    ["wen". ["wen-DE", "dsb-DE"]],
+    ["mk-MK"],
+# 0030
+    ["st"],
+    ["ts"],
+    ["tn-ZA"],
+    ["ven"],
+    ["xh-ZA"],
+    ["zu-ZA"],
+    ["af-ZA"],
+    ["ka-GE"],
+    ["fo-FO"],
+    ["hi-IN"],
+    ["mt"],
+    ["se", ["-NO", "-SE", "-FI", "smj-NO", "smj-SE", "sma-NO", "sma-SE",
+            "", "smn-FI"]],
+    ["ga-IE"],
+    ["yi"],
+    ["ms", ["-MY", "-BN"]],
+    ["kk-KZ"],
+# 0040
+    ["ky-KG"],
+    ["sw-KE"],
+    ["tk-TM"],
+    ["uz", ["-Latn-UZ", "-Cyrl-UZ"]],
+    ["tt-RU"],
+    ["bn", ["-IN", "-BD"]],
+    ["pa", ["-IN", "-Arab-PK"]],
+    ["gu-IN"],
+    ["or-IN"],
+    ["ta-IN"],
+    ["te-IN"],
+    ["kn-IN"],
+    ["ml-IN"],
+    ["as-IN"],
+    ["mr-IN"],
+    ["sa-IN"],
+# 0050
+    ["mn", ["-Cyrl-MN", "-Mong-CN"]],
+    ["bo", ["-CN", "-BT"]],
+    ["cy-GB"],
+    ["km-KH"],
+    ["lo-LA"],
+    ["my"],
+    ["gl-ES"],
+    ["kok-IN"],
+    ["mni"],
+    ["sd", ["-IN", "-PK"]],
+    ["syr-SY"],
+    ["si-LK"],
+    ["chr"],
+    ["iu", ["-Cans-CA", "-Latn-CA"]],
+    ["am-ET"],
+    ["tmz", ["-Arab", "tmz-Latn-DZ"]],
+# 0060
+    ["ks"],
+    ["ne", ["-NP", "-IN"]],
+    ["fy-NL"],
+    ["ps-AF"],
+    ["fil-PH"],
+    ["dv-MV"],
+    ["bin-NG"],
+    ["fuv-NG"], 
+    ["ha-Latn-NG"],
+    ["ibb-NG"],
+    ["yo-NG"],
+    ["quz", ["-BO", "-EC", "-PE"]],
+    ["ns-ZA"],
+    ["ba-RU"],
+    ["lb-LU"],
+    ["kl-GL"],
+# 0070
+    ["ig-NG"],
+    ["kau"],
+    ["om"],
+    ["ti", ["-ET". "-ER"]],
+    ["gn"],
+    ["haw"],
+    ["la"],
+    ["so"],
+    ["ii-CN"],
+    ["pap"],
+    ["arn-CL"],
+    [""],           # (unassigned)
+    ["moh-CA"],
+    [""],           # (unassigned)
+    ["br-FR"],
+    [""],           # (unassigned)
+# 0080
+    ["ug-CN"],
+    [""],           # (unassigned)
+    ["oc-FR"],
+    ["gsw-FR"],
+    [""],           # (unassigned)
+    ["sah-RU"],
+    ["qut-GT"],
+    ["rw-RW"],
+    ["wo-SN"],
+    [""],           # (unassigned)
+    [""],           # (unassigned)
+    [""],           # (unassigned)
+    ["gbz-AF"],
+);
+
+@mac_langs = (
+    'en', 'fr', 'de', 'it', 'nl', 'sv', 'es', 'da', 'pt', 'no',
+    'he', 'ja', 'ar', 'fi', 'el', 'is', 'mt', 'tr', 'hr', 'zh-Hant',
+    'ur', 'hi', 'th', 'ko', 'lt', 'pl', 'hu', 'et', 'lv', 'se',
+    'fo', 'ru' ,'zh-Hans', 'nl', 'ga', 'sq', 'ro', 'cs', 'sk',
+    'sl', 'yi', 'sr', 'mk', 'bg', 'uk', 'be', 'uz', 'kk', 'az-Cyrl',
+    'az-Latn', 'hy', 'ka', 'mo', 'ky', 'abh', 'tuk', 'mn-Mong', 'mn-Cyrl', 'pst',
+    'ku', 'ks', 'sd', 'bo', 'ne', 'sa', 'mr', 'bn', 'as', 'gu',
+    'pa', 'or', 'ml', 'kn', 'ta', 'te', 'si', 'my', 'km', 'lo',
+    'vi', 'id', 'tl', 'ms-Latn', 'ms-Arab', 'am', 'ti', 'tga', 'so', 'sw',
+    'rw', 'rn', 'ny', 'mg', 'eo', '', '', '', '', '',
+    '', '', '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '', 'cy', 'eu',
+    'la', 'qu', 'gn', 'ay', 'tt', 'ug', 'dz', 'jv-Latn', 'su-Latn',
+    'gl', 'af', 'br', 'iu', 'gd', 'gv', 'gd-IR-x-dotabove', 'to', 'el-polyton', 'kl',
+    'az-Latn'
+);
+
 }
 
 1;
