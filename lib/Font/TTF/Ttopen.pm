@@ -78,8 +78,7 @@ This holds the index of the default feature, if there is one, or -1 otherwise.
 
 =item FEATURES
 
-This is an array of feature indices which index into the FEATURES instance
-variable of the table
+This is an array of feature tags for all the features enabled for this language
 
 =back
 
