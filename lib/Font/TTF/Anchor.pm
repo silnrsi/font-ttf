@@ -49,6 +49,7 @@ YIdAnchor for multiple master vertical metric id
 =cut
 
 use strict;
+use Font::TTF::Utils;
 
 
 =head2 new
@@ -79,7 +80,7 @@ sub read
     my ($dat, $loc, $fmt, $x, $y, $p, $xoff, $yoff);
 
     $fh->read($dat, 6);
-    ($fmt, $x, $y) = unpack('n*', $dat);
+    ($fmt, $x, $y) = TTF_Unpack('Sss', $dat);
     if ($fmt == 4)
     { ($self->{'xid'}, $self->{'yid'}) = ($x, $y); }
     else
