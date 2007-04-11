@@ -77,14 +77,14 @@ at an arbitrary read point, usually the end of something!
 sub read
 {
     my ($self, $fh) = @_;
-    my ($dat, $loc, $fmt, $x, $y, $p, $xoff, $yoff);
+    my ($dat, $loc, $fmt, $p, $xoff, $yoff);
 
     $fh->read($dat, 6);
-    ($fmt, $x, $y) = TTF_Unpack('Sss', $dat);
+    $fmt = unpack('n', $dat);
     if ($fmt == 4)
-    { ($self->{'xid'}, $self->{'yid'}) = ($x, $y); }
+    { ($self->{'xid'}, $self->{'yid'}) = TTF_Unpack('S2', substr($dat,2)); }
     else
-    { ($self->{'x'}, $self->{'y'}) = ($x, $y); }
+    { ($self->{'x'}, $self->{'y'}) = TTF_Unpack('s2', substr($dat,2)); }
 
     if ($fmt == 2)
     {
@@ -113,7 +113,7 @@ sub read
 =head2 out($fh, $style)
 
 Outputs the Anchor to the given file handle at this point also addressing issues
-of deltas. If $style is set, then no output is set to the file handle. The return
+of deltas. If $style is set, then no output is sent to the file handle. The return
 value is the output string.
 
 =cut
@@ -124,12 +124,12 @@ sub out
     my ($xoff, $yoff, $fmt, $out);
 
     if (defined $self->{'xid'} || defined $self->{'yid'})
-    { $out = pack('n*', 4, $self->{'xid'}, $self->{'yid'}); }
+    { $out = TTF_pack('SSS', 4, $self->{'xid'}, $self->{'yid'}); }
     elsif (defined $self->{'p'})
-    { $out = pack('n*', 2, @{$self}{'x', 'y', 'p'}); }
+    { $out = TTF_pack('Ssss', 2, @{$self}{'x', 'y', 'p'}); }
     elsif (defined $self->{'xdev'} || defined $self->{'ydev'})
     {
-        $out = pack('n*', 3, @{$self}{'x', 'y'});
+        $out = TTF_pack('Sss', 3, @{$self}{'x', 'y'});
         if (defined $self->{'xdev'})
         {
             $out .= pack('n2', 10, 0);
@@ -145,7 +145,7 @@ sub out
             $out .= $self->{'ydev'}->out($fh, 1);
         }
     } else
-    { $out = pack('n3', 1, @{$self}{'x', 'y'}); }
+    { $out = TTF_pack('Sss', 1, @{$self}{'x', 'y'}); }
     $fh->print($out) unless $style;
     $out;
 }
