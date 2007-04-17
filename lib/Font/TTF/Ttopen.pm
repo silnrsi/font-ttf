@@ -413,10 +413,19 @@ sub read
     	$fh->read($dat, $nSub * 2);
     	$j = 0;
         my @offsets = unpack("n*", $dat);
+        my $isExtension = ($l->{'TYPE'} == $self->extension());
     	for ($j = 0; $j < $nSub; $j++)
     	{
-            $l->{'SUB'}[$j]{' OFFSET'} = $offsets[$j];
-    	    $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
+    	    $l->{'SUB'}[$j]{' OFFSET'} = $offsets[$j];
+       	    $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
+    	    if ($isExtension)
+    	    {
+    	        $fh->read($dat, 8);
+    	        my $longOff;
+    	        (undef, $l->{'TYPE'}, $longOff) = unpack("nnN", $dat);
+    	        $l->{'SUB'}[$j]{' OFFSET'} += $longOff;
+        	    $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
+            }
 	        $self->read_sub($fh, $l, $j);
 	    }
     }

@@ -257,7 +257,7 @@ sub read_sub
         for ($i = 0; $i < $mcount; $i++)
         { push (@{$lookup->{'RULES'}}, [{'ACTION' =>
                                     [$self->read_value($count, $loc, $lookup, $fh)]}]); }
-        $self->{'ACTION_TYPE'} = 'v';
+        $lookup->{'ACTION_TYPE'} = 'v';
     } elsif ($type == 2 && $fmt == 1)
     {
         $lookup->{'VFMT'} = $count;
