@@ -333,7 +333,7 @@ sub find_name
 }
 
 
-=head2 set_name($nid, $str, $lang)
+=head2 set_name($nid, $str[, $lang[, @cover]])
 
 Sets the given name id string to $str for all platforms and encodings that
 this module can handle. If $lang is set, it is interpretted as a language
@@ -346,8 +346,8 @@ Notice that this function does not add any names to the table.
 
 sub set_name
 {
-    my ($self, $nid, $str, $lang) = @_;
-    my ($pid, $eid, $lid);
+    my ($self, $nid, $str, $lang, @cover) = @_;
+    my ($pid, $eid, $lid, $c);
 
     foreach $pid (0 .. $#{$self->{'strings'}[$nid]})
     {
@@ -360,8 +360,23 @@ sub set_name
             {
                 next unless (!defined $lang || $self->match_lang($pid, $lid, $lang));
                 $self->{'strings'}[$nid][$pid][$eid]{$lid} = $strNL;
+                foreach $c (0 .. scalar @cover)
+                {
+                    next unless ($cover[$c][0] == $pid && $cover[$c][1] == $eid);
+                    delete $cover[$c];
+                    last;
+                }
             }
         }
+    }
+    foreach $c (@cover)
+    {
+        my ($pid, $eid) = @{$c};
+        my ($lid) = $self->find_lang($pid, $lang);
+        my $strNL = $str;
+        $strNL =~ s/\n/\r\n/og  if $pid == 3;
+        $strNL =~ s/\n/\r/og    if $pid == 1;
+        $self->{'strings'}[$nid][$pid][$eid]{$lid} = $strNL;
     }
     return $self;
 }
