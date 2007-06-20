@@ -351,12 +351,15 @@ sub set_name
 
     foreach $pid (0 .. $#{$self->{'strings'}[$nid]})
     {
+        my $strNL = $str;
+        $strNL =~ s/\n/\r\n/og  if $pid == 3;
+        $strNL =~ s/\n/\r/og    if $pid == 1;
         foreach $eid (0 .. $#{$self->{'strings'}[$nid][$pid]})
         {
             foreach $lid (keys %{$self->{'strings'}[$nid][$pid][$eid]})
             {
                 next unless (!defined $lang || $self->match_lang($pid, $lid, $lang));
-                $self->{'strings'}[$nid][$pid][$eid]{$lid} = $str;
+                $self->{'strings'}[$nid][$pid][$eid]{$lid} = $strNL;
             }
         }
     }
