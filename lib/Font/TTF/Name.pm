@@ -107,6 +107,14 @@ $utf8 = 1;
         { $win_langs{$i + 0x400} = $ms_langids[$i][0]; }
     }
     %langs_win = map {$win_langs{$_} => $_} keys %win_langs;
+    foreach my $k (keys %langs_win)
+    {
+        my ($j) = $langs_win{$k};
+        next if (($j & 0xFC00) != 0x400 || $k !~ m/-/o);
+        my ($i) = $k;
+        $i =~ s/-.*$//o;
+        $langs_win{$i} = $j;
+    }
     $i = 0;
     %langs_mac = map {$_ => $i++} @mac_langs;
 }

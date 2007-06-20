@@ -250,7 +250,7 @@ sub Init
     my ($class) = @_;
     my ($t);
 
-    foreach $t (keys %tables)
+    foreach $t (values %tables)
     {
         $t =~ s|::|/|oig;
         require "$t.pm";
