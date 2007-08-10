@@ -340,7 +340,10 @@ this module can handle. If $lang is set, it is interpretted as a language
 tag and if the particular language of a string is found to match, then
 that string is changed, otherwise no change occurs.
 
-Notice that this function does not add any names to the table.
+If supplied, @cover should be a list of references to two-element arrays 
+containing pid,eid pairs that should added to the name table if not already present.
+
+This function does not add any names to the table unless @cover is supplied. 
 
 =cut
 
