@@ -579,7 +579,7 @@ EOT
 );
 #'
 
-@ms_langids = ( [],
+@ms_langids = ( [""],
     ['ar', ["-SA", "-IQ", "-EG", "-LY", "-DZ", "-MA", "-TN", 
             "-OM", "-YE", "-SY", "-JO", "-LB", "-KW", "-AE",
             "-BH", "-QA"]],
