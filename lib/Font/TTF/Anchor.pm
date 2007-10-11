@@ -144,7 +144,7 @@ sub out
             substr($out, 8, 2) = pack('n', $yoff);
             $out .= $self->{'ydev'}->out($fh, 1);
         }
-    } else
+    } elsif (defined $self->{'x'} || defined $self->{'y'})
     { $out = TTF_pack('Sss', 1, @{$self}{'x', 'y'}); }
     $fh->print($out) unless $style;
     $out;

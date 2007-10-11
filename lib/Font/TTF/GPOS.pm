@@ -389,30 +389,29 @@ Outputs the subtable to the given filehandle
 
 sub out_sub
 {
-    my ($self, $fh, $main_lookup, $index) = @_;
+    my ($self, $fh, $main_lookup, $index, $ctables, $base) = @_;
     my ($type) = $main_lookup->{'TYPE'};
     my ($lookup) = $main_lookup->{'SUB'}[$index];
     my ($fmt) = $lookup->{'FORMAT'};
     my ($out, $r, $s, $t, $i, $j, $vfmt, $vfmt2, $loc1);
     my ($num) = $#{$lookup->{'RULES'}} + 1;
-    my ($ctables) = {};
     my ($mtables) = {};
     my (@reftables);
     
     if ($type == 1 && $fmt == 1)
     {
-        $out = pack('n2', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2));
+        $out = pack('n2', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base));
         $vfmt = $self->fmt_value($lookup->{'ADJUST'});
-        $out .= pack('n', $vfmt) . $self->out_value($lookup->{'ADJUST'}, $vfmt, $ctables, 6);
+        $out .= pack('n', $vfmt) . $self->out_value($lookup->{'ADJUST'}, $vfmt, $ctables, 6 + $base);
     } elsif ($type == 1 && $fmt == 2)
     {
         $vfmt = 0;
         foreach $r (@{$lookup->{'RULES'}})
         { $vfmt |= $self->fmt_value($r->[0]{'ACTION'}[0]); }
-        $out = pack('n4', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
+        $out = pack('n4', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base),
                             $vfmt, $#{$lookup->{'RULES'}} + 1);
         foreach $r (@{$lookup->{'RULES'}})
-        { $out .= $self->out_value($r->[0]{'ACTION'}[0], $vfmt, $ctables, length($out)); }
+        { $out .= $self->out_value($r->[0]{'ACTION'}[0], $vfmt, $ctables, length($out) + $base); }
     } elsif ($type == 2 && $fmt < 3)
     {
         $vfmt = 0;
@@ -430,7 +429,7 @@ sub out_sub
             # start PairPosFormat1 subtable
             $out = pack('n5', 
                         $fmt, 
-                        Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
+                        Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base),
                         $vfmt, 
                         $vfmt2, 
                         $#{$lookup->{'RULES'}} + 1); # PairSetCount
@@ -449,9 +448,9 @@ sub out_sub
                 {
                     $pairset .= pack('n', $t->{'MATCH'}[0]); # SecondGlyph - MATCH has only one entry
                     $pairset .= 
-                        $self->out_value($t->{'ACTION'}[0], $vfmt,  $ctables, $off + length($pairset));
+                        $self->out_value($t->{'ACTION'}[0], $vfmt,  $ctables, $off + length($pairset) + $base);
                     $pairset .= 
-                        $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, $off + length($pairset));
+                        $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, $off + length($pairset) + $base);
                 }
                 $off += length($pairset);
                 $pairsets .= $pairset;
@@ -460,36 +459,36 @@ sub out_sub
             die "internal error: PairPos size not as calculated" if (length($out) != $off);
         } else
         {
-            $out = pack('n8', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
+            $out = pack('n8', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base),
                             $vfmt, $vfmt2,
-                            Font::TTF::Ttopen::ref_cache($lookup->{'CLASS'}, $ctables, 1),
-                            Font::TTF::Ttopen::ref_cache($lookup->{'MATCH'}[0], $ctables, 1),
-                            $#{$lookup->{'RULES'}} + 1, $#{$lookup->{'RULES'}[0]} + 1);
+                            Font::TTF::Ttopen::ref_cache($lookup->{'CLASS'}, $ctables, 8 + $base),
+                            Font::TTF::Ttopen::ref_cache($lookup->{'MATCH'}[0], $ctables, 10 + $base),
+                            $lookup->{'CLASS'}{'max'} + 1, $lookup->{'MATCH'}[0]{'max'} + 1);
 
-            foreach $r (@{$lookup->{'RULES'}})
+            for ($i = 0; $i <= $lookup->{'CLASS'}{'max'}; $i++)
             {
-                foreach $t (@$r)
+                for ($j = 0; $j <= $lookup->{'MATCH'}[0]{'max'}; $j++)
                 {
-                    $out .= $self->out_value($t->{'ACTION'}[0], $vfmt, $ctables, length($out));
-                    $out .= $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, length($out));
+                    $out .= $self->out_value($lookup->{'RULES'}[$i][$j]{'ACTION'}[0], $vfmt, $ctables, length($out) + $base);
+                    $out .= $self->out_value($lookup->{'RULES'}[$i][$j]{'ACTION'}[1], $vfmt2, $ctables, length($out) + $base);
                 }
             }
         }
     } elsif ($type == 3 && $fmt == 1)
     {
-        $out = pack('n3', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
+        $out = pack('n3', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base),
                             $#{$lookup->{'RULES'}} + 1);
         foreach $r (@{$lookup->{'RULES'}})
         {
-            $out .= pack('n2', Font::TTF::Ttopen::ref_cache($r->[0]{'ACTION'}[0], $ctables, length($out)),
-                            Font::TTF::Ttopen::ref_cache($r->[0]{'ACTION'}[1], $ctables, length($out) + 2));
+            $out .= pack('n2', Font::TTF::Ttopen::ref_cache($r->[0]{'ACTION'}[0], $ctables, length($out) + $base),
+                            Font::TTF::Ttopen::ref_cache($r->[0]{'ACTION'}[1], $ctables, length($out) + 2 + $base));
         }
     } elsif ($type == 4 || $type == 5 || $type == 6)
     {
         my ($loc_off, $loc_t, $ltables);
         
-        $out = pack('n7', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'MATCH'}[0], $ctables, 2),
-                            Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 4),
+        $out = pack('n7', $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'MATCH'}[0], $ctables, 2 + $base),
+                            Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 4 + $base),
                             $#{$lookup->{'RULES'}[0][0]{'ACTION'}} + 1, 12, ($#{$lookup->{'MARKS'}} + 4) << 2,
                             $#{$lookup->{'MARKS'}} + 1);
         foreach $r (@{$lookup->{'MARKS'}})
@@ -525,10 +524,10 @@ sub out_sub
         }
         push (@reftables, [$ltables, $loc_t]) unless ($type == 5);
     } elsif ($type == 7 || $type == 8)
-    { $out = $self->out_context($lookup, $fh, $type - 2, $fmt, $ctables, $out, $num); }
-    push (@reftables, [$ctables, 0]);
-    Font::TTF::Ttopen::out_final($fh, $out, \@reftables);
-    $lookup;
+    { $out = $self->out_context($lookup, $fh, $type - 2, $fmt, $ctables, $out, $num, $base); }
+#    push (@reftables, [$ctables, 0]);
+    $out = Font::TTF::Ttopen::out_final($fh, $out, \@reftables, 1);
+    $out;
 }
             
 

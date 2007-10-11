@@ -134,15 +134,15 @@ sub out
         {
             $fmt = 2;
             last;
-        } elsif ($gids[$i] == $gids[$i-1] + 1)
+        } elsif ($gids[$i] == $gids[$i-1] + 1 && ($self->{'cover'} || $self->{'val'}{$gids[$i]} == $self->{'val'}{$gids[$i-1]}))
         { $eff++; }
         else
         { $grp++; }
     }
-    if ($self->{'cover'})
-    { $fmt = 2 if ($eff / $grp > 4); }
-    else
-    { $fmt = 2 if ($grp > 1); }
+#    if ($self->{'cover'})
+    { $fmt = 2 if ($eff / $grp > 3); }
+#    else
+#    { $fmt = 2 if ($grp > 1); }
     
     if ($fmt == 1 && $self->{'cover'})
     {
@@ -156,7 +156,7 @@ sub out
         foreach $g (@gids)
         {
             if ($g > $last + 1)
-            { &$shipout(pack('n*', 0 x ($g - $last - 1))); }
+            { &$shipout(pack('n*', (0) x ($g - $last - 1))); }
             &$shipout(pack('n', $self->{'val'}{$g}));
             $last = $g;
         }
@@ -201,7 +201,7 @@ sub out
 }
 
 
-=head2 $c->add($glyphid)
+=head2 $c->add($glyphid[, $class])
 
 Adds a glyph id to the coverage table incrementing the count so that each subsequent addition
 has the next sequential number. Returns the index number of the glyphid added
@@ -210,11 +210,20 @@ has the next sequential number. Returns the index number of the glyphid added
 
 sub add
 {
-    my ($self, $gid) = @_;
+    my ($self, $gid, $class) = @_;
     
     return $self->{'val'}{$gid} if (defined $self->{'val'}{$gid});
-    $self->{'val'}{$gid} = $self->{'count'};
-    return $self->{'count'}++;
+    if ($self->{'cover'})
+    {
+        $self->{'val'}{$gid} = $self->{'count'};
+        return $self->{'count'}++;
+    }
+    else
+    {
+        $self->{'val'}{$gid} = $class || '0';
+        $self->{'max'} = $class if ($class > $self->{'max'});
+        return $class;
+    }
 }
 
 

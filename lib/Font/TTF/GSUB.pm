@@ -197,17 +197,16 @@ index, this function outputs the subtable to $fh at that point.
 
 sub out_sub
 {
-    my ($self, $fh, $main_lookup, $index) = @_;
+    my ($self, $fh, $main_lookup, $index, $ctables, $base) = @_;
     my ($type) = $main_lookup->{'TYPE'};
     my ($lookup) = $main_lookup->{'SUB'}[$index];
     my ($fmt) = $lookup->{'FORMAT'};
     my ($out, $r, $t, $i, $j, $offc, $offd, $numd);
     my ($num) = $#{$lookup->{'RULES'}} + 1;
-    my ($ctables) = {};
 
     if ($type == 1)
     {
-        $out = pack("nn", $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2));
+        $out = pack("nn", $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base));
         if ($fmt == 1)
         { $out .= pack("n", $lookup->{'ADJUST'}); }
         else
@@ -218,7 +217,7 @@ sub out_sub
         }
     } elsif ($type == 2 || $type == 3)
     {
-        $out = pack("nnn", $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2),
+        $out = pack("nnn", $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base),
                             $num);
         $out .= pack('n*', (0) x $num);
         $offc = length($out);
@@ -230,9 +229,9 @@ sub out_sub
             $offc = length($out);
         }
     } elsif ($type == 4 || $type == 5 || $type == 6)
-    { $out = $self->out_context($lookup, $fh, $type, $fmt, $ctables, $out, $num); }
-    Font::TTF::Ttopen::out_final($fh, $out, [[$ctables, 0]]);
-    $lookup;
+    { $out = $self->out_context($lookup, $fh, $type, $fmt, $ctables, $out, $num, $base); }
+#    Font::TTF::Ttopen::out_final($fh, $out, [[$ctables, 0]]);
+    $out;
 }
 
 =head1 AUTHOR

@@ -775,6 +775,7 @@ sub get_points
             { ($x, $y) = ($x + $comp->{'args'}[0], $y + $comp->{'args'}[1]); }
             push (@{$self->{'x'}}, $x);
             push (@{$self->{'y'}}, $y);
+            push (@{$self->{'flags'}}, $compg->{'flags'}[$i]);
         }
         foreach $e (@{$compg->{'endPoints'}})
         { push (@{$self->{'endPoints'}}, $e + $nump); }
