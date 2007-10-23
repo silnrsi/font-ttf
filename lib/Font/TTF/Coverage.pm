@@ -137,7 +137,10 @@ sub out
         } elsif ($gids[$i] == $gids[$i-1] + 1 && ($self->{'cover'} || $self->{'val'}{$gids[$i]} == $self->{'val'}{$gids[$i-1]}))
         { $eff++; }
         else
-        { $grp++; }
+        {
+            $grp++;
+            $eff += $gids[$i] - $gids[$i-1];
+        }
     }
 #    if ($self->{'cover'})
     { $fmt = 2 if ($eff / $grp > 3); }
@@ -226,6 +229,22 @@ sub add
     }
 }
 
+
+=head2 $c->vec
+
+Returns a vector of all the glyph ids covered by this coverage table or class
+
+=cut
+
+sub vec
+{
+    my ($self) = @_;
+    my ($vec);
+
+    foreach (keys %{$self->{'val'}})
+    { vec($vec, $_, 1) = 1; }
+    $vec;
+}
 
 =head2 $c->out_xml($context)
 

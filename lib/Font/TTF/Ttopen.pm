@@ -760,7 +760,7 @@ sub out_final
     my ($fh, $out, $cache_list, $state) = @_;
     my ($len) = length($out || '');
     my ($base_loc) = $state ? 0 : $fh->tell();
-    my ($loc, $t, $r, $s, $master_cache, $offs, $str);
+    my ($loc, $t, $r, $s, $master_cache, $offs, $str, %vecs);
 
     $fh->print($out || '') unless $state;       # first output the current attempt
     foreach $r (@$cache_list)
@@ -771,12 +771,19 @@ sub out_final
             $str = "$t";
             if (!defined $master_cache->{$str})
             {
-                $master_cache->{$str} = ($state ? length($out) : $fh->tell())
-                                                            - $base_loc;
-                if ($state)
-                { $out .= $r->[0]{$str}[0]->out($fh, 1); }
+                my ($vec) = $r->[0]{$str}[0]->vec() if ($r->[0]{$str}[0]{'cover'});
+                if ($r->[0]{$str}[0]{'cover'} && $vecs{$vec})
+                { $master_cache->{$str} = $master_cache->{$vecs{$vec}}; }
                 else
-                { $r->[0]{$str}[0]->out($fh, 0); }
+                {
+                    $vecs{$vec} = $str;
+                    $master_cache->{$str} = ($state ? length($out) : $fh->tell())
+                                                                       - $base_loc;
+                    if ($state)
+                    { $out .= $r->[0]{$str}[0]->out($fh, 1); }
+                    else
+                    { $r->[0]{$str}[0]->out($fh, 0); }
+                }
             }
             foreach $s (@{$r->[0]{$str}[1]})
             { substr($out, $s, 2) = pack('n', $master_cache->{$str} - $offs); }

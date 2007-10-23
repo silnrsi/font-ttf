@@ -437,23 +437,30 @@ sub out_sub
             $off += length($out);
             $off += 2 * ($#{$lookup->{'RULES'}} + 1); # there will be PairSetCount offsets here
             my $pairsets = '';
+            my (%cache);
             foreach $r (@{$lookup->{'RULES'}}) # foreach PairSet table
             {
                 # write offset to this PairSet at end of PairPosFormat1 table
-                $out .= pack('n', $off);
-
-                # generate PairSet itself (using $off as eventual offset within PairPos subtable)
-                my $pairset = pack('n', $#{$r} + 1); # PairValueCount
-                foreach $t (@$r) # foreach PairValueRecord
+                if (defined $cache{"$r"})
+                { $out .= pack('n', $cache{"$r"}); }
+                else
                 {
-                    $pairset .= pack('n', $t->{'MATCH'}[0]); # SecondGlyph - MATCH has only one entry
-                    $pairset .= 
-                        $self->out_value($t->{'ACTION'}[0], $vfmt,  $ctables, $off + length($pairset) + $base);
-                    $pairset .= 
-                        $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, $off + length($pairset) + $base);
+                    $out .= pack('n', $off);
+                    $cache{"$r"} = $off;
+
+                    # generate PairSet itself (using $off as eventual offset within PairPos subtable)
+                    my $pairset = pack('n', $#{$r} + 1); # PairValueCount
+                    foreach $t (@$r) # foreach PairValueRecord
+                    {
+                        $pairset .= pack('n', $t->{'MATCH'}[0]); # SecondGlyph - MATCH has only one entry
+                        $pairset .= 
+                            $self->out_value($t->{'ACTION'}[0], $vfmt,  $ctables, $off + length($pairset) + $base);
+                        $pairset .= 
+                            $self->out_value($t->{'ACTION'}[1], $vfmt2, $ctables, $off + length($pairset) + $base);
+                    }
+                    $off += length($pairset);
+                    $pairsets .= $pairset;
                 }
-                $off += length($pairset);
-                $pairsets .= $pairset;
             }
             $out .= $pairsets;
             die "internal error: PairPos size not as calculated" if (length($out) != $off);
