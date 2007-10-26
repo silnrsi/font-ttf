@@ -124,12 +124,12 @@ sub out
     my ($xoff, $yoff, $fmt, $out);
 
     if (defined $self->{'xid'} || defined $self->{'yid'})
-    { $out = TTF_pack('SSS', 4, $self->{'xid'}, $self->{'yid'}); }
+    { $out = TTF_Pack('SSS', 4, $self->{'xid'}, $self->{'yid'}); }
     elsif (defined $self->{'p'})
-    { $out = TTF_pack('Ssss', 2, @{$self}{'x', 'y', 'p'}); }
+    { $out = TTF_Pack('Ssss', 2, @{$self}{'x', 'y', 'p'}); }
     elsif (defined $self->{'xdev'} || defined $self->{'ydev'})
     {
-        $out = TTF_pack('Sss', 3, @{$self}{'x', 'y'});
+        $out = TTF_Pack('Sss', 3, @{$self}{'x', 'y'});
         if (defined $self->{'xdev'})
         {
             $out .= pack('n2', 10, 0);
@@ -145,7 +145,7 @@ sub out
             $out .= $self->{'ydev'}->out($fh, 1);
         }
     } elsif (defined $self->{'x'} || defined $self->{'y'})
-    { $out = TTF_pack('Sss', 1, @{$self}{'x', 'y'}); }
+    { $out = TTF_Pack('Sss', 1, @{$self}{'x', 'y'}); }
     $fh->print($out) unless $style;
     $out;
 }
