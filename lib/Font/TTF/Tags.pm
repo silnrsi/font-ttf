@@ -638,7 +638,7 @@ use Exporter qw( import );
 }
 
 
-=head2 readfile ( filename )
+=head2 readtagsfile ( filename )
 
 Read a file in the syntax of Tags.txt (included with Microsoft VOLT) to obtain additional/replacement tag definitions.
 
