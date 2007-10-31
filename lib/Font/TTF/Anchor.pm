@@ -144,10 +144,17 @@ sub out
             substr($out, 8, 2) = pack('n', $yoff);
             $out .= $self->{'ydev'}->out($fh, 1);
         }
-    } elsif (defined $self->{'x'} || defined $self->{'y'})
+    } else
     { $out = TTF_Pack('Sss', 1, @{$self}{'x', 'y'}); }
     $fh->print($out) unless $style;
     $out;
+}
+
+
+sub signature
+{
+    my ($self) = @_;
+    return join (",", map {"${_}=$self->{$_}"} qw(x y p xdev ydev xid yid));
 }
 
 

@@ -230,19 +230,32 @@ sub add
 }
 
 
-=head2 $c->vec
+=head2 $c->signtaure
 
 Returns a vector of all the glyph ids covered by this coverage table or class
 
 =cut
 
-sub vec
+sub signature
 {
     my ($self) = @_;
-    my ($vec);
+    my ($vec, $range, $size);
 
+    if ($self->{'cover'})
+    { $range = 1; $size = 1; }
+    else
+    {
+        $range = $self->{'max'};
+        $size = 1;
+        while ($range > 1)
+        {
+            $size = $size << 1;
+            $range = $range >> 1;
+        }
+        $range = $self->{'max'} + 1;
+    }
     foreach (keys %{$self->{'val'}})
-    { vec($vec, $_, 1) = 1; }
+    { vec($vec, $_, $size) = $self->{'val'}{$_} > $range ? $range : $self->{'val'}{$_}; }
     $vec;
 }
 

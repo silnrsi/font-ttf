@@ -530,10 +530,10 @@ sub out_sub
             push (@reftables, [$ltables, $loc_t]) if ($type == 5);
         }
         push (@reftables, [$ltables, $loc_t]) unless ($type == 5);
+        $out = Font::TTF::Ttopen::out_final($fh, $out, \@reftables, 1);
     } elsif ($type == 7 || $type == 8)
     { $out = $self->out_context($lookup, $fh, $type - 2, $fmt, $ctables, $out, $num, $base); }
 #    push (@reftables, [$ctables, 0]);
-    $out = Font::TTF::Ttopen::out_final($fh, $out, \@reftables, 1);
     $out;
 }
             

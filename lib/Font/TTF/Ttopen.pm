@@ -771,8 +771,8 @@ sub out_final
             $str = "$t";
             if (!defined $master_cache->{$str})
             {
-                my ($vec) = $r->[0]{$str}[0]->vec() if ($r->[0]{$str}[0]{'cover'});
-                if ($r->[0]{$str}[0]{'cover'} && $vecs{$vec})
+                my ($vec) = $r->[0]{$str}[0]->signature();
+                if ($vecs{$vec})
                 { $master_cache->{$str} = $master_cache->{$vecs{$vec}}; }
                 else
                 {
