@@ -544,7 +544,7 @@ sub out
     $fh->print(pack("n", $nTags));
     $fh->print(pack("a4n", "    ", 0) x $nTags);
     
-    foreach $t (@{$self->{'FEATURES'}{'FEAT_TAGS'}})
+    foreach $t (sort @{$self->{'FEATURES'}{'FEAT_TAGS'}})
     {
         $tag = $self->{'FEATURES'}{$t};
         $tag->{' OFFSET'} = tell($fh) - $base - $oFeat;
@@ -552,7 +552,7 @@ sub out
     }
     $end = $fh->tell();
     $fh->seek($oFeat + $base + 2, 0);
-    foreach $t (@{$self->{'FEATURES'}{'FEAT_TAGS'}})
+    foreach $t (sort @{$self->{'FEATURES'}{'FEAT_TAGS'}})
     { $fh->print(pack("a4n", $t, $self->{'FEATURES'}{$t}{' OFFSET'})); }
 
     undef $big;
