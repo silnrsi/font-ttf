@@ -139,7 +139,7 @@ sub out
         else
         {
             $grp++;
-            $eff += $gids[$i] - $gids[$i-1];
+            $eff += $gids[$i] - $gids[$i-1] if (!$self->{'cover'});
         }
     }
 #    if ($self->{'cover'})
@@ -241,6 +241,8 @@ sub signature
     my ($self) = @_;
     my ($vec, $range, $size);
 
+if (0)
+{
     if ($self->{'cover'})
     { $range = 1; $size = 1; }
     else
@@ -256,7 +258,29 @@ sub signature
     }
     foreach (keys %{$self->{'val'}})
     { vec($vec, $_, $size) = $self->{'val'}{$_} > $range ? $range : $self->{'val'}{$_}; }
-    $vec;
+    length($vec) . ":" . $vec;
+}
+    $vec = join(";", map{"$_,$self->{'val'}{$_}"} keys %{$self->{'val'}});
+}
+
+=head2 @map=$c->sort
+
+Sorts the coverage table so that indexes are in ascending order of glyphid.
+Returns a map such that $map[$new_index]=$old_index.
+
+=cut
+
+sub sort
+{
+    my ($self) = @_;
+    my (@res, $i);
+
+    foreach (sort {$a <=> $b} keys %{$self->{'val'}})
+    {
+        push(@res, $self->{'val'}{$_});
+        $self->{'val'}{$_} = $i++;
+    }
+    @res;
 }
 
 =head2 $c->out_xml($context)

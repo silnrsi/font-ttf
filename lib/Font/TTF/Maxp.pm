@@ -146,7 +146,7 @@ sub update
     {
         my ($g) = $self->{' PARENT'}{'loca'}{'glyphs'}[$i] || next;
 
-        @n = $g->maxInfo($self->{' PARENT'}{'loca'}{'glyphs'});
+        @n = $g->maxInfo;
 
         for ($j = 0; $j <= $#n; $j++)
         { $m[$j] = $n[$j] if $n[$j] > $m[$j]; }

@@ -4,6 +4,8 @@ blib/
 \.bak
 CVS/
 \.tar
+\.tgz
+\.old
 misc/
 Build/
 exes/
@@ -17,3 +19,8 @@ debian/
 pm_to_blib
 \~$
 dev/
+build/
+dists/
+^libfont-
+description-pak
+^doc
