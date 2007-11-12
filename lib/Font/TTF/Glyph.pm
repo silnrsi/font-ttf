@@ -604,7 +604,8 @@ sub update
             $self->{' DAT'} .= pack("a" . $len, substr($self->{'hints'}, 0, $len));
         }
     }
-    $self->{' DAT'} .= "\000" if (length($self->{' DAT'}) & 1);
+    my ($olen) = length($self->{' DAT'});
+    $self->{' DAT'} .= ("\000") x (4 - ($olen & 3)) if ($olen & 3);
     $self->{' OUTLEN'} = length($self->{' DAT'});
     $self->{' read'} = 2;           # changed from 1 to 2 so we don't read_dat() again
 # we leave numPoints and instLen since maxp stats use this
