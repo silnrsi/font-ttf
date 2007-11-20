@@ -1,6 +1,7 @@
 package Font::TTF;
 
-$VERSION = '0.42';    # MJPH    11-OCT-2007      Add Volt2ttf support
+$VERSION = '0.43';    # MJPH    20-NOV-2007      Add a test!
+# $VERSION = '0.42';    # MJPH    11-OCT-2007      Add Volt2ttf support
 # $VERSION = '0.41';    # MJPH    27-MAR-2007      Remove warnings from font copy
 #                                                  Bug fixes in Ttopen, GDEF
 #                                                  Remove redundant head and maxp ->reads
