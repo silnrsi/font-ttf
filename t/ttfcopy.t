@@ -9,5 +9,7 @@ ok($f);
 $f->tables_do(sub { $_[0]->read; });
 $f->{'loca'}->glyphs_do(sub {$_[0]->read_dat; });
 $f->out("t/temp.ttf");
-ok(!compare("t/temp.ttf", "t/testfont.ttf"));
+$res = compare("t/temp.ttf", "t/testfont.ttf");
+ok(!$res);
+unlink "t/temp.ttf" unless ($res);
 
