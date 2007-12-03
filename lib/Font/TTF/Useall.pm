@@ -18,6 +18,7 @@ use Font::TTF::Bsln;
 use Font::TTF::Delta;
 use Font::TTF::Fdsc;
 use Font::TTF::Feat;
+use Font::TTF::GrFeat;
 use Font::TTF::Fmtx;
 use Font::TTF::GPOS;
 use Font::TTF::Mort;
