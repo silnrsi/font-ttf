@@ -291,7 +291,7 @@ sub TTF_word_utf8
     my ($res, $i);
     my (@dat) = unpack("n*", $str);
 
-    return pack("U*", @dat) if ($^V && $^V ge v5.6.0);
+    return pack("U*", @dat) if ($] >= 5.006);
     for ($i = 0; $i <= $#dat; $i++)
     {
         my ($dat) = $dat[$i];

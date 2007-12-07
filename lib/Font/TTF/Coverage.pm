@@ -93,13 +93,14 @@ sub read
                 map {$self->{'val'}{$_} = $c++} ($first .. $last);
             }
         }
+        $self->{'count'} = $num;
     } elsif ($fmt == 1)
     {
         $fh->read($dat, 2);
         $first = $num;
         ($num) = unpack("n", $dat);
         $fh->read($dat, $num << 1);
-        map {$self->{'val'}{$first++} = $_} unpack("n*", $dat);
+        map {$self->{'val'}{$first++} = $_; $self->{'max'} = $_ if ($_ > $self->{'max'})} unpack("n*", $dat);
     } elsif ($fmt == 2)
     {
         $fh->read($dat, $num * 6);
@@ -107,6 +108,7 @@ sub read
         {
             ($first, $last, $c) = unpack("n3", substr($dat, $i * 6, 6));
             map {$self->{'val'}{$_} = $c} ($first .. $last);
+            $self->{'max'} = $c if ($c > $self->{'max'});
         }
     }
     $self;

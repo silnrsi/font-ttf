@@ -734,8 +734,9 @@ sub ref_cache
     my ($obj, $cache, $offset) = @_;
 
     return 0 unless defined $obj;
-    $cache->{"$obj"}[0] = $obj unless defined $cache->{"$obj"};
-    push (@{$cache->{"$obj"}[1]}, $offset);
+    unless (defined $cache->{"$obj"})
+    { push (@{$cache->{''}}, $obj); }
+    push (@{$cache->{"$obj"}}, $offset);
     return 0;
 }
 
@@ -766,12 +767,12 @@ sub out_final
     foreach $r (@$cache_list)
     {
         $offs = $r->[1];
-        foreach $t (sort keys %{$r->[0]})
+        foreach $t (@{$r->[0]{''}})
         {
             $str = "$t";
             if (!defined $master_cache->{$str})
             {
-                my ($vec) = $r->[0]{$str}[0]->signature();
+                my ($vec) = $t->signature();
                 if ($vecs{$vec})
                 { $master_cache->{$str} = $master_cache->{$vecs{$vec}}; }
                 else
@@ -780,12 +781,12 @@ sub out_final
                     $master_cache->{$str} = ($state ? length($out) : $fh->tell())
                                                                        - $base_loc;
                     if ($state)
-                    { $out .= $r->[0]{$str}[0]->out($fh, 1); }
+                    { $out .= $t->out($fh, 1); }
                     else
-                    { $r->[0]{$str}[0]->out($fh, 0); }
+                    { $t->out($fh, 0); }
                 }
             }
-            foreach $s (@{$r->[0]{$str}[1]})
+            foreach $s (@{$r->[0]{$str}})
             { substr($out, $s, 2) = pack('n', $master_cache->{$str} - $offs); }
         }
     }
