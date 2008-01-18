@@ -2,7 +2,7 @@ package Font::TTF::Mort::Insertion;
 
 =head1 NAME
 
-Font::TTF::Mort::Insertion
+Font::TTF::Mort::Insertion - Insertion Mort subtable for AAT
 
 =head1 METHODS
 

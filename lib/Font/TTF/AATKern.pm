@@ -2,7 +2,7 @@ package Font::TTF::AATKern;
 
 =head1 NAME
 
-Font::TTF::AATKern
+Font::TTF::AATKern - AAT Kern table
 
 =head1 METHODS
 

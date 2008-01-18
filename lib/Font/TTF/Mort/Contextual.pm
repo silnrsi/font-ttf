@@ -2,7 +2,7 @@ package Font::TTF::Mort::Contextual;
 
 =head1 NAME
 
-Font::TTF::Mort::Contextual
+Font::TTF::Mort::Contextual - Contextual Mort subtable for AAT
 
 =head1 METHODS
 

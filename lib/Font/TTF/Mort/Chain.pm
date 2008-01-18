@@ -2,7 +2,7 @@ package Font::TTF::Mort::Chain;
 
 =head1 NAME
 
-Font::TTF::Mort::Chain
+Font::TTF::Mort::Chain - Chain Mort subtable for AAT
 
 =cut
 

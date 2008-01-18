@@ -2,7 +2,7 @@ package Font::TTF::Mort::Rearrangement;
 
 =head1 NAME
 
-Font::TTF::Mort::Rearrangement
+Font::TTF::Mort::Rearrangement - Rearrangement Mort subtable for AAT
 
 =head1 METHODS
 

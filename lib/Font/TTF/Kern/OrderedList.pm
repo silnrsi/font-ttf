@@ -2,7 +2,7 @@ package Font::TTF::Kern::OrderedList;
 
 =head1 NAME
 
-Font::TTF::Kern::OrderedList
+Font::TTF::Kern::OrderedList - Ordered List Kern subtable for AAT
 
 =head1 METHODS
 

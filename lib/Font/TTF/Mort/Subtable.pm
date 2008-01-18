@@ -2,7 +2,7 @@ package Font::TTF::Mort::Subtable;
 
 =head1 NAME
 
-Font::TTF::Mort::Subtable
+Font::TTF::Mort::Subtable - Mort subtable superclass for AAT
 
 =head1 METHODS
 

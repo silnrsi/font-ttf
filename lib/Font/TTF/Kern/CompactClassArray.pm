@@ -2,7 +2,7 @@ package Font::TTF::Kern::CompactClassArray;
 
 =head1 NAME
 
-Font::TTF::Kern::CompactClassArray
+Font::TTF::Kern::CompactClassArray - Compact Class Array kern subtable for AAT
 
 =head1 METHODS
 

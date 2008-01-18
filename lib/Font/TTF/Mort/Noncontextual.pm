@@ -2,7 +2,7 @@ package Font::TTF::Mort::Noncontextual;
 
 =head1 NAME
 
-Font::TTF::Mort::Noncontextual
+Font::TTF::Mort::Noncontextual - Noncontextual Mort subtable for AAT
 
 =head1 METHODS
 

@@ -2,7 +2,7 @@ package Font::TTF::Kern::Subtable;
 
 =head1 NAME
 
-Font::TTF::Kern::Subtable
+Font::TTF::Kern::Subtable - Kern Subtable superclass for AAT
 
 =head1 METHODS
 

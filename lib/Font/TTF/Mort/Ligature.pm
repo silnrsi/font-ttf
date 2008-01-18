@@ -2,7 +2,7 @@ package Font::TTF::Mort::Ligature;
 
 =head1 NAME
 
-Font::TTF::Mort::Ligature
+Font::TTF::Mort::Ligature - Ligature Mort subtable for AAT
 
 =head1 METHODS
 

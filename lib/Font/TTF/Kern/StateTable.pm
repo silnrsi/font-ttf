@@ -2,7 +2,7 @@ package Font::TTF::Kern::StateTable;
 
 =head1 NAME
 
-Font::TTF::Kern::StateTable
+Font::TTF::Kern::StateTable - State Table Kern subtable for AAT
 
 =head1 METHODS
 
