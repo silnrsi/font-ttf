@@ -668,6 +668,60 @@ sub out_sub
 { }
 
 
+=head2 $t->update
+
+Unless $t->{' PARENT'}{' noharmony'} is true, update will make sure that GPOS and GSUB include 
+the same scripts and languages. Any added scripts and languages will have empty feature sets.
+
+=cut
+
+# Assumes we are called on both GSUB and GPOS. So simply ADDS scripts and languages to $self that it finds
+# in the other table.
+
+sub update
+{
+    my ($self) = @_;
+    
+    return undef unless ($self->SUPER::update);
+
+    # Enforce script/lang congruence unless asked not to:
+    return $self if $self->{' PARENT'}{' noharmony'};
+
+    # Find my sibling (GSUB or GPOS, depending on which I am)
+    my $sibling = ref($self) eq 'Font::TTF::GSUB' ? 'GPOS' : ref($self) eq 'Font::TTF::GPOS' ? 'GSUB' : undef;
+    return $self unless $sibling && exists $self->{' PARENT'}{$sibling};
+    $sibling = $self->{' PARENT'}{$sibling};
+    next unless defined $sibling;
+    
+    # Look through scripts defined in sibling:
+    for my $sTag (grep {length($_) == 4} keys %{$sibling->{'SCRIPTS'}})
+    {
+        my $sibScript = $sibling->{'SCRIPTS'}{$sTag};
+        $sibScript = $sibling->{$sibScript->{' REFTAG'}} if exists $sibScript->{' REFTAG'} && $sibScript->{' REFTAG'} ne '';
+        
+        $self->{'SCRIPTS'}{$sTag} = {} unless defined $self->{'SCRIPTS'}{$sTag}; # Create script if not present in $self
+        
+        my $myScript = $self->{'SCRIPTS'}{$sTag};
+        $myScript = $self->{$myScript->{' REFTAG'}} if exists $myScript->{' REFTAG'} && $myScript->{' REFTAG'} ne '';
+                
+        foreach my $lTag (@{$sibScript->{'LANG_TAGS'}})
+        {
+            # Ok, found a script/lang that is in our sibling.
+            next if exists $myScript->{$lTag};  # Already in $self
+            
+            # Need to create this lang:
+            push @{$myScript->{'LANG_TAGS'}}, $lTag;
+            $myScript->{$lTag} = { 'FEATURES' => [] };
+        }
+        unless (defined $myScript->{'DEFAULT'})
+        {
+            # Create default lang for this script. Link to 'dflt' if it exists
+            $myScript->{'DEFAULT'} = exists $myScript->{'dflt'} ? {' REFTAG' => 'dflt'} : { 'FEATURES' => [] };
+        }
+    }
+    $self;
+}
+
 =head1 Internal Functions & Methods
 
 Most of these methods are used by subclasses for handling such things as coverage

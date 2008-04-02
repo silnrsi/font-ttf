@@ -96,6 +96,10 @@ This is used during output to disable the creation of the file checksum in the
 head table. For example, during DSIG table creation, this flag will be set to
 ensure that the file checksum is left at zero.
 
+=item noharmony
+
+If set, do not harmonize the script and lang trees of GPOS and GSUB tables. See L<Font::TTF::Ttopen> for more info.
+
 =item fname (R)
 
 Contains the filename of the font which this object was read from.
