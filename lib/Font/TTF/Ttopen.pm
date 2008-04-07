@@ -667,6 +667,61 @@ start of the subtable to be output
 sub out_sub
 { }
 
+=head2 $t->dirty
+
+Setting GPOS or GSUB dirty means that OS/2 may need updating, so set it dirty.
+
+=cut
+
+sub dirty
+{
+    my ($self, $val) = @_;
+    my $res = $self->SUPER::dirty ($val);
+    $self->{' PARENT'}{'OS/2'}->read->dirty($val) if exists $self->{' PARENT'}{'OS/2'};
+    $res;
+}
+
+=head2 $t->maxContext
+
+Returns the length of the longest opentype rule in this table.
+
+=cut
+
+sub maxContext
+{
+    my ($self) = @_;
+    
+    # Make sure table is read
+    $self->read;
+
+    # Calculate my contribution to OS/2 usMaxContext
+    
+    my ($maxcontext, $l, $s, $r, $m);
+   
+    for $l (@{$self->{'LOOKUP'}})        # Examine each lookup
+    {
+        for $s (@{$l->{'SUB'}})         # Multiple possible subtables for this lookup
+        {
+            for $r (@{$s->{'RULES'}})   # One ruleset for each covered glyph
+            {
+                for $m (@{$r})          # Multiple possible matches for this covered glyph 
+                {
+                    my $lgt;
+                    $lgt++ if exists $s->{'COVERAGE'};  # Count 1 for the coverage table if it exists
+                    for (qw(MATCH PRE POST))
+                    {
+                        $lgt += @{$m->{$_}} if exists $m->{$_};
+                    }
+                    $maxcontext = $lgt if $lgt > $maxcontext;
+                }
+            }
+            
+        }
+    }
+    
+    $maxcontext;    
+}    
+
 
 =head2 $t->update
 

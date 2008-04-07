@@ -327,6 +327,16 @@ sub update
     $self->{'Version'} = 1 if (defined $self->{'ulCodePageRange1'} && $self->{'Version'} < 1);
     $self->{'Version'} = 2 if (defined $self->{'maxLookups'} && $self->{'Version'} < 2);
     
+    if ((exists $self->{' PARENT'}{'GPOS'} && $self->{' PARENT'}{'GPOS'}{' read'}) ||
+        (exists $self->{' PARENT'}{'GSUB'} && $self->{' PARENT'}{'GSUB'}{' read'}))
+    {
+        # one or both of GPOS & GSUB exist and have been read or modified; so update usMaxContexts
+        my ($lp, $ls);
+        $lp = $self->{' PARENT'}{'GPOS'}->maxContext if exists $self->{' PARENT'}{'GPOS'};
+        $ls = $self->{' PARENT'}{'GSUB'}->maxContext if exists $self->{' PARENT'}{'GSUB'};
+        $self->{'maxLookups'} = $lp > $ls ? $lp : $ls;
+    }
+    
     $self;
 }
 
