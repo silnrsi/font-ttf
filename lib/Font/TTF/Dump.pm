@@ -4,6 +4,19 @@ package Font::TTF::Dump;
 
 Font::TTF::Dump - Debug dump of a font datastructure, avoiding recursion on ' PARENT'
 
+=head1 SYNOPSIS
+
+    Font::TTF::Dump;
+    
+    # Print a table from the font structure:
+    print ttfdump($font->{$tag});
+    
+    # Print font table with name
+    print ttfdump($font->{'head'}, 'head');
+    
+    # Print one glyph's data:
+    print ttfdump($font->{'loca'}->read->{'glyphs'}[$gid], "glyph_$gid");
+
 =head1 DESCRIPTION
 
 Font::TTF data structures are trees created from hashes and arrays. When trying to figure
@@ -18,24 +31,18 @@ To reduce output further, this module also skips over ' CACHE' elements and any
 hash element whose value is a Font::TTF::Glyph or Font::TTF::Font object. 
 (Really should make this configurable.)
 
-=head1 METHODS
-
 =cut
 
 use strict;
 use Data::Dumper;
 
-=head2
-
-Font::TTF::Dump::Dumper($var, [qw(name)])
-
-returns a string
-
-=cut
+use vars qw(@EXPORT);
+use Exporter qw( import );
+@EXPORT = qw( ttfdump );
 
 my %skip = ( Font => 1, Glyph => 1 );
 
-sub Dumper
+sub ttfdump
 {
     my ($var, $name) = @_;
     my $res;
@@ -63,3 +70,9 @@ sub myfilter
 }
 
 1;
+
+=head1 See also
+
+L<Font::TTF::Font>
+
+=cut
