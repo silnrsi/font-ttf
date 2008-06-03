@@ -1775,7 +1775,8 @@ use Exporter qw( import );
 	'cieuckorean' => "\x{3148}",
 	'cieucparenkorean' => "\x{3208}",
 	'cieucuparenkorean' => "\x{321C}",
-	'circleot' => "\x{2299}",
+	'circleot' => "\x{2299}",           # Actual Adobe glyph list entry -- identified as typo, May 2008
+	'circledot' => "\x{2299}",          # What it should have been
 	'circlepostalmark' => "\x{3036}",
 	'circlewithlefthalfblack' => "\x{25D0}",
 	'circlewithrighthalfblack' => "\x{25D1}",
