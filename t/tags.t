@@ -1,7 +1,7 @@
 use strict;
 
 use Test::Simple tests => 3;
-use Font::TTF::Tags qw( %tttags %ttnames readtagsfile);
+use Font::TTF::OTTags qw( %tttags %ttnames readtagsfile);
 
 ok($tttags{'SCRIPT'}{'Cypriot Syllabary'} eq 'cprt', 'tttags{SCRIPT}');
 

@@ -1,12 +1,12 @@
-package Font::TTF::Dump;
+package Font::TTF::Dumper;
 
 =head1 NAME
 
-Font::TTF::Dump - Debug dump of a font datastructure, avoiding recursion on ' PARENT'
+Font::TTF::Dumper - Debug dump of a font datastructure, avoiding recursion on ' PARENT'
 
 =head1 SYNOPSIS
 
-    Font::TTF::Dump;
+    Font::TTF::Dumper;
     
     # Print a table from the font structure:
     print ttfdump($font->{$tag});

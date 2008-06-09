@@ -1,12 +1,12 @@
-package Font::TTF::Tags;
+package Font::TTF::OTTags;
 
 =head1 NAME
 
-Font::TTF::Tags - Utilities for TrueType/OpenType tags
+Font::TTF::OTTags - Utilities for TrueType/OpenType tags
 
 =head1 SYNOPSIS
 
-  use Font::TTF::Tags qw( %tttags %ttnames readtagsfile );
+  use Font::TTF::OTTags qw( %tttags %ttnames readtagsfile );
   
   # Look at built-in stuff:
   $script_tag = $tttags{'SCRIPT'}{'Cypriot Syllabary'};
