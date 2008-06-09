@@ -553,7 +553,7 @@ Table number to use rather than the default Unicode table
 =item array
 
 Returns each element of reverse as an array since a glyph may be mapped by more
-than one Unicode value. The arrays are unsorted.
+than one Unicode value. The arrays are unsorted. Otherwise store any one unicode value for a glyph.
 
 =back
 
