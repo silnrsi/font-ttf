@@ -16,8 +16,8 @@ Font::TTF::PSNames - Utilities for Postscript glyph name processing
 
 use strict;
 use vars qw(%names %agl @EXPORT_OK, @ISA);
-use Exporter;
-@ISA = qw( import );
+require Exporter;
+@ISA = qw( Exporter );
 @EXPORT_OK = qw( parse lookup);
 
 # Adobe Glyph List for New Fonts	

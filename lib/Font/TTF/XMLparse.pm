@@ -105,7 +105,7 @@ context for available use later.
 =cut
 
 use XML::Parser::Expat;
-use Exporter;
+require Exporter;
 
 use strict;
 use vars qw(@ISA @EXPORT);

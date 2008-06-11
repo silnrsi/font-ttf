@@ -37,7 +37,7 @@ use strict;
 use Data::Dumper;
 
 use vars qw(@EXPORT @ISA);
-use Exporter;
+require Exporter;
 @ISA = qw( Exporter );
 @EXPORT = qw( ttfdump );
 

@@ -37,7 +37,7 @@ updated to draft v1.5 of the OpenType Spec.
 
 use strict;
 use vars qw( %tttags %ttnames @EXPORT_OK @ISA );
-use Exporter;
+require Exporter;
 @ISA = qw( Exporter );
 @EXPORT_OK = qw( %tttags %ttnames readtagsfile);
 
