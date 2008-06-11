@@ -36,8 +36,9 @@ hash element whose value is a Font::TTF::Glyph or Font::TTF::Font object.
 use strict;
 use Data::Dumper;
 
-use vars qw(@EXPORT);
-use Exporter qw( import );
+use vars qw(@EXPORT @ISA);
+use Exporter;
+@ISA = qw( Exporter );
 @EXPORT = qw( ttfdump );
 
 my %skip = ( Font => 1, Glyph => 1 );
