@@ -47,7 +47,7 @@ sub create
     elsif ($type == 3) {
         $subclass = 'Font::TTF::Kern::CompactClassArray';
     }
-    
+
     my @options;
     push @options,'vertical'    if ($coverage & 0x8000) != 0;
     push @options,'crossStream' if ($coverage & 0x4000) != 0;
