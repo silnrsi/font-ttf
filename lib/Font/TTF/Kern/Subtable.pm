@@ -50,8 +50,8 @@ sub create
     
     my @options;
     push @options,'vertical'    if ($coverage & 0x8000) != 0;
-    push @options,'crossStream'    if ($coverage & 0x4000) != 0;
-    push @options,'variation'    if ($coverage & 0x2000) != 0;
+    push @options,'crossStream' if ($coverage & 0x4000) != 0;
+    push @options,'variation'   if ($coverage & 0x2000) != 0;
     
     my ($subTable) = $subclass->new(@options);
 
@@ -76,11 +76,11 @@ sub out
     my $subtableStart = $fh->tell();
     my $type = $self->{'type'};
     my $coverage = $type;
-    $coverage += 0x4000 if $self->{'direction'} eq 'RL';
-    $coverage += 0x2000 if $self->{'orientation'} eq 'VH';
-    $coverage += 0x8000 if $self->{'orientation'} eq 'V';
+    $coverage += 0x8000 if $self->{'vertical'};
+    $coverage += 0x4000 if $self->{'crossStream'};
+    $coverage += 0x2000 if $self->{'variation'};
     
-    $fh->print(TTF_Pack("SSL", 0, $coverage, $self->{'subFeatureFlags'}));    # placeholder for length
+    $fh->print(TTF_Pack("LSS", 0, $coverage, $self->{'tupleIndex'}));    # placeholder for length
     
     $self->out_sub($fh);
     
@@ -89,7 +89,7 @@ sub out
     $fh->print(pack("C*", (0) x $padBytes));
     $length += $padBytes;
     $fh->seek($subtableStart, IO::File::SEEK_SET);
-    $fh->print(pack("n", $length));
+    $fh->print(pack("N", $length));
     $fh->seek($subtableStart + $length, IO::File::SEEK_SET);
 }
 
