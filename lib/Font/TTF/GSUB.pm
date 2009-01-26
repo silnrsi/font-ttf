@@ -129,6 +129,7 @@ sub read_sub
     $lookup->{'FORMAT'} = $fmt;
     if ($type == 1 && $fmt == 1)
     {
+        $count -= 32768 if ($count > 32767);
         $lookup->{'ADJUST'} = $count;
         $lookup->{'ACTION_TYPE'} = 'o';
     } elsif ($type == 1 && $fmt == 2)

@@ -266,8 +266,8 @@ sub out
         $ltables = {};
         $loff = $fh->tell() - $loc;
         $out = pack('n*',
-                        Font::TTF::Ttopen->ref_cache($self->{'LIG'}{'COVERAGE'}, $ltables, 0),
-                        0, $#{$self->{'LIG'}{'LIGS'}} + 1,
+                        Font::TTF::Ttopen::ref_cache($self->{'LIG'}{'COVERAGE'}, $ltables, 0),
+                        $#{$self->{'LIG'}{'LIGS'}} + 1,
                         (0) x ($#{$self->{'LIG'}{'LIGS'}} + 1));
         push (@reftables, [$ltables, 0]);
         $i = 0;
@@ -283,7 +283,7 @@ sub out
                 substr($out, ($j << 1) + 2 + $loc1, 2) =
                         TTF_Pack('S', length($out) - $loc1);
                 $out .= TTF_Pack('SS', $s->{'FMT'}, $s->{'VAL'});
-                $out .= pack('n', Font::TTF::Ttopen->ref_cache($s->{'DEVICE'},
+                $out .= pack('n', Font::TTF::Ttopen::ref_cache($s->{'DEVICE'},
                         $ltables, length($out))) if ($s->{'FMT'} == 3);
                 $j++;
             }

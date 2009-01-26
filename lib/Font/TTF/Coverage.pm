@@ -58,7 +58,10 @@ sub new
         { $self->{'val'}{$v} = $self->{'count'}++; }
     }
     else
-    { $self->{'val'} = {@_}; }
+    {
+        $self->{'val'} = {@_};
+        foreach (@_) {$self->{'max'} = $_ if $_ > $self->{'max'}}
+    }
     bless $self, $class;
 }
 
@@ -232,7 +235,7 @@ sub add
 }
 
 
-=head2 $c->signtaure
+=head2 $c->signature
 
 Returns a vector of all the glyph ids covered by this coverage table or class
 

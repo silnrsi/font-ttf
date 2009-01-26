@@ -570,7 +570,7 @@ sub update
                 {
                     if ($comp->{'scale'}[0] == $comp->{'scale'}[3])
                     { $flag |= 8 unless ($comp->{'scale'}[0] == 0
-                                    || abs(abs($comp->{'scale'}[0]) - 1.) < .001); }
+                                    || $comp->{'scale'}[0] == 1); }
                     else
                     { $flag |= 64; }
                 } else
@@ -668,6 +668,8 @@ sub update_bbox
                 $gxx += $comp->{'args'}[0];
                 $gxy += $comp->{'args'}[1];
             }
+            ($gnx, $gxx) = ($gxx, $gnx) if $gnx > $gxx;
+            ($gny, $gxy) = ($gxy, $gny) if $gny > $gxy;
             $maxx = $gxx if $gxx > $maxx;
             $minx = $gnx if $gnx < $minx;
             $maxy = $gxy if $gxy > $maxy;
