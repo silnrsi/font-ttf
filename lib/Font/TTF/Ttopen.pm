@@ -297,7 +297,7 @@ sub read
 
     $self->SUPER::read or return $self;
     $fh->read($dat, 10);
-    ($self->{'Version'}, $oScript, $oFeat, $oLook) = TTF_Unpack("fSSS", $dat);
+    ($self->{'Version'}, $oScript, $oFeat, $oLook) = TTF_Unpack("vSSS", $dat);
 
 # read features first so that in the script/lang hierarchy we can use feature tags
 
@@ -481,7 +481,7 @@ sub out
     { $self->{'FEATURES'}{$t}{'INDEX'} = $i++; }
 
     $base = $fh->tell();
-    $fh->print(TTF_Pack("f", $self->{'Version'}));
+    $fh->print(TTF_Pack("v", $self->{'Version'}));
     $fh->print(pack("n3", 10, 0, 0));
     $oScript = $fh->tell() - $base;
     @script = sort grep {length($_) == 4} keys %{$self->{'SCRIPTS'}};

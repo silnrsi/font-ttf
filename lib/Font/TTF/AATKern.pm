@@ -32,7 +32,7 @@ sub read
     $fh = $self->{' INFILE'};
 
     $fh->read($dat, 8);
-    ($self->{'version'}, $numSubtables) = TTF_Unpack("fL", $dat);
+    ($self->{'version'}, $numSubtables) = TTF_Unpack("vL", $dat);
     
     my $subtables = [];
     foreach (1 .. $numSubtables) {
@@ -68,7 +68,7 @@ sub out
     return $self->SUPER::out($fh) unless $self->{' read'};
 
     my $subtables = $self->{'subtables'};
-    $fh->print(TTF_Pack("fL", $self->{'version'}, scalar @$subtables));
+    $fh->print(TTF_Pack("vL", $self->{'version'}, scalar @$subtables));
 
     foreach (@$subtables) {
         $_->out($fh);

@@ -85,7 +85,7 @@ sub read
 
     init unless defined $fields{'numGlyphs'};    # any key would do
     $self->{' INFILE'}->read($dat, 4);
-    $self->{'version'} = TTF_Unpack("f", $dat);
+    $self->{'version'} = TTF_Unpack("v", $dat);
 
     if ($self->{'version'} == 0.5)
     {
@@ -111,7 +111,7 @@ sub out
     my ($self, $fh) = @_;
 
     return $self->SUPER::out($fh) unless $self->{' read'};
-    $fh->print(TTF_Pack("f", $self->{'version'}));
+    $fh->print(TTF_Pack("v", $self->{'version'}));
     
     if ($self->{'version'} == 0.5)
     { $fh->print(pack("n", $self->{'numGlyphs'})); }

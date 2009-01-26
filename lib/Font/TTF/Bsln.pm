@@ -52,7 +52,7 @@ sub read
 
     $fh = $self->{' INFILE'};
     $fh->read($dat, 8);
-    my ($version, $format, $defaultBaseline) = TTF_Unpack("fSS", $dat);
+    my ($version, $format, $defaultBaseline) = TTF_Unpack("vSS", $dat);
 
     if ($format == 0 or $format == 1) {
         $fh->read($dat, 64);
@@ -96,7 +96,7 @@ sub out
 
     my $format = $self->{'format'};
     my $defaultBaseline = $self->{'defaultBaseline'};
-    $fh->print(TTF_Pack("fSS", $self->{'version'}, $format, $defaultBaseline));
+    $fh->print(TTF_Pack("vSS", $self->{'version'}, $format, $defaultBaseline));
 
     AAT_write_lookup($fh, $self->{'lookupFormat'}, $self->{'lookup'}, 2, $defaultBaseline) if ($format == 1 or $format == 3);
 }

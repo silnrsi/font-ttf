@@ -32,7 +32,7 @@ sub read
     $fh = $self->{' INFILE'};
 
     $fh->read($dat, 8);
-    ($self->{'version'}, $numChains) = TTF_Unpack("fL", $dat);
+    ($self->{'version'}, $numChains) = TTF_Unpack("vL", $dat);
     
     my $chains = [];
     foreach (1 .. $numChains) {
@@ -60,7 +60,7 @@ sub out
     return $self->SUPER::out($fh) unless $self->{' read'};
 
     my $chains = $self->{'chains'};
-    $fh->print(TTF_Pack("fL", $self->{'version'}, scalar @$chains));
+    $fh->print(TTF_Pack("vL", $self->{'version'}, scalar @$chains));
 
     foreach (@$chains) {
         $_->out($fh);

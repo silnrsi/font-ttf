@@ -55,7 +55,7 @@ sub TTF_Init_Fields
     $len = "" unless defined $len;
     $pos = 0 if !defined $pos || $pos eq "";
     $res = "$pos:$val:$len";
-    if ($val eq "f" || $val =~ m/^[l]/oi)
+    if ($val eq "f" || $val eq 'v' || $val =~ m/^[l]/oi)
     { $pos += 4 * ($len ne "" ? $len : 1); }
     elsif ($val eq "F" || $val =~ m/^[s]/oi)
     { $pos += 2 * ($len ne "" ? $len : 1); }
@@ -107,6 +107,7 @@ may be one of:
     L       ULONG
     s       SHORT
     S       USHORT
+    v       Version number (FIXED)
 
 Note that C<FUNIT>, C<FWORD> and C<UFWORD> are not data types but units.
 
@@ -119,7 +120,7 @@ sub TTF_Unpack
     my ($fmt, $dat) = @_;
     my ($res, $frac, $i, $arrlen, $type, @res);
 
-    while ($fmt =~ s/^([cfls])(\d+|\*)?//oi)
+    while ($fmt =~ s/^([cflsv])(\d+|\*)?//oi)
     {
         $type = $1;
         $arrlen = $2;
@@ -134,6 +135,13 @@ sub TTF_Unpack
                 substr($dat, 0, 4) = "";
                 $res -= 65536 if $res > 32767;
                 $res += $frac / 65536.;
+            }
+            elsif ($type eq "v")
+            {
+                ($res, $frac) = unpack("nn", $dat);
+                substr($dat, 0, 4) = "";
+                $res -= 65536 if $res > 32767;
+                $res = sprintf("%d.%X", $res, $frac);
             }
             elsif ($type eq "F")
             {
@@ -214,7 +222,7 @@ sub TTF_Pack
     my ($type, $i, $arrlen, $dat, $res, $frac);
 
     $dat = '';
-    while ($fmt =~ s/^([flsc])(\d+|\*)?//oi)
+    while ($fmt =~ s/^([flscv])(\d+|\*)?//oi)
     {
         $type = $1;
         $arrlen = $2 || "";
@@ -229,6 +237,17 @@ sub TTF_Pack
                 $frac = int(($res - int($res)) * 65536);
                 $res = (int($res) << 16) + $frac;
                 $dat .= pack("N", $res);
+            }
+            elsif ($type eq "v")
+            {
+                if ($res =~ s/\.(\d+)$//o)
+                {
+                    $frac = $1;
+                    $frac .= "0" x (4 - length($frac));
+                }
+                else
+                { $frac = 0; }
+                $dat .= pack('nn', $res, eval("0x$frac"));
             }
             elsif ($type eq "F")
             {

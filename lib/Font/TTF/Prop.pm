@@ -46,7 +46,7 @@ sub read
 
     $fh = $self->{' INFILE'};
     $fh->read($dat, 8);
-    ($version, $lookupPresent, $default) = TTF_Unpack("fSS", $dat);
+    ($version, $lookupPresent, $default) = TTF_Unpack("vSS", $dat);
 
     if ($lookupPresent) {
         my ($format, $lookup) = AAT_read_lookup($fh, 2, $self->{' LENGTH'} - 8, $default);
@@ -76,7 +76,7 @@ sub out
 
     $default = $self->{'default'};
     $lookup = $self->{'lookup'};
-    $fh->print(TTF_Pack("fSS", $self->{'version'}, (defined $lookup ? 1 : 0), $default));
+    $fh->print(TTF_Pack("vSS", $self->{'version'}, (defined $lookup ? 1 : 0), $default));
 
     AAT_write_lookup($fh, $self->{'format'}, $lookup, 2, $default) if (defined $lookup);
 }

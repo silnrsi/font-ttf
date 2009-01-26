@@ -286,7 +286,9 @@ sub read_dat
         $max = 0;
         foreach (@{$self->{'endPoints'}})
         { $max = $_ if $_ > $max; }
-        $max++;
+#        print STDERR join(",", unpack('C*', $self->{" DAT"}));
+#        printf STDERR ("(%d,%d in %d=%d @ %d)", scalar @{$self->{'endPoints'}}, $max, length($dat), $self->{' LEN'}, $fp);
+        $max++ if (@{$self->{'endPoints'}});
         $self->{'numPoints'} = $max;
         $self->{'instLen'} = unpack("n", substr($dat, $fp));
         $self->{'hints'} = substr($dat, $fp + 2, $self->{'instLen'});

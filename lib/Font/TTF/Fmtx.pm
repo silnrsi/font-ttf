@@ -33,7 +33,7 @@ use Font::TTF::Utils;
 
 @ISA = qw(Font::TTF::Table);
 @field_info = (
-    'version' => 'f',
+    'version' => 'v',
     'glyphIndex' => 'L',
     'horizontalBefore' => 'c',
     'horizontalAfter' => 'c',

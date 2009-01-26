@@ -39,7 +39,7 @@ sub read
 
     $fh = $self->{' INFILE'};
     $fh->read($dat, 4);
-    $self->{'version'} = TTF_Unpack("f", $dat);
+    $self->{'version'} = TTF_Unpack("v", $dat);
 
     $fh->read($dat, 4);
 
@@ -68,7 +68,7 @@ sub out
 
     return $self->SUPER::out($fh) unless $self->{' read'};
     
-    $fh->print(TTF_Pack("f", $self->{'version'}));
+    $fh->print(TTF_Pack("v", $self->{'version'}));
     
     $descs = $self->{'descriptors'} or {};
     

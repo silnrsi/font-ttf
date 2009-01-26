@@ -36,7 +36,7 @@ use Font::TTF::Utils;
 
 @ISA = qw(Font::TTF::Table);
 @field_info = (
-    'version' => 'f',
+    'version' => 'v',
     'Ascender' => 's',
     'Descender' => 's',
     'LineGap' => 's',

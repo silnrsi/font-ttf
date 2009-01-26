@@ -64,7 +64,7 @@ sub read
 
     $self->SUPER::read_dat or return $self;
 
-    ($self->{'version'}, $featureCount) = TTF_Unpack("fS", $self->{' dat'});
+    ($self->{'version'}, $featureCount) = TTF_Unpack("vS", $self->{' dat'});
 
     $features = [];
     foreach (1 .. $featureCount) {
@@ -114,7 +114,7 @@ sub out
         }
     }
 
-    $fh->print(TTF_Pack("fSSL", $self->{'version'}, $numFeatures, 0, 0));
+    $fh->print(TTF_Pack("vSSL", $self->{'version'}, $numFeatures, 0, 0));
     $fh->print($featuresData);
     $fh->print($settingsData);
 
