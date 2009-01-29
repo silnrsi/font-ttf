@@ -132,6 +132,19 @@ sub out
     $out;
 }
 
+=head2 $d->signature()
+
+Returns a content based identifying string for this delta for
+compression purposes
+
+=cut
+
+sub signature
+{
+    my ($self) = @_;
+    return join (",", $self->{'first'}, $self->{'last'}, @{$self->{'val'}});
+}
+
 
 =head2 $d->out_xml($context)
 

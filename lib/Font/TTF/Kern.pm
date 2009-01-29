@@ -133,12 +133,15 @@ sub read
         $fh->read($dat, $len - 6);
         if ($t->{'Version'} == 0)
         {
-            my ($j);
-
             $t->{'Num'} = unpack("n", $dat);
-            for ($j = 0; $j < $t->{'Num'}; $j++)
+            my (@vals) = unpack("n*", substr($dat, 8, $t->{'Num'} * 6));
+            for (0 .. ($t->{'Num'} - 1))
             {
-                my ($f, $l, $v) = TTF_Unpack("SSs", substr($dat, $j * 6 + 8, 6));
+                my ($f, $l, $v);
+                $f = shift @vals;
+                $l = shift @vals;
+                $v = shift @vals;
+                $v -= 65536 if ($v > 32767);
                 $t->{'kern'}{$f}{$l} = $v;
             }
         } elsif ($t->{'Version'} == 2)

@@ -60,7 +60,7 @@ sub new
     else
     {
         $self->{'val'} = {@_};
-        foreach (@_) {$self->{'max'} = $_ if $_ > $self->{'max'}}
+        foreach (values %{$self->{'val'}}) {$self->{'max'} = $_ if $_ > $self->{'max'}}
     }
     bless $self, $class;
 }
