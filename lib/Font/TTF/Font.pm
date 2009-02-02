@@ -47,6 +47,7 @@ defaults to L<Font::TTF::Table>. The current tables which are supported are:
     LTSH        Font::TTF::LTSH
     OS/2        Font::TTF::OS_2
     PCLT        Font::TTF::PCLT
+    Sill        Font::TTF::Sill
     bsln        Font::TTF::Bsln
     cmap        Font::TTF::Cmap       - see also Font::TTF::OldCmap
     cvt         Font::TTF::Cvt_
@@ -75,7 +76,7 @@ Links are:
 L<Font::TTF::Table> 
 L<Font::TTF::EBDT> L<Font::TTF::EBLC> L<Font::TTF::GrFeat>
 L<Font::TTF::GDEF> L<Font::TTF::GPOS> L<Font::TTF::GSUB> L<Font::TTF::LTSH>
-L<Font::TTF::OS_2> L<Font::TTF::PCLT> L<Font::TTF::Bsln> L<Font::TTF::Cmap> L<Font::TTF::Cvt_>
+L<Font::TTF::OS_2> L<Font::TTF::PCLT> L<Font::TTF::Sill> L<Font::TTF::Bsln> L<Font::TTF::Cmap> L<Font::TTF::Cvt_>
 L<Font::TTF::Fdsc> L<Font::TTF::Feat> L<Font::TTF::Fmtx> L<Font::TTF::Fpgm> L<Font::TTF::Glyf>
 L<Font::TTF::Hdmx> L<Font::TTF::Head> L<Font::TTF::Hhea> L<Font::TTF::Hmtx> L<Font::TTF::Kern>
 L<Font::TTF::Loca> L<Font::TTF::Maxp> L<Font::TTF::Mort> L<Font::TTF::Name> L<Font::TTF::Post>
@@ -127,7 +128,8 @@ use Symbol();
 
 require 5.004;
 
-$VERSION = 0.37;    # MJPH       7-OCT-2005     Force hhea update if dirty, give more OS/2 stuff in update
+$VERSION = 0.38;    # MJPH       2-FEB-2008     Add Sill table
+# $VERSION = 0.37;    # MJPH       7-OCT-2005     Force hhea update if dirty, give more OS/2 stuff in update
 # $VERSION = 0.36;    # MJPH      19-AUG-2005     Change cmap::reverse api to be opts based
 # $VERSION = 0.35;    # MJPH       4-MAY-2004     Various fixes to OpenType stuff, separate off scripts
 # $VERSION = 0.34;    # MJPH      22-MAY-2003     Update PSNames to latest AGL
@@ -180,6 +182,7 @@ $VERSION = 0.37;    # MJPH       7-OCT-2005     Force hhea update if dirty, give
         'LTSH' => 'Font::TTF::LTSH',
         'OS/2' => 'Font::TTF::OS_2',
         'PCLT' => 'Font::TTF::PCLT',
+        'Sill' => 'Font::TTF::Sill',
         'bsln' => 'Font::TTF::Bsln',
         'cmap' => 'Font::TTF::Cmap',
         'cvt ' => 'Font::TTF::Cvt_',
