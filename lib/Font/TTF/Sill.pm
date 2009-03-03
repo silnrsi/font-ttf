@@ -67,6 +67,7 @@ sub out
     my ($offset) = $num * 8 + 20;   #header = 12, dummy = 8
     my ($k, $s);
 
+    return $self->SUPER::out($fh) unless ($self->{' read'});
     $fh->print(TTF_Pack("vSSSS", $self->{'version'}, $num, $range, $select, $shift));
     foreach $k (sort (keys %{$self->{'langs'}}), '+1')
     {
