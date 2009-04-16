@@ -1,4 +1,4 @@
-use Font::TTF::Sill
+use Font::TTF::Sill;
 use Font::TTF::Cvt_;
 use Font::TTF::Fpgm;
 use Font::TTF::Glyf;
