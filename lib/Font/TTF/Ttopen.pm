@@ -504,7 +504,7 @@ sub out
     	    my ($def);
     	    $l = $tag->{$lTag};
     	    next if (!defined $l || (defined $l->{' REFTAG'} && $l->{' REFTAG'} ne ''));
-    	    $l->{' OFFSET'} = tell($fh) - $base - $oScript - $tag->{' OFFSET'};
+    	    $l->{' OFFSET'} = $fh->tell() - $base - $oScript - $tag->{' OFFSET'};
     	    if (defined $l->{'DEFAULT'})
 #    	    { $def = $self->{'FEATURES'}{$l->{'FEATURES'}[$l->{'DEFAULT'}]}{'INDEX'}; }
             { $def = $l->{'DEFAULT'}; }
@@ -517,16 +517,29 @@ sub out
     	if ($tag->{'DEFAULT'}{' REFTAG'} || defined $tag->{'DEFAULT'}{'FEATURES'})
     	{
         	$fh->seek($base + $oScript + $tag->{' OFFSET'}, 0);
-        	$off = $tag->{'DEFAULT'}{' REFTAG'} ?
-        	        $tag->{$tag->{'DEFAULT'}{' REFTAG'}}{' OFFSET'} :
-        	        $tag->{'DEFAULT'}{' OFFSET'};
+            if (defined $tag->{'DEFAULT'}{' REFTAG'})
+            {
+                my ($ttag);
+                for ($ttag = $tag->{'DEFAULT'}{' REFTAG'}; defined $tag->{$ttag}{' REFTAG'}; $ttag = $tag->{$ttag}{' REFTAG'})
+                { }
+                $off = $tag->{$ttag}{' OFFSET'};
+            }
+            else
+            { $off = $tag->{'DEFAULT'}{' OFFSET'}; }
         	$fh->print(pack("n", $off));
     	}
     	$fh->seek($base + $oScript + $tag->{' OFFSET'} + 4, 0);
     	foreach (sort @{$tag->{'LANG_TAGS'}})
     	{
-    	    $off = $tag->{$_}{' REFTAG'} ? $tag->{$tag->{$_}{' REFTAG'}}{' OFFSET'} :
-    	            $tag->{$_}{' OFFSET'};
+            if (defined $tag->{$_}{' REFTAG'})
+            {
+                my ($ttag);
+                for ($ttag = $tag->{$_}{' REFTAG'}; defined $tag->{$ttag}{' REFTAG'}; $ttag = $tag->{$ttag}{' REFTAG'})
+                { }
+                $off = $tag->{$ttag}{' OFFSET'};
+            }
+            else
+            { $off = $tag->{$_}{' OFFSET'}; }
     	    $fh->print(pack("a4n", $_, $off));
     	}
     }
