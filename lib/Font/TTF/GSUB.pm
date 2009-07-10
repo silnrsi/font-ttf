@@ -30,7 +30,7 @@ The action contains a string of glyphs to replace the match string by
 
 =item l
 
-The action array contains a list of lookups and offsets to run, in order, on
+The action array contains a list of offsets and lookups to run, in order, on
 the matched string
 
 =item a

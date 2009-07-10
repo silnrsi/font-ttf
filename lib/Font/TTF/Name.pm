@@ -341,7 +341,7 @@ tag and if the particular language of a string is found to match, then
 that string is changed, otherwise no change occurs.
 
 If supplied, @cover should be a list of references to two-element arrays 
-containing pid,eid pairs that should added to the name table if not already present.
+containing pid,eid pairs that should be added to the name table if not already present.
 
 This function does not add any names to the table unless @cover is supplied. 
 
@@ -363,7 +363,7 @@ sub set_name
             {
                 next unless (!defined $lang || $self->match_lang($pid, $lid, $lang));
                 $self->{'strings'}[$nid][$pid][$eid]{$lid} = $strNL;
-                foreach $c (0 .. scalar @cover)
+                foreach $c (0 .. $#cover)
                 {
                     next unless ($cover[$c][0] == $pid && $cover[$c][1] == $eid);
                     delete $cover[$c];
