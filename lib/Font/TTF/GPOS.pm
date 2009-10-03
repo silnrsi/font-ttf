@@ -570,7 +570,7 @@ sub read_value
     foreach $s (qw(XPlaDevice YPlaDevice XAdvDevice YAdvDevice))
     {
         if ($fmt & $flag)
-        { $res->{$s} = $self->read_delta(TTF_Unpack('S', substr($i++ << 1, 2)),
+        { $res->{$s} = $self->read_delta(TTF_Unpack('S', substr($dat, $i++ << 1, 2)),
                             $base, $lookup, $fh); }
         $flag <<= 1;
     }
