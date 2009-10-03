@@ -116,7 +116,7 @@ sub read
 {
     my ($self) = @_;
     my ($fh) = $self->{' INFILE'};
-    my ($dat, $i, $numt, $len, $cov, $t);
+    my ($dat, $i, $numt, $t);
 
     $self->SUPER::read or return $self;
 
@@ -151,6 +151,7 @@ sub read
 sub read_subtable
 {
     my ($self, $fh) = @_;
+    my ($dat, $len, $cov, $t);
 
     $t = {};
     $fh->read($dat, 6);
@@ -217,12 +218,12 @@ Outputs the kerning tables to the given file
 sub out
 {
     my ($self, $fh) = @_;
-    my ($i, $l, $r, $t);
+    my ($i, $t);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
 
     if ($self->{'Version'} > 0)
-    { $fh->print(TTF_pack("vL", $self->{'Version'}, $self->{'Num'}); }
+    { $fh->print(TTF_pack("vL", $self->{'Version'}, $self->{'Num'})); }
     else
     { $fh->print(pack("n2", $self->{'Version'}, $self->{'Num'})); }
 
@@ -243,7 +244,7 @@ sub out_subtable
 {
     my ($self, $fh, $t) = @_;
     my ($loc) = $fh->tell();
-    my ($loc1);
+    my ($loc1, $l, $r);
 
     $fh->print(pack("nnn", $t->{'Version'}, 0, $t->{'coverage'}));
     if ($t->{'Version'} == 0)
