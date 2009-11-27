@@ -43,6 +43,8 @@ If no $isCover, then vals is a hash of glyphs against class values.
 
 =cut
 
+our $dontsort;
+
 sub new
 {
     my ($class) = shift;
@@ -132,7 +134,7 @@ sub out
     my ($shipout) = ($state ? sub {$out .= $_[0];} : sub {$fh->print($_[0]);});
     my (@gids) = sort {$a <=> $b} keys %{$self->{'val'}};
 
-    if ($self->{'cover'})
+    if ($self->{'cover'} and !$self->{'dontsort'} and !$dontsort)
     { $self->sort(); }
 
     $fmt = 1; $grp = 1; $eff = 0;

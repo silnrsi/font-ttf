@@ -116,7 +116,7 @@ sub read
 {
     my ($self) = @_;
     my ($fh) = $self->{' INFILE'};
-    my ($dat, $i, $numt, $t);
+    my ($dat, $i, $numt, $len, $cov, $t);
 
     $self->SUPER::read or return $self;
 
@@ -206,6 +206,7 @@ sub read_subtable
                     unpack("n$maxr", substr($dat, $off + $wid * $j));
         }
     }
+    return $t;
 }
 
 
@@ -218,7 +219,7 @@ Outputs the kerning tables to the given file
 sub out
 {
     my ($self, $fh) = @_;
-    my ($i, $t);
+    my ($i, $l, $r, $t);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
 
