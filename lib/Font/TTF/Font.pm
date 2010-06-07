@@ -70,6 +70,7 @@ defaults to L<Font::TTF::Table>. The current tables which are supported are:
     prop        Font::TTF::Prop
     vhea        Font::TTF::Vhea
     vmtx        Font::TTF::Vmtx
+    DSIG        FONT::TTF::DSIG
 
 Links are:
 
@@ -82,6 +83,7 @@ L<Font::TTF::Hdmx> L<Font::TTF::Head> L<Font::TTF::Hhea> L<Font::TTF::Hmtx> L<Fo
 L<Font::TTF::Loca> L<Font::TTF::Maxp> L<Font::TTF::Mort> L<Font::TTF::Name> L<Font::TTF::Post>
 L<Font::TTF::Prep> L<Font::TTF::Prop> L<Font::TTF::Vhea> L<Font::TTF::Vmtx> L<Font::TTF::OldCmap>
 L<Font::TTF::Glyph> L<Font::TTF::AATKern> L<Font::TTF::OldMort>
+L<Font::TTF::DSIG>
 
 
 =head1 INSTANCE VARIABLES
@@ -128,7 +130,8 @@ use Symbol();
 
 require 5.004;
 
-$VERSION = 0.38;    # MJPH       2-FEB-2008     Add Sill table
+$VERSION = 0.39;    # MJPH       2-FEB-2008     Add DSIG table
+# $VERSION = 0.38;    # MJPH       2-FEB-2008     Add Sill table
 # $VERSION = 0.37;    # MJPH       7-OCT-2005     Force hhea update if dirty, give more OS/2 stuff in update
 # $VERSION = 0.36;    # MJPH      19-AUG-2005     Change cmap::reverse api to be opts based
 # $VERSION = 0.35;    # MJPH       4-MAY-2004     Various fixes to OpenType stuff, separate off scripts
@@ -173,6 +176,7 @@ $VERSION = 0.38;    # MJPH       2-FEB-2008     Add Sill table
 
 %tables = (
         'table' => 'Font::TTF::Table',
+        'DSIG' => 'Font::TTF::DSIG',
         'EBDT' => 'Font::TTF::EBDT',
         'EBLC' => 'Font::TTF::EBLC',
         'Feat' => 'Font::TTF::GrFeat',
