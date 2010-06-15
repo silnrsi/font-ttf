@@ -309,26 +309,26 @@ sub read
     $fh->read($dat, 6 * $nFeat);
     for ($i = 0; $i < $nFeat; $i++)
     {
-    	($tag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
-    	while (defined $l->{$tag})
-    	{
-    	    if ($tag =~ m/(.*?)\s_(\d+)$/o)
-    	    { $tag = $1 . " _" . ($2 + 1); }
-    	    else
-    	    { $tag .= " _0"; }
-    	}
-	    $l->{$tag}{' OFFSET'} = $off + $oFeat;
-	    $l->{$tag}{'INDEX'} = $i;
-	    push (@{$l->{'FEAT_TAGS'}}, $tag);
+        ($tag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
+        while (defined $l->{$tag})
+        {
+            if ($tag =~ m/(.*?)\s_(\d+)$/o)
+            { $tag = $1 . " _" . ($2 + 1); }
+            else
+            { $tag .= " _0"; }
+        }
+        $l->{$tag}{' OFFSET'} = $off + $oFeat;
+        $l->{$tag}{'INDEX'} = $i;
+        push (@{$l->{'FEAT_TAGS'}}, $tag);
     }
 
     foreach $tag (grep {m/^.{4}(?:\s_\d+)?$/o} keys %$l)
     {
-	    $fh->seek($moff + $l->{$tag}{' OFFSET'}, 0);
-    	$fh->read($dat, 4);
-	    ($l->{$tag}{'PARMS'}, $nLook) = unpack("n2", $dat);
-    	$fh->read($dat, $nLook * 2);
-	    $l->{$tag}{'LOOKUPS'} = [unpack("n*", $dat)];
+        $fh->seek($moff + $l->{$tag}{' OFFSET'}, 0);
+        $fh->read($dat, 4);
+        ($l->{$tag}{'PARMS'}, $nLook) = unpack("n2", $dat);
+        $fh->read($dat, $nLook * 2);
+        $l->{$tag}{'LOOKUPS'} = [unpack("n*", $dat)];
     }
 
 # Now the script/lang hierarchy
@@ -341,51 +341,51 @@ sub read
     $fh->read($dat, 6 * $nScript);
     for ($i = 0; $i < $nScript; $i++)
     {
-    	($tag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
-    	$off += $oScript;
+        ($tag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
+        $off += $oScript;
         foreach (keys %$l)
         { $l->{$tag}{' REFTAG'} = $_ if ($l->{$_}{' OFFSET'} == $off
                                         && !defined $l->{$_}{' REFTAG'}); }
-	    $l->{$tag}{' OFFSET'} = $off;
+        $l->{$tag}{' OFFSET'} = $off;
     }
 
     foreach $tag (keys %$l)
     {
         next if ($l->{$tag}{' REFTAG'});
-    	$fh->seek($moff + $l->{$tag}{' OFFSET'}, 0);
-    	$fh->read($dat, 4);
-    	($dLang, $nLang) = unpack("n2", $dat);
-    	$l->{$tag}{'DEFAULT'}{' OFFSET'} =
-    	        $dLang + $l->{$tag}{' OFFSET'} if $dLang;
-    	$fh->read($dat, 6 * $nLang);
-    	for ($i = 0; $i < $nLang; $i++)
-    	{
-    	    ($lTag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
-    	    $off += $l->{$tag}{' OFFSET'};
-    	    $l->{$tag}{$lTag}{' OFFSET'} = $off;
+        $fh->seek($moff + $l->{$tag}{' OFFSET'}, 0);
+        $fh->read($dat, 4);
+        ($dLang, $nLang) = unpack("n2", $dat);
+        $l->{$tag}{'DEFAULT'}{' OFFSET'} =
+                $dLang + $l->{$tag}{' OFFSET'} if $dLang;
+        $fh->read($dat, 6 * $nLang);
+        for ($i = 0; $i < $nLang; $i++)
+        {
+            ($lTag, $off) = unpack("a4n", substr($dat, $i * 6, 6));
+            $off += $l->{$tag}{' OFFSET'};
+            $l->{$tag}{$lTag}{' OFFSET'} = $off;
             foreach (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
             { $l->{$tag}{$lTag}{' REFTAG'} = $_ if ($l->{$tag}{$_}{' OFFSET'} == $off
                                                    && !$l->{$tag}{$_}{' REFTAG'}); }
-    	    push (@{$l->{$tag}{'LANG_TAGS'}}, $lTag);
-    	}
-    	foreach $lTag (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
-    	{
-    	    next unless defined $l->{$tag}{$lTag};
+            push (@{$l->{$tag}{'LANG_TAGS'}}, $lTag);
+        }
+        foreach $lTag (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
+        {
+            next unless defined $l->{$tag}{$lTag};
             next if ($l->{$tag}{$lTag}{' REFTAG'});
-    	    $fh->seek($moff + $l->{$tag}{$lTag}{' OFFSET'}, 0);
-    	    $fh->read($dat, 6);
-    	    ($l->{$tag}{$lTag}{'RE-ORDER'}, $l->{$tag}{$lTag}{'DEFAULT'}, $nFeat) 
-    	      = unpack("n3", $dat);
-    	    $fh->read($dat, $nFeat * 2);
-    	    $l->{$tag}{$lTag}{'FEATURES'} = [map {$self->{'FEATURES'}{'FEAT_TAGS'}[$_]} unpack("n*", $dat)];
-    	}
-    	foreach $lTag (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
-    	{
-       	    next unless $l->{$tag}{$lTag}{' REFTAG'};
-    	    $temp = $l->{$tag}{$lTag}{' REFTAG'};
-    	    $l->{$tag}{$lTag} = &copy($l->{$tag}{$temp});
-    	    $l->{$tag}{$lTag}{' REFTAG'} = $temp;
-    	}
+            $fh->seek($moff + $l->{$tag}{$lTag}{' OFFSET'}, 0);
+            $fh->read($dat, 6);
+            ($l->{$tag}{$lTag}{'RE-ORDER'}, $l->{$tag}{$lTag}{'DEFAULT'}, $nFeat) 
+              = unpack("n3", $dat);
+            $fh->read($dat, $nFeat * 2);
+            $l->{$tag}{$lTag}{'FEATURES'} = [map {$self->{'FEATURES'}{'FEAT_TAGS'}[$_]} unpack("n*", $dat)];
+        }
+        foreach $lTag (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
+        {
+            next unless $l->{$tag}{$lTag}{' REFTAG'};
+            $temp = $l->{$tag}{$lTag}{' REFTAG'};
+            $l->{$tag}{$lTag} = &copy($l->{$tag}{$temp});
+            $l->{$tag}{$lTag}{' REFTAG'} = $temp;
+        }
     }
     foreach $tag (keys %$l)
     {
@@ -406,28 +406,28 @@ sub read
 
     for ($i = 0; $i < $nLook; $i++)
     {
-    	$l = $self->{'LOOKUP'}[$i];
-    	$fh->seek($l->{' OFFSET'} + $moff + $oLook, 0);
-    	$fh->read($dat, 6);
-    	($l->{'TYPE'}, $l->{'FLAG'}, $nSub) = unpack("n3", $dat);
-    	$fh->read($dat, $nSub * 2);
-    	$j = 0;
+        $l = $self->{'LOOKUP'}[$i];
+        $fh->seek($l->{' OFFSET'} + $moff + $oLook, 0);
+        $fh->read($dat, 6);
+        ($l->{'TYPE'}, $l->{'FLAG'}, $nSub) = unpack("n3", $dat);
+        $fh->read($dat, $nSub * 2);
+        $j = 0;
         my @offsets = unpack("n*", $dat);
         my $isExtension = ($l->{'TYPE'} == $self->extension());
-    	for ($j = 0; $j < $nSub; $j++)
-    	{
-    	    $l->{'SUB'}[$j]{' OFFSET'} = $offsets[$j];
-       	    $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
-    	    if ($isExtension)
-    	    {
-    	        $fh->read($dat, 8);
-    	        my $longOff;
-    	        (undef, $l->{'TYPE'}, $longOff) = unpack("nnN", $dat);
-    	        $l->{'SUB'}[$j]{' OFFSET'} += $longOff;
-        	    $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
+        for ($j = 0; $j < $nSub; $j++)
+        {
+            $l->{'SUB'}[$j]{' OFFSET'} = $offsets[$j];
+            $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
+            if ($isExtension)
+            {
+                $fh->read($dat, 8);
+                my $longOff;
+                (undef, $l->{'TYPE'}, $longOff) = unpack("nnN", $dat);
+                $l->{'SUB'}[$j]{' OFFSET'} += $longOff;
+                $fh->seek($moff + $oLook + $l->{' OFFSET'} + $l->{'SUB'}[$j]{' OFFSET'}, 0);
             }
-	        $self->read_sub($fh, $l, $j);
-	    }
+            $self->read_sub($fh, $l, $j);
+        }
     }
     return $self;
 }
@@ -495,28 +495,28 @@ sub out
         $fh->seek($end, 0);
         $tag = $self->{'SCRIPTS'}{$t};
         next if ($tag->{' REFTAG'});
-    	$tag->{' OFFSET'} = tell($fh) - $base - $oScript;
-    	$fh->print(pack("n2", 0, $#{$tag->{'LANG_TAGS'}} + 1));
-    	foreach $lTag (sort @{$tag->{'LANG_TAGS'}})
-    	{ $fh->print(pack("a4n", $lTag, 0)); }
-    	foreach $lTag (@{$tag->{'LANG_TAGS'}}, 'DEFAULT')
-    	{
-    	    my ($def);
-    	    $l = $tag->{$lTag};
-    	    next if (!defined $l || (defined $l->{' REFTAG'} && $l->{' REFTAG'} ne ''));
-    	    $l->{' OFFSET'} = $fh->tell() - $base - $oScript - $tag->{' OFFSET'};
-    	    if (defined $l->{'DEFAULT'})
-#    	    { $def = $self->{'FEATURES'}{$l->{'FEATURES'}[$l->{'DEFAULT'}]}{'INDEX'}; }
+        $tag->{' OFFSET'} = tell($fh) - $base - $oScript;
+        $fh->print(pack("n2", 0, $#{$tag->{'LANG_TAGS'}} + 1));
+        foreach $lTag (sort @{$tag->{'LANG_TAGS'}})
+        { $fh->print(pack("a4n", $lTag, 0)); }
+        foreach $lTag (@{$tag->{'LANG_TAGS'}}, 'DEFAULT')
+        {
+            my ($def);
+            $l = $tag->{$lTag};
+            next if (!defined $l || (defined $l->{' REFTAG'} && $l->{' REFTAG'} ne ''));
+            $l->{' OFFSET'} = $fh->tell() - $base - $oScript - $tag->{' OFFSET'};
+            if (defined $l->{'DEFAULT'})
+#           { $def = $self->{'FEATURES'}{$l->{'FEATURES'}[$l->{'DEFAULT'}]}{'INDEX'}; }
             { $def = $l->{'DEFAULT'}; }
-    	    else
-    	    { $def = -1; }
-    	    $fh->print(pack("n*", $l->{'RE_ORDER'} || 0, $def, $#{$l->{'FEATURES'}} + 1,
-    	            map {$self->{'FEATURES'}{$_}{'INDEX'} || 0} @{$l->{'FEATURES'}}));
-    	}
-    	$end = $fh->tell();
-    	if ($tag->{'DEFAULT'}{' REFTAG'} || defined $tag->{'DEFAULT'}{'FEATURES'})
-    	{
-        	$fh->seek($base + $oScript + $tag->{' OFFSET'}, 0);
+            else
+            { $def = -1; }
+            $fh->print(pack("n*", $l->{'RE_ORDER'} || 0, $def, $#{$l->{'FEATURES'}} + 1,
+                    map {$self->{'FEATURES'}{$_}{'INDEX'} || 0} @{$l->{'FEATURES'}}));
+        }
+        $end = $fh->tell();
+        if ($tag->{'DEFAULT'}{' REFTAG'} || defined $tag->{'DEFAULT'}{'FEATURES'})
+        {
+            $fh->seek($base + $oScript + $tag->{' OFFSET'}, 0);
             if (defined $tag->{'DEFAULT'}{' REFTAG'})
             {
                 my ($ttag);
@@ -526,11 +526,11 @@ sub out
             }
             else
             { $off = $tag->{'DEFAULT'}{' OFFSET'}; }
-        	$fh->print(pack("n", $off));
-    	}
-    	$fh->seek($base + $oScript + $tag->{' OFFSET'} + 4, 0);
-    	foreach (sort @{$tag->{'LANG_TAGS'}})
-    	{
+            $fh->print(pack("n", $off));
+        }
+        $fh->seek($base + $oScript + $tag->{' OFFSET'} + 4, 0);
+        foreach (sort @{$tag->{'LANG_TAGS'}})
+        {
             if (defined $tag->{$_}{' REFTAG'})
             {
                 my ($ttag);
@@ -540,8 +540,8 @@ sub out
             }
             else
             { $off = $tag->{$_}{' OFFSET'}; }
-    	    $fh->print(pack("a4n", $_, $off));
-    	}
+            $fh->print(pack("a4n", $_, $off));
+        }
     }
     $fh->seek($base + $oScript + 2, 0);
     foreach $t (@script)
@@ -576,19 +576,19 @@ sub out
     $nTags = $#{$self->{'LOOKUP'}} + 1;
     $fh->print(pack("n", $nTags));
     $fh->print(pack("n", 0) x $nTags);
-    $end = $fh->tell();		# end of LookupListTable = start of Lookups
+    $end = $fh->tell();     # end of LookupListTable = start of Lookups
     foreach $tag (@{$self->{'LOOKUP'}})
     { $nSubs += $self->num_sub($tag); }
     for ($i = 0; $i < $nTags; $i++)
     {
         $fh->seek($end, 0);
         $tag = $self->{'LOOKUP'}[$i];
-        $off = $end - $base - $oLook;	# BH 2004-03-04
+        $off = $end - $base - $oLook;   # BH 2004-03-04
         # Is there room, from the start of this i'th lookup, for this and the remaining
         # lookups to be wrapped in extension lookups?
         if (!defined $big && $off + ($nTags - $i) * 6 + $nSubs * 10 > 65535) # BH 2004-03-04
         {
-			# Not enough room -- need to start an extension!            
+            # Not enough room -- need to start an extension!            
             my ($k, $ext);
             $ext = $self->extension();
             # Must turn previous lookup into the first extension
@@ -603,8 +603,8 @@ sub out
                 $tag = $self->{'LOOKUP'}[$j];
                 $nSub = $self->num_sub($tag);
                 $fh->print(pack("nnn", $ext, $tag->{'FLAG'}, $nSub));
-                $fh->print(pack("n*", map {$_ * 8 + 6 + $nSub * 2} (0 .. $nSub-1)));	# BH 2004-03-04
-                $tag->{' EXT_OFFSET'} = $fh->tell();	# = first extension lookup subtable
+                $fh->print(pack("n*", map {$_ * 8 + 6 + $nSub * 2} (0 .. $nSub-1)));    # BH 2004-03-04
+                $tag->{' EXT_OFFSET'} = $fh->tell();    # = first extension lookup subtable
                 $tag->{' OFFSET'} = $tag->{' EXT_OFFSET'} - $nSub * 2 - 6 - $base - $oLook; # offset to this extension lookup
                 for ($k = 0; $k < $nSub; $k++)
                 { $fh->print(pack('nnN', 1, $tag->{'TYPE'}, 0)); }
@@ -613,7 +613,7 @@ sub out
             $tag = $self->{'LOOKUP'}[$i];
             # Leave file positioned after all the extension lookups -- where the referenced lookups will start.
         }
-        $tag->{' OFFSET'} = $off unless defined $big;	# BH 2004-03-04
+        $tag->{' OFFSET'} = $off unless defined $big;   # BH 2004-03-04
         $nSub = $self->num_sub($tag);
         if (!defined $big)
         {
@@ -738,6 +738,8 @@ sub maxContext
 
 =head2 $t->update
 
+Sort COVERAGE table and RULES for all lookups.
+
 Unless $t->{' PARENT'}{' noharmony'} is true, update will make sure that GPOS and GSUB include 
 the same scripts and languages. Any added scripts and languages will have empty feature sets.
 
@@ -751,6 +753,28 @@ sub update
     my ($self) = @_;
     
     return undef unless ($self->SUPER::update);
+    
+    if (!$Font::TTF::Coverage::dontsort and defined ($self->{'LOOKUP'}))
+    {
+        # Sort coverage tables and rules of all lookups by glyphID
+        
+        for my $l (@{$self->{'LOOKUP'}})
+        {
+            next unless defined $l->{'SUB'};
+            for my $sub (@{$l->{'SUB'}})
+            {
+                next unless defined ($sub->{'COVERAGE'} and !$sub->{'COVERAGE'}{'dontsort'} and defined $sub->{'RULES'});
+                
+                # OK! Found a lookup to sort:
+
+                my @map = $sub->{'COVERAGE'}->sort();
+                my $newrules = [];
+                foreach (0 .. $#map)
+                { push @{$newrules}, $sub->{'RULES'}[$map[$_]]; }
+                $sub->{'RULES'} = $newrules;
+            }
+        }
+    }
 
     # Enforce script/lang congruence unless asked not to:
     return $self if $self->{' PARENT'}{' noharmony'};
@@ -1183,7 +1207,7 @@ sub out_context
     } elsif ($type == 6 && $fmt == 3)
     {
         $r = $lookup->{'RULES'}[0][0];
-		no strict 'refs';	# temp fix - more code needed (probably "if" statements in the event 'PRE' or 'POST' are empty)
+        no strict 'refs';   # temp fix - more code needed (probably "if" statements in the event 'PRE' or 'POST' are empty)
         $out .= pack('n2', $fmt, defined $r->{'PRE'} ? scalar @{$r->{'PRE'}} : 0);
         foreach $t (@{$r->{'PRE'}})
         { $out .= pack('n', Font::TTF::Ttopen::ref_cache($t, $ctables, length($out) + $base)); }
