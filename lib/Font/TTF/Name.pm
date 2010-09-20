@@ -359,13 +359,26 @@ sub set_name
         $strNL =~ s/\n/\r/og    if $pid == 1;
         foreach $eid (0 .. $#{$self->{'strings'}[$nid][$pid]})
         {
+            if (defined $self->{'strings'}[$nid][$pid][$eid])
+            {
+                my ($isincover) = 0;
+                foreach $c (@cover)
+                {
+                    if ($c->[0] == $pid && $c->[1] == $eid)
+                    {
+                        $isincover = 1;
+                        last;
+                    }
+                }
+                push(@cover, [$pid, $eid]) if (!$isincover);
+            }
             foreach $lid (keys %{$self->{'strings'}[$nid][$pid][$eid]})
             {
                 next unless (!defined $lang || $self->match_lang($pid, $lid, $lang));
                 $self->{'strings'}[$nid][$pid][$eid]{$lid} = $strNL;
                 foreach $c (0 .. $#cover)
                 {
-                    next unless ($cover[$c][0] == $pid && $cover[$c][1] == $eid);
+                    next unless (defined $cover[$c] && $cover[$c][0] == $pid && $cover[$c][1] == $eid);
                     delete $cover[$c];
                     last;
                 }
@@ -374,6 +387,7 @@ sub set_name
     }
     foreach $c (@cover)
     {
+        next unless (defined $c && scalar @$c);
         my ($pid, $eid) = @{$c};
         my ($lid) = $self->find_lang($pid, $lang);
         my $strNL = $str;
@@ -399,6 +413,7 @@ sub match_lang
     my ($self, $pid, $lid, $lang) = @_;
     my ($langid) = $self->get_lang($pid, $lid);
 
+    return 1 if ($pid == 0);        # all languages are equal in unicode since nothing defined
     return ($lid == $lang) if ($lang != 0 || $lang eq '0');
     return !index(lc($langid), lc($lang));
 }
