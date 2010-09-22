@@ -19,12 +19,12 @@ sub create
 sub read
 {
     my ($self) = @_;
-    my ($dat, $i, @records);
+    my ($dat, $i, @records, $r);
 
     $self->SUPER::read || return $self;
     $self->{' INFILE'}->read($dat, 8);
     ($self->{'version'}, $self->{'numtables'}, $self->{'perms'}) = unpack("LNN", $dat);
-    for ($i = 0; $i < $self->{'numtables'}; $I++)
+    for ($i = 0; $i < $self->{'numtables'}; $i++)
     {
         $self->{' INFILE'}->read($dat, 12);
         push (@records, [unpack("L3", $dat)]);
@@ -52,8 +52,8 @@ sub out
     $curlen = 0;
     for ($i = 0; $i < $self->{'numtables'}; $i++)
     {
-        $fh->print(pack("L3", 1, length($self->{'records'}[$i]) + 8, $curlen + $self->{'numtables'} * 12 + 8);
-        $curlen += length($self->{'records'}[$i] + 8;
+        $fh->print(pack("L3", 1, length($self->{'records'}[$i]) + 8, $curlen + $self->{'numtables'} * 12 + 8));
+        $curlen += length($self->{'records'}[$i]) + 8;
     }
     for ($i = 0; $i < $self->{'numtables'}; $i++)
     {
