@@ -415,7 +415,7 @@ sub match_lang
 
     return 1 if ($pid == 0);        # all languages are equal in unicode since nothing defined
     return ($lid == $lang) if ($lang != 0 || $lang eq '0');
-    return !index(lc($langid), lc($lang));
+    return !index(lc($langid), lc($lang)) || !index(lc($lang), lc($langid));
 }
 
 =head2 Font::TTF::Name->get_lang($pid, $lid)
