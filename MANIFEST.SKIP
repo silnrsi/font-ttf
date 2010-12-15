@@ -24,3 +24,4 @@ dists/
 ^libfont-
 description-pak
 ^doc
+\.swp

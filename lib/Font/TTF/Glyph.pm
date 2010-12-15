@@ -252,7 +252,7 @@ sub read
     my ($fh) = $self->{' INFILE'};
     my ($dat);
 
-    return $self if ($self->{' read'} > 0);
+    return $self if (defined $self->{' read'} && $self->{' read'} > 0);
     $self->{' read'} = 1;
     $fh->seek($self->{' LOC'} + $self->{' BASE'}, 0);
     $fh->read($self->{' DAT'}, $self->{' LEN'});

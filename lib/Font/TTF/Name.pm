@@ -355,8 +355,8 @@ sub set_name
     foreach $pid (0 .. $#{$self->{'strings'}[$nid]})
     {
         my $strNL = $str;
-        $strNL =~ s/\n/\r\n/og  if $pid == 3;
-        $strNL =~ s/\n/\r/og    if $pid == 1;
+        $strNL =~ s/(?:\r?)\n/\r\n/og  if $pid == 3;
+        $strNL =~ s/(?:\r?)\n/\r/og    if $pid == 1;
         foreach $eid (0 .. $#{$self->{'strings'}[$nid][$pid]})
         {
             if (defined $self->{'strings'}[$nid][$pid][$eid])
