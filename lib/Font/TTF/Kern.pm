@@ -102,6 +102,7 @@ use strict;
 use vars qw(@ISA);
 use Font::TTF::Utils;
 use Font::TTF::Table;
+use Font::TTF::Kern::Subtable;
 
 @ISA = qw(Font::TTF::Table);
 my @subtables = qw(OrderedList StateTable ClassArray CompactClassArray);
@@ -136,7 +137,7 @@ sub read
             $fh->read($dat, 8);
             my ($length, $coverage, $index) = unpack("Nnn", $dat);
             my ($type) = $coverage & 0xFF;
-            $t = Font::TTF::Kern::SubTable->create($type, $coverage, $length);
+            $t = Font::TTF::Kern::Subtable->create($type, $coverage, $length);
             $t->read($fh);
         }
         else
@@ -224,7 +225,7 @@ sub out
     return $self->SUPER::out($fh) unless ($self->{' read'});
 
     if ($self->{'Version'} > 0)
-    { $fh->print(TTF_pack("vL", $self->{'Version'}, $self->{'Num'})); }
+    { $fh->print(TTF_Pack("vL", $self->{'Version'}, $self->{'Num'})); }
     else
     { $fh->print(pack("n2", $self->{'Version'}, $self->{'Num'})); }
 
