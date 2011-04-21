@@ -757,23 +757,40 @@ sub update
     if (!$Font::TTF::Coverage::dontsort and defined ($self->{'LOOKUP'}))
     {
         # Sort coverage tables and rules of all lookups by glyphID
-        
-        for my $l (@{$self->{'LOOKUP'}})
+        # The lookup types that need to be sorted are:
+        #    GSUB: 1.2 2 3 4 5.1 6.1 8    (However GSUB type 8 lookups are not yet supported by Font::TTF)
+        #    GPOS: 1.2 2.1 3 4 5 6 7.1 8.1
+
+		for my $l (@{$self->{'LOOKUP'}})
         {
             next unless defined $l->{'SUB'};
             for my $sub (@{$l->{'SUB'}})
             {
-                next unless defined ($sub->{'COVERAGE'} and !$sub->{'COVERAGE'}{'dontsort'} and defined $sub->{'RULES'});
-                
-                # OK! Found a lookup to sort:
-
-                my @map = $sub->{'COVERAGE'}->sort();
-                my $newrules = [];
-                foreach (0 .. $#map)
-                { push @{$newrules}, $sub->{'RULES'}[$map[$_]]; }
-                $sub->{'RULES'} = $newrules;
+            	if (defined $sub->{'COVERAGE'} and $sub->{'COVERAGE'}{'cover'} and !$sub->{'COVERAGE'}{'dontsort'})
+            	{
+            		# OK! Found a lookup with coverage table:
+            		my @map = $sub->{'COVERAGE'}->sort();
+	            	if (defined $sub->{'RULES'} and ($sub->{'MATCH_TYPE'} =~ /g/ or $sub->{'ACTION_TYPE'} =~ /[gvea]/))
+	            	{
+						# And also a RULES table which now needs to be re-sorted
+		                my $newrules = [];
+		                foreach (0 .. $#map)
+		                { push @{$newrules}, $sub->{'RULES'}[$map[$_]]; }
+		                $sub->{'RULES'} = $newrules;
+		            }
+	            }
+	                
+                # Special case for Mark positioning -- need to also sort the MarkArray
+                if (exists($sub->{'MARKS'}) and ref($sub->{'MATCH'}[0]) =~ /Cover/ and $sub->{'MATCH'}[0]{'cover'} and !$sub->{'MATCH'}[0]{'dontsort'})
+                {
+                	my @map = $sub->{'MATCH'}[0]->sort();
+                	my $newmarks = [];
+                	foreach (0 .. $#map)
+	                { push @{$newmarks}, $sub->{'MARKS'}[$map[$_]]; }
+	                $sub->{'MARKS'} = $newmarks;
+                }
             }
-        }
+		}
     }
 
     # Enforce script/lang congruence unless asked not to:

@@ -309,5 +309,49 @@ sub out
     $self;
 }
 
+
+=head2 $t->update
+
+Sort COVERAGE tables.
+
+=cut
+
+sub update
+{
+    my ($self) = @_;
+    
+    return undef unless ($self->SUPER::update);
+    
+    unless ($Font::TTF::Coverage::dontsort)
+    {
+    	if (defined $self->{'ATTACH'} and defined $self->{'ATTACH'}{'COVERAGE'} and !$self->{'ATTACH'}{'COVERAGE'}{'dontsort'} )
+    	{
+    		my @map = $self->{'ATTACH'}{'COVERAGE'}->sort();
+        	if (defined $self->{'ATTACH'}{'POINTS'})
+        	{
+				# And also a POINTS array which now needs to be re-sorted
+                my $newpoints = [];
+                foreach (0 .. $#map)
+                { push @{$newpoints}, $self->{'ATTACH'}{'POINTS'}[$map[$_]]; }
+                $self->{'ATTACH'}{'POINTS'} = $newpoints;
+            }
+    	}
+    	if (defined ($self->{'LIG'} and defined $self->{'LIG'}{'COVERAGE'} and !$self->{'LIG'}{'COVERAGE'}{'dontsort'} ))
+    	{
+    		my @map = $self->{'LIG'}{'COVERAGE'}->sort();
+        	if (defined $self->{'LIG'}{'LIGS'})
+        	{
+				# And also a LIGS array which now needs to be re-sorted
+                my $newligs = [];
+                foreach (0 .. $#map)
+                { push @{$newligs}, $self->{'LIG'}{'LIGS'}[$map[$_]]; }
+                $self->{'LIG'}{'LIGS'} = $newligs;
+            }
+    	}
+    }
+    
+    $self;
+}
+    	
 1;
 
