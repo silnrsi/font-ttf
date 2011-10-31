@@ -367,7 +367,7 @@ sub out
         $numlin = -1;
         foreach (0 .. $#{$silf->{'classes'}})
         {
-            if (@{$silf->{'classes'}[$_]} > 8)          # binary search vs linear search crosses at 8 elements
+            if (scalar keys %{$silf->{'classes'}[$_]} > 8)  # binary search vs linear search crosses at 8 elements
             {
                 $numlin = $_;
                 last;
