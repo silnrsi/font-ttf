@@ -359,10 +359,11 @@ sub out
         $fh->print(TTF_Pack("S", $silf->{'lbGID'}));
         $ooPasses = $fh->tell();
         $fh->print(pack("N*", (0) x @{$silf->{'PASS'}}));
-        $fh->print(TTF_Pack("SSSS", TTF_bininfo(@{$silf->{'pseudos'}})));
+        my (@pskeys) = keys %{$silf->{'pseudos'}};
+        $fh->print(TTF_Pack("SSSS", TTF_bininfo(scalar @pskeys)));
         $oPseudo = $fh->tell() - $subbase;
-        while (my ($k, $v) = each %{$silf->{'pseudos'}})
-        { $fh->print(TTF_Pack("LS", $k, $v)); }
+        foreach my $k (sort {$a <=> $b} @pskeys)
+        { $fh->print(TTF_Pack("LS", $k, $silf->{'pseudos'}{$k})); }
         $numlin = -1;
         foreach (0 .. $#{$silf->{'classes'}})
         {
