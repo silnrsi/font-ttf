@@ -110,7 +110,7 @@ table of this particular feature.
 
 =item PARMS
 
-This is an unused offset to the parameters for each feature
+If FeatureParams are defined for this feature, this contains a reference to the corresponding FeatureParams object.  Otherwise set to null.
 
 =item LOOKUPS
 
@@ -276,10 +276,17 @@ are stored relative to another base within the subtable.
 use Font::TTF::Table;
 use Font::TTF::Utils;
 use Font::TTF::Coverage;
+
 use strict;
-use vars qw(@ISA);
+use vars qw(@ISA %FeatParams);
 
 @ISA = qw(Font::TTF::Table);
+
+%FeatParams = (
+	'ss' => 'Font::TTF::Features::Sset',
+  'cv' => 'Font::TTF::Features::Cvar',
+  'si' => 'Font::TTF::Features::Size',
+  );
 
 =head2 $t->read
 
@@ -291,7 +298,7 @@ sub read
 {
     my ($self) = @_;
     my ($dat, $i, $l, $oScript, $oFeat, $oLook, $tag, $nScript, $off, $dLang, $nLang, $lTag);
-    my ($nFeat, $nLook, $nSub, $j, $temp);
+    my ($nFeat, $oParms, $FType, $nLook, $nSub, $j, $temp, $t);
     my ($fh) = $self->{' INFILE'};
     my ($moff) = $self->{' OFFSET'};
 
@@ -324,11 +331,30 @@ sub read
 
     foreach $tag (grep {m/^.{4}(?:\s_\d+)?$/o} keys %$l)
     {
-        $fh->seek($moff + $l->{$tag}{' OFFSET'}, 0);
+        $oFeat=$moff + $l->{$tag}{' OFFSET'};
+        $fh->seek($oFeat, 0);
         $fh->read($dat, 4);
-        ($l->{$tag}{'PARMS'}, $nLook) = unpack("n2", $dat);
+        ($oParms, $nLook) = unpack("n2", $dat);
         $fh->read($dat, $nLook * 2);
         $l->{$tag}{'LOOKUPS'} = [unpack("n*", $dat)];
+        $l->{$tag}{'PARMS'}="";
+        if ($oParms > 0)
+        {
+        	$FType=$FeatParams{substr($tag,0,2)};
+        	if ($FType)
+        	{
+        		$t=$FType;
+        		if ($^O eq "MacOS")
+        			{ $t =~ s/^|::/:/oig; }
+        		else
+        			{ $t =~ s|::|/|oig; }
+		    		require "$t.pm";
+	       		$l->{$tag}{'PARMS'} = $FType->new( INFILE  => $fh,
+	       																			 OFFSET => $oFeat+$oParms);
+            $l->{$tag}{'PARMS'}->read;
+          }
+        }       		
+        
     }
 
 # Now the script/lang hierarchy
@@ -459,7 +485,7 @@ sub extension
 Writes this Opentype table to the output calling $t->out_sub for each sub table
 at the appropriate point in the output. The assumption is that on entry the
 number of scripts, languages, features, lookups, etc. are all resolved and
-the relationships fixed. This includes a script's LANG_TAGS list and that all
+the relationships fixed. This includes a LANG_TAGS list for a script, and that all
 scripts and languages in their respective dictionaries either have a REFTAG or contain
 real data.
 
@@ -469,8 +495,8 @@ sub out
 {
     my ($self, $fh) = @_;
     my ($i, $j, $base, $off, $tag, $t, $l, $lTag, $oScript, @script, @tags);
-    my ($end, $nTags, @offs, $oFeat, $oLook, $nSub, $nSubs, $big, $out);
-
+    my ($end, $nTags, @offs, $oFeat, $oFtable, $oParms, $FType, $oLook, $nSub, $nSubs, $big, $out);
+    
     return $self->SUPER::out($fh) unless $self->{' read'};
 
 # First sort the features
@@ -560,8 +586,18 @@ sub out
     foreach $t (@{$self->{'FEATURES'}{'FEAT_TAGS'}})
     {
         $tag = $self->{'FEATURES'}{$t};
-        $tag->{' OFFSET'} = tell($fh) - $base - $oFeat;
+        $oFtable = tell($fh) - $base - $oFeat;
+        $tag->{' OFFSET'} = $oFtable;
         $fh->print(pack("n*", 0, $#{$tag->{'LOOKUPS'}} + 1, @{$tag->{'LOOKUPS'}}));
+        if ($tag->{'PARMS'})
+        {
+        	$end = $fh->tell();
+        	$oParms = $end - $oFtable - $base - $oFeat;
+        	$fh->seek($oFtable + $base + $oFeat,0);
+        	$fh->print(pack("n",$oParms));
+        	$fh->seek($end,0);
+        	$tag->{'PARMS'}->out($fh);
+        }
     }
     $end = $fh->tell();
     $fh->seek($oFeat + $base + 2, 0);
@@ -857,7 +893,7 @@ sub copy
 =head2 $t->read_cover($cover_offset, $lookup_loc, $lookup, $fh, $is_cover)
 
 Reads a coverage table and stores the results in $lookup->{' CACHE'}, that is, if
-it hasn't been read already.
+it has not been read already.
 
 =cut
 

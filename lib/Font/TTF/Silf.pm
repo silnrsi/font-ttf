@@ -358,7 +358,7 @@ sub out
         { $fh->print(pack("a4", $_)); }
         $fh->print(TTF_Pack("S", $silf->{'lbGID'}));
         $ooPasses = $fh->tell();
-        $fh->print(pack("N*", (0) x @{$silf->{'PASS'}}));
+        if ($silf->{'PASS'}) { $fh->print(pack("N*", (0) x @{$silf->{'PASS'}}));}
         my (@pskeys) = keys %{$silf->{'pseudos'}};
         $fh->print(TTF_Pack("SSSS", TTF_bininfo(scalar @pskeys)));
         $oPseudo = $fh->tell() - $subbase;
