@@ -315,6 +315,7 @@ sub update
         $self->{'xAvgCharWidth'} = $avg;
     }
 
+    $self->{'ulUnicodeRange2'} &= ~0x2000000;
     foreach $i (keys %{$map->{'val'}})
     {
         if ($i >= 0x10000)
