@@ -600,7 +600,7 @@ EOT
             "-BH", "-QA"]],
     ['bg-BG'],
     ['ca-ES'],
-    ['zh', ['-TW', 'CN', '-HK', '-SG', '-MO']],
+    ['zh', ['-TW', '-CN', '-HK', '-SG', '-MO']],
     ["cs-CZ"],
     ["da-DK"],
     ["de", ["-DE", "-CH", "-AT", "-LU", "-LI"]],
