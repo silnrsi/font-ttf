@@ -45,10 +45,6 @@ The number of named parameters
 
 The 'name' table name ID for the first named parameter
 
-=item CharCount
-
-The count of characters for which the feature provides glyph variants
-
 =item Characters
 
 An array holding the unicode values of the characters for which the feature 
@@ -74,7 +70,7 @@ sub read
   my ($self) = @_;
   my ($fh) = $self->{' INFILE'};
   my ($off) = $self->{' OFFSET'};
-  my ($dat, $i);
+  my ($dat, $i, $charcount);
 	$fh->seek($off, 0); 
   $fh->read($dat, 14);
   ( $self->{'Format'}
@@ -83,12 +79,12 @@ sub read
 		,$self->{'SampleTextNameID'}
 		,$self->{'NumNamedParm'}
 		,$self->{'FirstNamedParmID'}
-		,$self->{'CharCount'} ) = TTF_Unpack("S*", $dat);
+		,$charcount ) = TTF_Unpack("S*", $dat);
 
 # Now read the list of characters.  Since these are 24bit insigned integers, need to 
 # read add a zero value byte to the front then treat as a 32bit integer
 
-		foreach $i (0 .. $self->{'CharCount'}-1)
+		foreach $i (0 .. $charcount-1)
 		{
 			$fh->read($dat,3);
 			$dat = pack("C","0") . $dat;
@@ -110,7 +106,8 @@ sub out
 {
   my ($self, $fh) = @_;
   my $chars = $self->{'Characters'};
-  my $numchars = scalar @{$chars};
+  my $charcount = 0;
+  if ($chars) { $charcount = scalar @{$chars} }
   my ($dat, $i);
   
   $fh->print(TTF_Pack("S*" 
@@ -118,11 +115,11 @@ sub out
 		,$self->{'UINameID'}
 		,$self->{'TooltipNameID'}
 		,$self->{'SampleTextNameID'}
-		,$self->{'NumNamedParm'}
+		,$self->{'NumNamedParms'}
 		,$self->{'FirstNamedParmID'}
-		,$self->{'CharCount'} ));
+		,$charcount ));
 	
-	foreach $i ( 0 .. $numchars-1)
+	foreach $i ( 0 .. $charcount-1)
 	{
 		$dat = substr ( TTF_Pack("L",$chars->[$i]) ,1,3); # Pack as long then remove first byte to get UINT22
 		$fh->print($dat);
