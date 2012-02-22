@@ -104,6 +104,14 @@ ensure that the file checksum is left at zero.
 
 If set, do not harmonize the script and lang trees of GPOS and GSUB tables. See L<Font::TTF::Ttopen> for more info.
 
+=item nocompress
+
+Is the default value controlling WOFF output table compression. If undef, all tables will be compressed if there is 
+a size benefit in doing so. 
+It may be set to an array of tagnames naming tables that should not be compressed, or to a scalar integer specifying a 
+table size threshold below which tables will not be compressed. 
+Note that individual L<Font::TTF::Table> objects may override this default. See L<Font::TTF::Table> for more info.
+
 =item fname (R)
 
 Contains the filename of the font which this object was read from.
@@ -116,6 +124,10 @@ The file handle which reflects the source file for this font.
 
 Contains the offset from the beginning of the read file of this particular
 font directory, thus providing support for TrueType Collections.
+
+=item WOFF
+
+Contains a reference to a C<Font::TTF::Woff> object.
 
 =back
 
@@ -130,6 +142,8 @@ use vars qw(%tables $VERSION $dumper);
 use Symbol();
 
 require 5.004;
+
+my $havezlib = eval {require Compress::Zlib};
 
 $VERSION = 0.39;    # MJPH       2-FEB-2008     Add DSIG table
 # $VERSION = 0.38;    # MJPH       2-FEB-2008     Add Sill table
@@ -324,7 +338,7 @@ sub open
 
 =head2 $f->read
 
-Reads a Truetype font directory starting from the current location in the file.
+Reads a Truetype font directory starting from location C<$self->{' OFFSET'}> in the file.
 This has been separated from the C<open> function to allow support for embedded
 TTFs for example in TTCs. Also reads the C<head> and C<maxp> tables immediately.
 
@@ -335,16 +349,86 @@ sub read
     my ($self) = @_;
     my ($fh) = $self->{' INFILE'};
     my ($dat, $i, $ver, $dir_num, $type, $name, $check, $off, $len, $t);
+    my ($iswoff, $woffLength, $sfntSize, $zlen);	# needed for WOFF files
 
     $fh->seek($self->{' OFFSET'}, 0);
-    $fh->read($dat, 12);
-    ($ver, $dir_num) = unpack("Nn", $dat);
-    $ver == 1 << 16 || $ver == unpack('N', 'OTTO') || $ver == 0x74727565 or return undef;  # support Mac sfnts
+    $fh->read($dat, 4);
+    $ver = unpack("N", $dat);
+    $iswoff = ($ver == unpack('N', 'wOFF'));
+	if ($iswoff)
+	{
+		require Font::TTF::Woff;
+		my $woff = Font::TTF::Woff->new(PARENT  => $self);
+		$fh->read($dat, 32);
+		($ver, $woffLength, $dir_num, undef, $sfntSize, $woff->{'majorVersion'}, $woff->{'minorVersion'}, 
+		    $off, $zlen, $len) = unpack('NNnnNnnNNN', $dat);
+		# TODO: According to WOFF spec we should verify $woffLength and $sfntSize, and fail if the values are wrong.
+		if ($off)
+		{
+			# Font has metadata
+			if ($off + $zlen > $woffLength)
+			{
+				warn "invalid WOFF header in $self->{' fname'}: meta data beyond end.";
+				return undef;
+			}
+			require Font::TTF::Woff::MetaData;
+			$woff->{'metaData'} = Font::TTF::Woff::MetaData->new(
+				PARENT     => $woff,
+				INFILE     => $fh,
+	            OFFSET     => $off,
+	            LENGTH     => $len,
+	            ZLENGTH    => $zlen);
+	    }
+			
+		$fh->read($dat, 8);
+		($off, $len) = unpack('NN', $dat);
+		if ($off)
+		{
+			# Font has private data
+			if ($off + $len > $woffLength)
+			{
+				warn "invalid WOFF header in $self->{' fname'}: private data beyond end.";
+				return undef;
+			}
+			require Font::TTF::Woff::PrivateData;
+			$woff->{'privateData'} = Font::TTF::Woff::PrivateData->new(
+				PARENT     => $woff,
+				INFILE     => $fh,
+	            OFFSET     => $off,
+	            LENGTH     => $len);
+	    } 
+		
+		$self->{' WOFF'} = $woff;
+	}
+	else
+	{
+		$fh->read($dat, 8);
+	    $dir_num = unpack("n", $dat);
+	}
+	
+    $ver == 1 << 16 				# TrueType outlines
+    || $ver == unpack('N', 'OTTO') 	# 0x4F54544F CFF outlines
+    || $ver == unpack('N', 'true')	# 0x74727565 Mac sfnts
+    or return undef;  			# else unrecognized type
+    
     
     for ($i = 0; $i < $dir_num; $i++)
     {
-        $fh->read($dat, 16) || die "Reading table entry";
-        ($name, $check, $off, $len) = unpack("a4NNN", $dat);
+    	$fh->read($dat, $iswoff ? 20 : 16) || die "Reading table entry";
+    	if ($iswoff)
+    	{
+    		($name, $off, $zlen, $len, $check) = unpack("a4NNNN", $dat);
+    		if ($off + $zlen > $woffLength || $zlen > $len)
+			{
+				warn "invalid WOFF '$name' table in $self->{' fname'}";
+				return undef;
+			}
+    	}
+    	else
+    	{
+    		($name, $check, $off, $len) = unpack("a4NNN", $dat);
+    		$zlen = $len;
+    	}
         $self->{$name} = $self->{' PARENT'}->find($self, $name, $check, $off, $len) && next
                 if (defined $self->{' PARENT'});
         $type = $tables{$name} || 'Font::TTF::Table';
@@ -359,6 +443,7 @@ sub read
                                     INFILE  => $fh,
                                     OFFSET  => $off,
                                     LENGTH  => $len,
+                                    ZLENGTH => $zlen,
                                     CSUM    => $check);
     }
     
@@ -372,7 +457,7 @@ sub read
 =head2 $f->out($fname [, @tablelist])
 
 Writes a TTF file consisting of the tables in tablelist. The list is checked to
-ensure that only tables that exist are output. (This means that you can't have
+ensure that only tables that exist are output. (This means that you cannot have
 non table information stored in the font object with key length of exactly 4)
 
 In many cases the user simply wants to output all the tables in alphabetical order.
@@ -392,6 +477,8 @@ sub out
     my ($dat, $numTables, $sRange, $eSel);
     my (%dir, $k, $mloc, $count);
     my ($csum, $lsum, $msum, $loc, $oldloc, $len, $shift);
+
+    my ($iswoff); # , $woffLength, $sfntSize, $zlen);	# needed for WOFF files
 
     unless (ref($fname))
     {
@@ -420,10 +507,16 @@ sub out
     $numTables = $#tlist + 1;
     $numTables++ if ($self->{' wantsig'});
     
-    ($numTables, $sRange, $eSel, $shift) = Font::TTF::Utils::TTF_bininfo($numTables, 16);
-    $dat = pack("Nnnnn", 1 << 16, $numTables, $sRange, $eSel, $shift);
-    $fh->print($dat);
-    $msum = unpack("%32N*", $dat);
+    if ($iswoff)
+    {
+    }
+    else
+    {
+	    ($numTables, $sRange, $eSel, $shift) = Font::TTF::Utils::TTF_bininfo($numTables, 16);
+	    $dat = pack("Nnnnn", 1 << 16, $numTables, $sRange, $eSel, $shift);
+	    $fh->print($dat);
+	    $msum = unpack("%32N*", $dat);
+	}
 
 # reserve place holders for each directory entry
     foreach $k (@tlist)
@@ -444,9 +537,53 @@ sub out
     foreach $k (@tlist)
     {
         $oldloc = $loc;
-        $self->{$k}->out($fh);
-        $loc = $fh->tell();
-        $len = $loc - $oldloc;
+        if ($iswoff && $havezlib &&
+        	# output font is WOFF -- should we try to compress this table?
+        	exists ($self->{$k}->{' nocompress'}) ? $self->{$k}->{' nocompress'} != -1 :
+        	ref($self->{' nocompress'}) eq 'ARRAY' ? !exists($self->{' nocompress'}{$k}) :
+        	ref($self->{' nocompress'}) eq 'SCALAR' && $self->{' nocompress'} != -1)
+        {
+        	# Yes -- we may want to compress this table.
+        	# Create string file handle to hold uncompressed table
+        	my $dat;
+        	my $fh2 = IO::String->new($dat);
+        	binmode $fh2;
+        	$self->{$k}->out($fh2);
+        	$len = $fh2->tell();
+        	close $fh2;
+        	
+        	# Is table long enough to try compression?
+        	unless (
+        		exists ($self->{$k}->{' nocompress'}) && $len <= $self->{$k}->{' nocompress'} ||
+        		ref($self->{' nocompress'}) eq 'SCALAR' && $len <= $self->{' nocompress'})
+        	{
+	        	# Yes -- so compress and check lengths:
+	        	my $zdat = Compress::Zlib::compress($dat);
+	        	my $zlen = bytes::length($zdat);
+	        	if ($zlen < $len)
+	        	{
+	        		# write the compressed $zdat
+	        		
+	        	}
+	        	else
+	        	{
+	        		# write the uncompressed $dat
+	        	}
+	        }
+	        else
+	        {
+	        	# write uncompressed $dat
+	        }
+        	
+        	
+        }
+        else
+        {
+        	# Output table normally
+        	$self->{$k}->out($fh);
+        	$loc = $fh->tell();
+        	$len = $loc - $oldloc;
+        }
         if ($loc & 3)
         {
             $fh->print(substr("\000" x 4, $loc & 3));

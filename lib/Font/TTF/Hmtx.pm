@@ -58,10 +58,10 @@ sub read
 sub _read
 {
     my ($self, $numg, $numh, $tAdv, $tLsb) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($i, $dat);
-    
-    $self->SUPER::read or return $self;
 
     for ($i = 0; $i < $numh; $i++)
     {

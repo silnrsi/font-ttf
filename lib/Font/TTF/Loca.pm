@@ -10,7 +10,7 @@ The location table holds the directory of locations of each glyph within the
 glyf table. Due to this relationship and the unimportance of the actual locations
 when it comes to holding glyphs in memory, reading the location table results
 in the creation of glyph objects for each glyph and stores them here.
-So if you are looking for glyphs, don't look in the C<glyf> table, look here
+So if you are looking for glyphs, do not look in the C<glyf> table, look here
 instead.
 
 Things get complicated if you try to change the glyph list within the one table.
@@ -70,13 +70,17 @@ allowing their later reading.
 sub read
 {
     my ($self) = @_;
+
+	# Do this before $self->SUPER::read because this can alter the file pointer:
+    my ($glyfLoc) = $self->{' PARENT'}{'glyf'}->_read->{' OFFSET'};		# May seek on $fh!
+
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($locFmt) = $self->{' PARENT'}{'head'}{'indexToLocFormat'};
     my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
-    my ($glyfLoc) = $self->{' PARENT'}{'glyf'}{' OFFSET'};
     my ($dat, $last, $i, $loc);
 
-    $self->SUPER::read or return $self;
     $fh->read($dat, $locFmt ? 4 : 2);
     $last = unpack($locFmt ? "N" : "n", $dat);
     for ($i = 0; $i < $numGlyphs; $i++)
@@ -87,7 +91,7 @@ sub read
                 LOC => $last << ($locFmt ? 0 : 1),
                 OUTLOC => $last << ($locFmt ? 0 : 1),
                 PARENT => $self->{' PARENT'},
-                INFILE => $fh,
+                INFILE => $self->{' PARENT'}{'glyf'}{' INFILE'},
                 BASE => $glyfLoc,
                 OUTLEN => ($loc - $last) << ($locFmt ? 0 : 1),
                 LEN => ($loc - $last) << ($locFmt ? 0 : 1)) if ($loc != $last);

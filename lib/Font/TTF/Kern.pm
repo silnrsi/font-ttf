@@ -116,10 +116,10 @@ Reads the whole kerning table into structures
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($dat, $i, $numt, $len, $cov, $t);
-
-    $self->SUPER::read or return $self;
 
     $fh->read($dat, 4);
     ($self->{'Version'}, $numt) = unpack("n2", $dat);

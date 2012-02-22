@@ -39,10 +39,10 @@ Reads the table
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($numg, $dat);
-
-    $self->SUPER::read or return $self;
 
     $fh->read($dat, 4);
     ($self->{'Version'}, $numg) = unpack("nn", $dat);

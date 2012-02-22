@@ -45,11 +45,12 @@ Reads the table into data structures
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($numg, $ppem, $i, $numt, $dat, $len);
 
     $numg = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
-    $self->SUPER::read or return $self;
 
     $fh->read($dat, 8);
     ($self->{'Version'}, $numt, $len) = unpack("nnN", $dat);

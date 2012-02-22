@@ -32,7 +32,7 @@ variables available to control what post table types can be written.
 =item $Font::TTF::Post::no25
 
 If set tells Font::TTF::Post::out to use table type 2 instead of 2.5 in case apps
-can't handle version 2.5.
+cannot handle version 2.5.
 
 =item VAL
 
@@ -126,11 +126,12 @@ Reads the Postscript table into memory from disk
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($dat, $dat1, $i, $off, $c, $maxoff, $form, $angle, $numGlyphs);
     my ($fh) = $self->{' INFILE'};
 
     $numGlyphs = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
-    $self->SUPER::read or return $self;
     init unless ($fields{'FormatType'});
     $fh->read($dat, 32);
     TTF_Read_Fields($self, $dat, \%fields);

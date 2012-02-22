@@ -89,11 +89,12 @@ Format 2 subtables are not read at all.
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($dat, $i, $j, $k, $id, @ids, $s);
     my ($start, $end, $range, $delta, $form, $len, $num, $ver);
     my ($fh) = $self->{' INFILE'};
 
-    $self->SUPER::read or return $self;
     $fh->read($dat, 4);
     $self->{'Num'} = unpack("x2n", $dat);
     $self->{'Tables'} = [];

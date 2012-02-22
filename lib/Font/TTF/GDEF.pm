@@ -110,11 +110,12 @@ Reads the table into the data structure
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($boff) = $self->{' OFFSET'};
     my ($dat, $goff, $loff, $aoff, $moff, $r, $s, $bloc);
 
-    $self->SUPER::read or return $self;
     $bloc = $fh->tell();
     if ($new_gdef)
     {

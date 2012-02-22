@@ -63,6 +63,8 @@ Reads the location information of embedded bitmap from the TTF file into memory
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($i, $dat);
     my ($indexSubTableArrayOffset,
@@ -77,7 +79,6 @@ sub read
     my ($bst, $ista, $ist);
     my ($j);
 
-    $self->SUPER::read or return $self;
 
     # eblcHeader
     $fh->read($dat, 4);

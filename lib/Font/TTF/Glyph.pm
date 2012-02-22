@@ -169,7 +169,7 @@ calling C<out> or C<out_dat>.
 
 If you want to edit a glyph in some way, then you should read_dat the glyph, then
 make your changes and then update the glyph or set the $g->{' isdirty'} variable.
-It is the application's duty to ensure that the following instance variables are
+The application must ensure that the following instance variables are
 correct, from which update will calculate the rest, including the bounding box
 information.
 

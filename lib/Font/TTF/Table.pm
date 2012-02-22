@@ -25,6 +25,12 @@ Flag which indicates that the table has already been read from file.
 Allows the creation of unspecific tables. Data is simply output to any font
 file being created.
 
+=item nocompress
+
+If set, overrides the font default for WOFF table compression. Is a scalar integer specifying a 
+table size threshold below which this table will not be compressed. Set to -1 to never
+compress; 0 to always compress.
+
 =item INFILE
 
 The read file handle
@@ -36,6 +42,10 @@ Location of the file in the input file
 =item LENGTH
 
 Length in the input directory
+
+=item ZLENGTH
+
+Compressed length of the table if a WOFF font. 0 < ZLENGTH < LENGTH implies table is compressed.
 
 =item CSUM
 
@@ -54,9 +64,11 @@ The L<Font::TTF::Font> that table is part of
 use strict;
 use vars qw($VERSION);
 use Font::TTF::Utils;
-
+use IO::String;
 $VERSION = 0.0001;
 
+my $havezlib = eval {require Compress::Zlib};
+	
 =head2 Font::TTF::Table->new(%parms)
 
 Creates a new table or subclass. Table instance variables are passed in
@@ -93,6 +105,18 @@ sub read
     return $self->read_dat if (ref($self) eq "Font::TTF::Table");
     return undef if $self->{' read'};
     $self->{' INFILE'}->seek($self->{' OFFSET'}, 0);
+    if (0 < $self->{' ZLENGTH'} && $self->{' ZLENGTH'} < $self->{' LENGTH'})
+    {
+    	# WOFF table is compressed. Uncompress it to memory and create new fh
+    	die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
+    	my $dat;
+    	$self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
+    	$dat = Compress::Zlib::uncompress($dat);
+    	warn "$self->{' NAME'} table decompressed to wrong length" if $self->{' LENGTH'} != bytes::length($dat);
+        $self->{' INFILE'} = IO::String->new($dat);
+        binmode $self->{' INFILE'};
+        $self->{' OFFSET'} = 0;
+    }
     $self->{' read'} = 1;
     $self;
 }
@@ -114,14 +138,27 @@ sub read_dat
     return undef if ($self->{' read'});
 #    $self->{' read'} = 1;      # Let read do this, now out will call us for subclasses
     $self->{' INFILE'}->seek($self->{' OFFSET'}, 0);
-    $self->{' INFILE'}->read($self->{' dat'}, $self->{' LENGTH'});
+    if (0 < $self->{' ZLENGTH'} && $self->{' ZLENGTH'} < $self->{' LENGTH'})
+    {
+    	# WOFF table is compressed. Uncompress it directly to ' dat'
+    	die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
+    	my $dat;
+    	$self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
+    	$dat = Compress::Zlib::uncompress($dat);
+    	warn "$self->{' NAME'} table decompressed to wrong length" if $self->{' LENGTH'} != bytes::length($dat);
+    	$self->{' dat'} = $dat;
+ 	}
+ 	else
+ 	{
+	    $self->{' INFILE'}->read($self->{' dat'}, $self->{' LENGTH'});
+	}
     $self;
 }
 
 =head2 $t->out($fh)
 
 Writes out the table to the font file. If there is anything in the
-C<data> instance variable then this is output, otherwise the data is copied
+C<dat> instance variable then this is output, otherwise the data is copied
 from the input file to the output
 
 =cut

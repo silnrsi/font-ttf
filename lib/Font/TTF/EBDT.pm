@@ -56,13 +56,14 @@ This routine should be called _after_ {'EBLC'}->read.
 sub read
 {
     my ($self) = shift;
-    my ($fh) = $self->{' INFILE'};
+    my ($fh);
     my ($i, $dat);
     my ($eblc) = $self->{' PARENT'}->{'EBLC'};
     my ($bst_array);
 
     $eblc->read;
     $self->SUPER::read || return $self;
+    $fh = $self->{' INFILE'};
 
     # ebdtHeader
     $fh->read($dat, 4);	# version

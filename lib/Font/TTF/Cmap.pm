@@ -79,11 +79,12 @@ fill in the segmented array accordingly.
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($dat, $i, $j, $k, $id, @ids, $s);
     my ($start, $end, $range, $delta, $form, $len, $num, $ver, $sg);
     my ($fh) = $self->{' INFILE'};
 
-    $self->SUPER::read or return $self;
     $fh->read($dat, 4);
     $self->{'Num'} = unpack("x2n", $dat);
     $self->{'Tables'} = [];

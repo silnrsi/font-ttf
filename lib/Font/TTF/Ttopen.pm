@@ -297,12 +297,13 @@ Reads the table passing control to the subclass to handle the subtable specifics
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($dat, $i, $l, $oScript, $oFeat, $oLook, $tag, $nScript, $off, $dLang, $nLang, $lTag);
     my ($nFeat, $oParms, $FType, $nLook, $nSub, $j, $temp, $t);
     my ($fh) = $self->{' INFILE'};
     my ($moff) = $self->{' OFFSET'};
 
-    $self->SUPER::read or return $self;
     $fh->read($dat, 10);
     ($self->{'Version'}, $oScript, $oFeat, $oLook) = TTF_Unpack("vSSS", $dat);
 

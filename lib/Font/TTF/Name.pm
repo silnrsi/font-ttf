@@ -124,10 +124,11 @@ Reads all the names into memory
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($dat, $num, $stroff, $i, $pid, $eid, $lid, $nid, $len, $off, $here);
 
-    $self->SUPER::read or return $self;
     $fh->read($dat, 6);
     ($num, $stroff) = unpack("x2nn", $dat);
     for ($i = 0; $i < $num; $i++)
@@ -592,7 +593,7 @@ M7'3)95=<=<UU-]QTRVUWW'7/?0\\],AC3SSUS',OO/3*:V^\]<Y['WSTR6=?
 1?/7-=S_\],MO?_S]!Y==>0@`
 EOT
 );
-#'
+
 
 @ms_langids = ( [""],
     ['ar', ["-SA", "-IQ", "-EG", "-LY", "-DZ", "-MA", "-TN", 
