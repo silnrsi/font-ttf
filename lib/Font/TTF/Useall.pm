@@ -60,5 +60,8 @@ use Font::TTF::Mort::Subtable;
 use Font::TTF::Features::Cvar;
 use Font::TTF::Features::Size;
 use Font::TTF::Features::SSet;
+use Font::TTF::Woff;
+use Font::TTF::Woff::MetaData;
+use Font::TTF::Woff::PrivateData;
 
 1;
