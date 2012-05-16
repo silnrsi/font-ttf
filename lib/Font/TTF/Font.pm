@@ -44,6 +44,8 @@ defaults to L<Font::TTF::Table>. The current tables which are supported are:
     GDEF        Font::TTF::GDEF
     GPOS        Font::TTF::GPOS
     GSUB        Font::TTF::GSUB
+    Glat        Font::TTF::Glat
+    Gloc        Font::TTF::Gloc
     LTSH        Font::TTF::LTSH
     OS/2        Font::TTF::OS_2
     PCLT        Font::TTF::PCLT
@@ -77,7 +79,7 @@ Links are:
 
 L<Font::TTF::Table> 
 L<Font::TTF::EBDT> L<Font::TTF::EBLC> L<Font::TTF::GrFeat>
-L<Font::TTF::GDEF> L<Font::TTF::GPOS> L<Font::TTF::GSUB> L<Font::TTF::LTSH>
+L<Font::TTF::GDEF> L<Font::TTF::GPOS> L<Font::TTF::GSUB> L<Font::TTF::Glat> L<Font::TTF::Gloc> L<Font::TTF::LTSH>
 L<Font::TTF::OS_2> L<Font::TTF::PCLT> L<Font::TTF::Sill> L<Font::TTF::Silf> L<Font::TTF::Bsln> L<Font::TTF::Cmap> L<Font::TTF::Cvt_>
 L<Font::TTF::Fdsc> L<Font::TTF::Feat> L<Font::TTF::Fmtx> L<Font::TTF::Fpgm> L<Font::TTF::Glyf>
 L<Font::TTF::Hdmx> L<Font::TTF::Head> L<Font::TTF::Hhea> L<Font::TTF::Hmtx> L<Font::TTF::Kern>
@@ -198,6 +200,8 @@ $VERSION = 0.39;    # MJPH       2-FEB-2008     Add DSIG table
         'GDEF' => 'Font::TTF::GDEF',
         'GPOS' => 'Font::TTF::GPOS',
         'GSUB' => 'Font::TTF::GSUB',
+        'Glat' => 'Font::TTF::Glat',
+        'Gloc' => 'Font::TTF::Gloc',
         'LTSH' => 'Font::TTF::LTSH',
         'OS/2' => 'Font::TTF::OS_2',
         'PCLT' => 'Font::TTF::PCLT',

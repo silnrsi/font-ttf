@@ -6,24 +6,250 @@ Font::TTF::Silf - The main Graphite table
 
 =head1 DESCRIPTION
 
-yadayadaya
+The Silf table holds the core of the Graphite rules for a font. A Silf table has
+potentially multiple silf subtables, although there is usually only one. Within a silf subtable,
+there are a number of passes which contain the actual finite state machines to match rules
+and the constraint and action code to be executed when a rule matches.
 
 =head1 INSTANCE VARIABLES
 
 =over 4
 
+=item Version
+
+Silf table format version
+
+=item Compiler
+
+Lowest compiler version necessary to fully support the semantics expressed in this
+Graphite description
+
 =item SILF
 
-There are multiple graphite descriptions in a single Silf table. Each is held
-as an item in the SILF array
+An array of Silf subtables
 
 =over 4
 
+=item maxGlyphID
+
+The maximum glyph id referenced including pseudo and non glyphs
+
+=item Ascent
+
+Extra ascent to be added to the font ascent.
+
+=item Descent
+
+Extra descent to be added to the font descent. Both values are assumed to be
+positive for a descender below the base line.
+
+=item substPass
+
+Pass index into PASS of the first substitution pass.
+
+=item posPass
+
+Pass index into PASS of the first positioning pass.
+
+=item justPass
+
+Pass index into PASS of the first justification pass.
+
+=item bidiPass
+
+Pass index of the pass before which the bidirectional processing pass will be executed.
+0xFF indicates that there is no bidi pass to be executed.
+
+=item Flags
+
+A bitfield of flags:
+
+    0 - Indicates there are line end contextual rules in one of the passes
+
+=item maxPreContext
+
+Maximum length of a context preceding a cross line boundary contextualisation.
+
+=item maxPostContext
+
+Maximum length of a context following a cross line boundary contextualsation.
+
+=item attrPseudo
+
+Glyph attribute for the actual glyph id associated with a pseudo glyph.
+
+=item attrBreakWeight
+
+Glyph attribute number of the attribute holding the default breakweight associated with a glyph.
+
+=item attrDirectionality
+
+Glyph attribute number of the attribute holding the default directionality value associated with a glyph.
+
+=item JUST
+
+The may be a number of justification levels each with their own property values.
+This points to an array of hashes, one for each justification level.
+
+=over 4
+
+=item attrStretch
+
+Glyph attribute number for the amount of stretch allowed before this glyph.
+
+=item attrShrink
+
+Glyph attribute number for the amount of shrink allowed before this glyph.
+
+=item attrStep
+
+Glyph attribute number specifying the minimum granularity of actual spacing associated with this glyph at this level.
+
+=item attrWeight
+
+Glyph attribute number giving the weight associated with spreading space across a run of glyphs.
+
+=item runto
+
+Which level starts the next stage.
+
+=back
+
+=item numLigComp
+
+Number of initial glyph attributes that represent ligature components
+
+=item numUserAttr
+
+Number of user defined slot attributes referenced. Tells the engine how much space to
+allocate to a slot for user attributes.
+
+=item maxCompPerLig
+
+Maximum number of components per ligature.
+
+=item direction
+
+Supported directions for this writing system
+
+=item CRIT_FEATURE
+
+Array of critical features.
+
+=item scripts
+
+Array of script tags that indicate which set of GDL rules to execute if there is more than one in a font.
+
+=item lbGID
+
+Glyph ID of the linebreak pseudo glyph.
+
+=item pseudos
+
+Hash of Unicode values to pseduo glyph ids.
+
+=item classes
+
+This is an array of classes, each of which is an array of glyph ids in class order.
+
 =item PASS
 
-The core of Silf description is the sequence of passes that are executed on the
-glyph string.
+The details of rules and actions are stored in passes. This value is an array of pass subobjects one for each pass.
 
+=over 4
+
+=item flags
+
+This is a bitfield:
+
+    0 - If true, this pass makes no change to the slot stream considered as a sequence of glyph ids.
+        Only slot attributes are expected to change (for example during positioning).
+
+=item maxRuleLoop
+
+How many times the engine will allow rules to be tested and run without the engine advancing through the
+input slot stream.
+
+=item maxRuleContext
+
+Number of slots of input needed to run this pass.
+
+=item maxBackup
+
+Number of slots by which the following pass needs to trail this pass (i.e. the maximum this pass is allowed to back up).
+
+=item numRules
+
+Number of action code blocks, and so uncompressed rules, in this pass.
+
+=item numRows
+
+Number of rows in the finite state machine.
+
+=item numTransitional
+
+Number of rows in the finite state machine that are not final states. This specifies the number of rows in the fsm
+element.
+
+=item numSuccess
+
+Number of success states. A success state may also be a transitional state.
+
+=item numColumns
+
+Number of columns in the finite state machine.
+
+=item colmap
+
+A hash, indexed by glyphid, that gives the fsm column number associated with that glyphid. If not present, then
+the glyphid is not part of the fsm and will finish fsm processing if it occurs.
+
+=item rulemap
+
+An array of arrays, one for each success state. Each array holds a list of rule numbers associated with that state.
+
+=item minRulePreContext
+
+Minimum number of items in a rule's precontext.
+
+=item maxRulePreContext
+
+The maximum number of items in any rule's precontext.
+
+=item startStates
+
+Array of starting state numbers dependeing on the length of actual precontext.
+There are maxRulePreContext - minRulePreContext + 1 of these.
+
+=item ruleSortKeys
+
+An array of sort keys one for each rule giving the length of the rule without its precontext.
+
+=item rulePreContexts
+
+An array of precontext lengths for each rule.
+
+=item fsm
+
+A two dimensional array such that $p->{'fsm'}[$row][$col] gives the row of the next node to try in the fsm.
+
+=item passConstraintLen
+
+Length in bytes of the passConstraint code.
+
+=item passConstraintCode
+
+A byte string holding the pass constraint code.
+
+=item constraintCode
+
+An array of byte strings holding the constraint code for each rule.
+
+=item actionCode
+
+An array of byte strings holding the action code for each rule.
+
+=back
 
 =back
 
@@ -203,7 +429,7 @@ sub read_pass
     $fh->read($dat, $pass->{'numRules'});
     $pass->{'rulePreContexts'} = [unpack('C*', $dat)];
     $fh->read($dat, 3);
-    ($d, $pass->{'pConstraintLen'}) = TTF_Unpack("CS", $dat);
+    ($d, $pass->{'passConstraintLen'}) = TTF_Unpack("CS", $dat);
     $fh->read($dat, ($pass->{'numRules'} + 1) * 2);
     @oconstraints = unpack('n*', $dat);
     $fh->read($dat, ($pass->{'numRules'} + 1) * 2);
@@ -324,6 +550,12 @@ sub out_pass
     $fh->print(pack("n*", @offsets));
     $fh->seek($res, 0);
 }
+
+=head2 out
+
+Outputs a Silf data structure to a font file in binary format
+
+=cut
 
 sub out
 {

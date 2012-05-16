@@ -25,3 +25,4 @@ dists/
 description-pak
 ^doc
 \.swp
+^\.hg/
