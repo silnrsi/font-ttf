@@ -264,6 +264,45 @@ use vars qw(@ISA);
 
 @ISA = qw(Font::TTF::Table);
 
+=head2 @opcodes
+
+Each array holds the name of the opcode, the number of operand bytes and a string describing the operands.
+The characterse in the string have the following meaning:
+
+    c - lsb of class id
+    C - msb of class id
+    f - feature index
+    g - lsb of glyph attribute id
+    G - msb of glyph attribute id
+    l - lsb of a 32-bit extension to a 16-bit number
+    L - msb of a 32-bit number
+    m - glyph metric id
+    n - lsb of a number
+    N - msb of a 16-bit number
+    o - offset (jump)
+    s - slot reference
+    S - slot attribute id
+    v - variable number of following arguments
+
+=cut
+
+@opcodes = ( ["nop", 0, ""], ["push_byte", 1, "n"], ["push_byte_u", 1, "n"], ["push_short", 2, "Nn"],
+             ["push_short_u", 2, "Nn"], ["push_long", 4, "LlNn"], ["add", 0, ""], ["sub", 0, ""],
+             ["mul", 0, ""], ["div", 0, ""], ["min", 0, ""], ["max", 0, ""],
+             ["neg", 0, ""], ["trunc8", 0, ""], ["trunc16", 0, ""], ["cond", 0, ""],
+             ["and", 0, ""], ["or", 0, ""], ["not", 0, ""], ["equal", 0, ""],
+             ["not_eq", 0, ""], ["less", 0, ""], ["gtr", 0, ""], ["less_eq", 0, ""],
+             ["gtr_eq", 0, ""], ["next", 0, ""], ["next_n", 1, "n"], ["copy_next", 0, ""],
+             ["put_glyph_8bit_obs", 1, "c"], ["put_subs_8bit_obs", 3, "scc"], ["put_copy", 1, "s"], ["insert", 0, ""],
+             ["delete", 0, ""], ["assoc", -1, "v"], ["cntxt_item", 2, "so"], ["attr_set", 1, "S"],
+             ["attr_add", 1, "S"], ["attr_sub", 1, "S"], ["attr_set_slot", 1, "S"], ["iattr_set_slot", 2, "Sn"],
+             ["push_slot_attr", 2, "Ss"], ["push_glyph_attr_obs", "gs"], ["push_glyph_metric", 3, "msn"], ["push_feat", 2, "fs"],
+             ["push_att_to_gattr_obs", 2, "gs"], ["push_att_to_glyph_metric", 3, "msn"], ["push_islot_attr", 3, "Ssn"], ["push_iglyph_attr", 3, "gsn"],
+             ["pop_ret", 0, ""], ["ret_zero", 0, ""], ["ret_true", 0, ""], ["iattr_set", 2, "Sn"],
+             ["iattr_add", 2, "Sn"], ["iattr_sub", 2, "Sn"], ["push_proc_state", 1, "n"], ["push_version", 0, ""],
+             ["put_subs", 5, "sCcCc"], ["put_subs2", 4, "cscc"], ["put_subs3", 7, "scscscc"], ["put_glyph", 2, "Cc"],
+             ["push_glyph_attr", 3, "Ggs"], ["push_att_to_glyph_attr", 3, "Ggs"] );
+
 =head2 read
 
 Reads the Silf table into the internal data structure
