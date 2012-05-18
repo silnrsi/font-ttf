@@ -3,7 +3,7 @@ use Font::TTF::PSNames;
 use Font::TTF::OTTags;
 use Font::TTF::EBDT;
 use Font::TTF::EBLC;
-use Font::TTF::Dsig;
+use Font::TTF::DSIG;
 use Font::TTF::Sill;
 use Font::TTF::Silf;
 use Font::TTF::Cvt_;

@@ -286,7 +286,7 @@ The characterse in the string have the following meaning:
 
 =cut
 
-@opcodes = ( ["nop", 0, ""], ["push_byte", 1, "n"], ["push_byte_u", 1, "n"], ["push_short", 2, "Nn"],
+our @opcodes = ( ["nop", 0, ""], ["push_byte", 1, "n"], ["push_byte_u", 1, "n"], ["push_short", 2, "Nn"],
              ["push_short_u", 2, "Nn"], ["push_long", 4, "LlNn"], ["add", 0, ""], ["sub", 0, ""],
              ["mul", 0, ""], ["div", 0, ""], ["min", 0, ""], ["max", 0, ""],
              ["neg", 0, ""], ["trunc8", 0, ""], ["trunc16", 0, ""], ["cond", 0, ""],
