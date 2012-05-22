@@ -29,6 +29,10 @@ If defined, an array of name table name ids indexed by attribute number.
 
 =cut
 
+use strict;
+use vars qw(@ISA);
+@ISA = qw(Font::TTF::Table);
+
 sub read
 {
     my ($self) = @_;
@@ -63,7 +67,7 @@ sub out
 {
     my ($self, $fh) = @_;
     my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
-    my ($flags);
+    my ($flags, $num);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
     $num = $self->{'numAttrib'};
@@ -76,3 +80,4 @@ sub out
     { $fh->write(pack("n$num", @{$self->{'names'}})); }
 }
 
+1;

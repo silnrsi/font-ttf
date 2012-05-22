@@ -1,5 +1,9 @@
 package Font::TTF::Glat;
 
+use strict;
+use vars qw(@ISA);
+@ISA = qw(Font::TTF::Table);
+
 sub read
 {
     my ($self) = @_;
@@ -31,7 +35,7 @@ sub read
             ($first, $number) = unpack("C2", substr($dat, $j, 2));
             @vals = unpack("n$number", substr($dat, $j + 2, $number));
         }
-        for ($k = 0; $k < $number; $k++)
+        for (my $k = 0; $k < $number; $k++)
         { $self->{'attribs'}[$i]{$first + $k} = $vals[$k]; }
     }
 }
@@ -71,9 +75,10 @@ sub out
             { $next = shift(@a); }
             for ($j = $first; $j <= $next; $j++)
             { push (@v, $self->{'attribs'}[$i]{$j}); }
-            { $fh->print(pack("$type2n*", $first, $next - $first + 1, @v)); }
+            { $fh->print(pack("${type}2n*", $first, $next - $first + 1, @v)); }
         }
     }
     push(@{$gloc->{'locations'}}, $fh->tell() - $base);
 }
 
+1;
