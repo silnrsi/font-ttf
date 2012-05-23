@@ -495,7 +495,7 @@ sub update
     my ($self) = @_;
     my ($dat, $loc, $len, $flag, $x, $y, $i, $comp, $num);
 
-    return $self unless (defined $self->{' read'} && $self->{' read'} > 1);
+    return $self unless (defined $self->{' isDirty'} && $self->{' isDirty'} && defined $self->{' read'} && $self->{' read'} > 1);
     $self->update_bbox;
     $self->{' DAT'} = TTF_Out_Fields($self, \%fields, 10);
     $num = $self->{'numberOfContours'};

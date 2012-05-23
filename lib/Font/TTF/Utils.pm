@@ -564,7 +564,7 @@ sub make_circle
 {
     my ($font, $cmap, $dia, $sb, %opts) = @_;
     my ($upem) = $font->{'head'}{'unitsPerEm'};
-    my ($glyph) = Font::TTF::Glyph->new('PARENT' => $font, 'read' => 2);
+    my ($glyph) = Font::TTF::Glyph->new('PARENT' => $font, 'read' => 2, 'isDirty' => 1);
     my ($PI) = 3.1415926535;
     my ($R, $r, $xorg, $yorg);
     my ($i, $j, $numg, $maxp);
