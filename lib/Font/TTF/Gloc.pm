@@ -29,6 +29,7 @@ If defined, an array of name table name ids indexed by attribute number.
 
 =cut
 
+use Font::TTF::Table;
 use strict;
 use vars qw(@ISA);
 @ISA = qw(Font::TTF::Table);
@@ -81,3 +82,4 @@ sub out
 }
 
 1;
+

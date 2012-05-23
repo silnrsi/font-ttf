@@ -1,5 +1,6 @@
 package Font::TTF::Glat;
 
+use Font::TTF::Table;
 use strict;
 use vars qw(@ISA);
 @ISA = qw(Font::TTF::Table);
@@ -82,3 +83,4 @@ sub out
 }
 
 1;
+

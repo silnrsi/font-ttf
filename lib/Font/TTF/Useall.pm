@@ -63,5 +63,7 @@ use Font::TTF::Features::SSet;
 use Font::TTF::Woff;
 use Font::TTF::Woff::MetaData;
 use Font::TTF::Woff::PrivateData;
+use Font::TTF::Glat;
+use Font::TTF::Gloc;
 
 1;
