@@ -45,7 +45,6 @@ sub out
 {
     my ($self, $fh) = @_;
     my ($gloc) = $self->{' PARENT'}{'Gloc'};
-    my ($fh) = $self->{' INFILE'};
     my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
     my ($base) = $fh->tell();
     my ($i, $type);
