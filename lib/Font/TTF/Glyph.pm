@@ -2,7 +2,7 @@ package Font::TTF::Glyph;
 
 =head1 NAME
 
-Font::TTF::Glyph - Holds a single glyph's information
+Font::TTF::Glyph - Holds a information for a single glyph
 
 =head1 DESCRIPTION
 
@@ -153,7 +153,7 @@ by calling the C<update> method whenever any of the glyph content changes.
 
 Location relative to the start of the glyf table. This variable is only active
 whilst the output process is going on. It is used to inform the location table
-where the glyph's location is, since the glyf table is output before the loca
+where the glyph is located, since the glyf table is output before the loca
 table due to alphabetical ordering.
 
 =item OUTLEN (P)
@@ -493,7 +493,7 @@ something > 1) for the update to work.
 sub update
 {
     my ($self) = @_;
-    my ($dat, $loc, $len, $flag, $x, $y, $i, $comp, $num);
+    my ($dat, $loc, $len, $flag, $x, $y, $i, $comp, $num, @rflags, $repeat);
 
     return $self unless (defined $self->{' isDirty'} && $self->{' isDirty'} && defined $self->{' read'} && $self->{' read'} > 1);
     $self->update_bbox;
@@ -505,6 +505,7 @@ sub update
         $len = $self->{'instLen'};
         $self->{' DAT'} .= pack("n", $len);
         $self->{' DAT'} .= pack("a" . $len, substr($self->{'hints'}, 0, $len)) if ($len > 0);
+        $repeat = 0;
         for ($i = 0; $i < $self->{'numPoints'}; $i++)
         {
             $flag = $self->{'flags'}[$i] & 1;
@@ -529,9 +530,28 @@ sub update
                 $flag |= 4;
                 $flag |= 32 if ($y >= 0);
             }
-            $self->{' DAT'} .= pack("C", $flag);                    # sorry no repeats
+            if ($i > 0 && $rflags[-1] == $flag && $repeat < 255)
+            {
+            	$repeat++;
+            } else
+            {
+            	if ($repeat)
+            	{
+            		$rflags[-1] |= 8;
+            		push @rflags, $repeat;
+            	}
+            	push @rflags, $flag;
+            	$repeat = 0;
+            } 
             $self->{'flags'}[$i] = $flag;
         }
+		# Add final repeat if needed, then pack up the flag bytes:
+    	if ($repeat)
+    	{
+    		$rflags[-1] |= 8;
+    		push @rflags, $repeat;
+    	}
+        $self->{' DAT'} .= pack("C*", @rflags);	
         for ($i = 0; $i < $self->{'numPoints'}; $i++)
         {
             $flag = $self->{'flags'}[$i];
