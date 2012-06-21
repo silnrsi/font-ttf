@@ -901,14 +901,17 @@ For more details see the appropriate class files.
 
 =head1 AUTHOR
 
-Martin Hosken Martin_Hosken@sil.org
+Martin Hosken L<Martin_Hosken@sil.org>
 
-Copyright Martin Hosken 1998.
+Copyright (c) 1998-2012, Martin Hosken (SIL International)
+(see CONTRIBUTORS for other authors).
 
-No warranty or expression of effectiveness, least of all regarding anyone's
+No warranty or expression of effectiveness for anything, least of all anyone's
 safety, is implied in this software or documentation.
 
-=head2 Licensing
+=head1 LICENSE INFORMATION
 
-The Perl TTF module is licensed under the Perl Artistic License.
+This module is free software; you can redistribute it and/or modify it under the terms of the
+Artistic License 2.0. For details, see the full text of the license in the file LICENSE.
 
+The test suite contains test fonts released under the Open Font License v1.1, see OFL.txt.
