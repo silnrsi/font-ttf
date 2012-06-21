@@ -1,8 +1,8 @@
-        Perl Module: Font::TTF
+Perl Module Font::TTF is Copyright (c) 1998-2012, Martin Hosken (SIL International)
 
-=head1 Introduction
+=head1 INTRODUCTION
 
-Perl module for TrueType font hacking. Supports reading, processing and
+Perl module for TrueType/OpenType font hacking. Supports reading, processing and
 writing of the following tables: GDEF, GPOS, GSUB, LTSH, OS/2, PCLT,
 bsln, cmap, cvt, fdsc, feat, fpgm, glyf, hdmx, head, hhea, hmtx, kern,
 loca, maxp, mort, name, post, prep, prop, vhea, vmtx and the reading and
@@ -16,7 +16,8 @@ received and probably included in a future release. Please send them to me.
 
 This module has been tested on Win32, Unix and Mac.
 
-Applications that were associated with this module have been moved to Font::TTF::Scripts where great things can be done.
+Applications that were associated with this module have been moved to
+Font::TTF::Scripts where great things can be done.
 
 =head1 SYNOPSIS
 
@@ -39,7 +40,7 @@ the outputs of the two runs.
     $f->out($ARGV[1]);
     $f->DESTROY;               # forces close of $in and maybe memory reclaim!
 
-=head1 Installation
+=head1 INSTALLATION
 
 If you have received this package as part of an Activestate PPM style .zip file
 then type
@@ -88,12 +89,15 @@ I do not anticipate any more restructuring changes (but reserve the right to do 
 
 Martin Hosken L<Martin_Hosken@sil.org>
 
-Copyright Martin Hosken 1998 and following.
+Copyright (c) 1998-2012, Martin Hosken (SIL International)
+(see CONTRIBUTORS for other authors).
 
 No warranty or expression of effectiveness for anything, least of all anyone's
 safety, is implied in this software or documentation.
 
-=head2 Licensing
+=head1 LICENSE INFORMATION
 
-The Perl TTF module is licensed under the Perl Artistic License.
+This module is free software; you can redistribute it and/or modify it under the terms of the
+Artistic License 2.0. For details, see the full text of the license in the file LICENSE.
 
+The test suite contains test fonts released under the Open Font License v1.1, see OFL.txt.
