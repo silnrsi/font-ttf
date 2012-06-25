@@ -1,0 +1,6 @@
+author: [ 'Martin Hosken <martin_hosken@sil.org>' ]
+version: '0.45'
+description:  "Font::TTF allows you to do almost anything to a TrueType/OpenType Font
+including modify and inspect nearly all tables."
+license: 'artistic2'
+homepage: "http://scripts.sil.org/FontUtils"
