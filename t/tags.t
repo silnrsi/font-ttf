@@ -1,3 +1,4 @@
+#! /usr/bin/perl
 use strict;
 
 use Test::Simple tests => 6;
