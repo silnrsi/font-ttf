@@ -5,6 +5,7 @@ use vars qw(@ISA @EXPORT);
 require Exporter;
 
 use Font::TTF::Utils;
+use Font::TTF::Segarr;
 use IO::File;
 
 @ISA = qw(Exporter);
