@@ -758,7 +758,7 @@ sub maxContext
                 {
                     my $lgt;
                     $lgt++ if exists $s->{'COVERAGE'};  # Count 1 for the coverage table if it exists
-                    for (qw(MATCH PRE POST))
+                    for (qw(MATCH POST))				# only Input and Lookahead sequences count (Lookbehind doesn't) -- see OT spec.
                     {
                         $lgt += @{$m->{$_}} if exists $m->{$_};
                     }
