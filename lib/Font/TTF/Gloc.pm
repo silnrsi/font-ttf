@@ -30,6 +30,7 @@ If defined, an array of name table name ids indexed by attribute number.
 =cut
 
 use Font::TTF::Table;
+use Font::TTF::Utils;
 use strict;
 use vars qw(@ISA);
 @ISA = qw(Font::TTF::Table);
@@ -37,7 +38,7 @@ use vars qw(@ISA);
 sub read
 {
     my ($self) = @_;
-    my ($fh) = $self->{' NFILE'};
+    my ($fh) = $self->{' INFILE'};
     my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
     my ($dat, $flags);
 

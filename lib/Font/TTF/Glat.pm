@@ -1,6 +1,7 @@
 package Font::TTF::Glat;
 
 use Font::TTF::Table;
+use Font::TTF::Utils;
 use strict;
 use vars qw(@ISA);
 @ISA = qw(Font::TTF::Table);
@@ -24,7 +25,7 @@ sub read
         my ($j) = 0;
         my ($num) = $gloc->{'locations'}[$i + 1] - $gloc->{'locations'}[$i];
         my ($first, $number, @vals);
-        $fh->seek($base + $gloc->{'locations'}[$i]);
+        $fh->seek($base + $gloc->{'locations'}[$i], 0);
         $fh->read($dat, $num);
         if ($self->{'Version'} > 1)
         {
