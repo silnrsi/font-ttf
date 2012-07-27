@@ -12,7 +12,7 @@ speculation...
 
 =head1 INSTANCE VARIABLES
 
-There are 4 tables in the GDEF table, each with their own structure:
+There are up to 5 tables in the GDEF table, each with their own structure:
 
 =over 4
 
@@ -78,12 +78,12 @@ For FMT = 3, a device table is also referenced which is stored here
 
 =item MARKS
 
-Due to confusion in the GDEF specification, this field is currently withdrawn until
-the confusion is resolved. That way, perhaps this stuff will work!
+This class definition table defines the classes of mark glyphs that can be selected
+for processing using the MarkAttachmentType field of lookup FLAG words. 
 
-This class definition table stores the mark attachment point numbers for each
-attachment mark, to indicate which attachment point the mark attaches to on its
-base glyph.
+=item MARKSETS
+
+Contains an array of coverage tables indexed by the FILTER value of a lookup.
 
 =back
 
@@ -99,7 +99,10 @@ use Font::TTF::Ttopen;
 use vars qw(@ISA $new_gdef);
 
 @ISA = qw(Font::TTF::Table);
-$new_gdef = 1;
+$new_gdef = 1;	# Prior to 2012-07, this config variable did more than it does today.
+				# Currently all it does is force the GDEF to include a field in the
+				# header for the MARKS class definition. That is, it makes sure the
+				# font is compatible with at least the OT 1.2 specification.
 
 =head2 $t->read
 
@@ -114,30 +117,60 @@ sub read
 
     my ($fh) = $self->{' INFILE'};
     my ($boff) = $self->{' OFFSET'};
-    my ($dat, $goff, $loff, $aoff, $moff, $r, $s, $bloc);
+    my ($dat, $goff, $aoff, $loff, $macoff, $mgsoff, $r, $s, $bloc);
 
     $bloc = $fh->tell();
-    if ($new_gdef)
+    $fh->read($dat, 10);
+    ($self->{'Version'}, $goff, $aoff, $loff) = TTF_Unpack('LS3', $dat);
+    
+    # GDEF is the ONLY table that uses a ULONG for version rather than a Fixed or USHORT,
+    # and this seems to clearly be a hack. 
+    # OpenType 1.2 introduced MarkAttachClassDef but left the table version at 0x00010000
+    # Up through OpenType 1.5, the Version field was typed as Fixed.
+    # OpenType 1.6 introduced MarkGlyphSetsDef and bumped table version to 0x00010002 (sic)
+    # and changed it to ULONG.
+    
+    
+    # Thus some trickery here to read the table correctly!
+    
+    if ($self->{'Version'} > 0x00010000)
     {
-        $fh->read($dat, 12);
-        ($self->{'Version'}, $goff, $aoff, $loff, $moff) = TTF_Unpack('fS4', $dat);
+    	# Ok, header guaranteed to have both MarAttachClassDef MarkGlyphSetsDef
+        $fh->read($dat, 4);
+        ($macoff, $mgsoff) = TTF_Unpack('S2', $dat);
     }
     else
     {
-        $fh->read($dat, 10);
-        ($self->{'Version'}, $goff, $aoff, $loff) = TTF_Unpack('fS3', $dat);
-    }
+    	# What I've seen in other code (examples:
+    	#     http://skia.googlecode.com/svn/trunk/third_party/harfbuzz/src/harfbuzz-gdef.c and
+    	#     http://doxygen.reactos.org/d0/d55/otvalid_8h_a0487daffceceb98ba425bbf2806fbaff.html
+    	# ) is to read GPOS and GDEF and see if any lookups have a
+    	# MarkAttachType in the upper byte of their flag word and if so then assume that the
+    	# MarkAttachClassDef field is in the header. While this is probably the most 
+    	# reliable way to do it, it would require us to read GSUB and GPOS. 
+    	# Prior to 2012-07 what we did is depend on our $new_gdef class variable to tell us
+    	# whether to assume a MarkAttachClassDef. 
+    	# What we do now is see if the header actually has room for the MarkAttachClassDef field.
+    	
+    	my $minOffset = $self->{' LENGTH'};
+    	foreach ($goff, $aoff, $loff)
+    	{
+    		$minOffset = $_ if $_ > 0 && $_ < $minOffset;
+    	}
+    	if ($minOffset >= 12)
+    	{
+    		# There is room for the field, so read it:
+		    $fh->read($dat, 2);
+		    ($macoff) = TTF_Unpack('S', $dat);
+		    # Sanity check:
+		    $macoff = 0 if $macoff >= $self->{' LENGTH'};
+		}
+	}
 
     if ($goff > 0)
     {
         $fh->seek($goff + $boff, 0);
         $self->{'GLYPH'} = Font::TTF::Coverage->new(0)->read($fh);
-    }
-
-    if ($new_gdef && $moff > 0 && $moff < $self->{' LENGTH'})
-    {
-        $fh->seek($moff + $boff, 0);
-        $self->{'MARKS'} = Font::TTF::Coverage->new(0)->read($fh);
     }
 
     if ($aoff > 0)
@@ -197,19 +230,45 @@ sub read
                 {
                     $fh->read($dat, 2);
                     $off = TTF_Unpack('S', $dat);
-                    if (defined $self->{' CACHE'}{$off + $s + $r})
-                    { $comp->{'DEVICE'} = $self->{' CACHE'}{$off + $s + $r}; }
+                    if (defined $self->{' CACHE'}{$off + $s + $r + $loff})
+                    { $comp->{'DEVICE'} = $self->{' CACHE'}{$off + $s + $r + $loff}; }
                     else
                     {
                         $fh->seek($off + $s + $r + $loff + $boff, 0);
                         $comp->{'DEVICE'} = Font::TTF::Delta->new->read($fh);
-                        $self->{' CACHE'}{$off + $s + $r} = $comp->{'DEVICE'};
+                        $self->{' CACHE'}{$off + $s + $r + $loff} = $comp->{'DEVICE'};
                     }
                 }
                 push (@$srec, $comp);
             }
             push (@{$self->{'LIG'}{'LIGS'}}, $srec);
         }
+    }
+
+    if ($macoff > 0)
+    {
+        $fh->seek($macoff + $boff, 0);
+        $self->{'MARKS'} = Font::TTF::Coverage->new(0)->read($fh);
+    }
+    
+    if ($mgsoff > 0)
+    {
+    	my ($fmt, $count, $off);
+    	$fh->seek($mgsoff + $boff, 0);
+    	$fh->read($dat, 4);
+    	($fmt, $count) = TTF_Unpack('SS', $dat);
+    	# Sanity check opportunity: Could verify $fmt == 1, but I don't.
+    	$self->{'MARKSETS'} = [];
+    	$fh->read($dat, $count << 2);	# NB: These offets are ULONGs!
+    	foreach $off (TTF_Unpack('L*', $dat))
+    	{
+            unless (defined $self->{' CACHE'}{$off + $mgsoff})
+            {
+                $fh->seek($off + $mgsoff + $boff, 0);
+                $self->{' CACHE'}{$off + $mgsoff} = Font::TTF::Coverage->new(1)->read($fh);
+            }
+            push @{$self->{'MARKSETS'}}, $self->{' CACHE'}{$off + $mgsoff};
+    	}
     }
 
     $self;
@@ -225,15 +284,24 @@ Writes out this table.
 sub out
 {
     my ($self, $fh) = @_;
-    my ($goff, $aoff, $loff, $moff, @offs, $loc1, $coff, $loc);
+    my ($goff, $aoff, $loff, $macoff, $mgsoff, @offs, $loc1, $coff, $loc);
 
     return $self->SUPER::out($fh) unless $self->{' read'};
 
     $loc = $fh->tell();
-    if ($new_gdef)
-    { $fh->print(TTF_Pack('fSSSS', $self->{'Version'}, 0, 0, 0, 0)); }
+    if (defined $self->{'MARKSETS'} && @{$self->{'MARKSETS'}} > 0)
+    {
+    	$self->{'Version'} = 0x00010002;
+    	$fh->print(TTF_Pack('LSSSSS', $self->{'Version'}, 0, 0, 0, 0, 0));
+    }
     else
-    { $fh->print(TTF_Pack('fSSS', $self->{'Version'}, 0, 0, 0)); }
+    {
+    	$self->{'Version'} = 0x00010000;
+	    if ($new_gdef || defined $self->{'MARKS'})
+	    { $fh->print(TTF_Pack('LSSSS', $self->{'Version'}, 0, 0, 0, 0)); }
+	    else
+	    { $fh->print(TTF_Pack('LSSS', $self->{'Version'}, 0, 0, 0)); }
+	}
 
     if (defined $self->{'GLYPH'})
     {
@@ -294,16 +362,33 @@ sub out
         Font::TTF::Ttopen::out_final($fh, $out, \@reftables);
     }
 
-    if ($new_gdef && defined $self->{'MARKS'})
+    if (defined $self->{'MARKS'})
     {
-        $moff = $fh->tell() - $loc;
+        $macoff = $fh->tell() - $loc;
         $self->{'MARKS'}->out($fh);
+    }
+    
+    if (defined $self->{'MARKSETS'})
+    {
+
+        my (@reftables, $ctables, $c, $out); 
+    	$ctables = {};    	
+    	$mgsoff = $fh->tell() - $loc;
+    	$out = TTF_Pack('SS', 1, $#{$self->{'MARKSETS'}}+1);
+    	foreach $c (@{$self->{'MARKSETS'}})
+		{
+			$out .= pack('N', Font::TTF::Ttopen::ref_cache($c, $ctables, length($out), 'N'));
+		}
+		push (@reftables, [$ctables, 0]);
+		Font::TTF::Ttopen::out_final($fh, $out, \@reftables);
     }
 
     $loc1 = $fh->tell();
     $fh->seek($loc + 4, 0);
-    if ($new_gdef)
-    { $fh->print(TTF_Pack('S4', $goff, $aoff, $loff, $moff)); }
+    if ($mgsoff)
+    { $fh->print(TTF_Pack('S5', $goff, $aoff, $loff, $macoff, $mgsoff)); }
+    elsif ($macoff)
+    { $fh->print(TTF_Pack('S4', $goff, $aoff, $loff, $macoff)); }
     else
     { $fh->print(TTF_Pack('S3', $goff, $aoff, $loff)); }
     $fh->seek($loc1, 0);
@@ -337,7 +422,7 @@ sub update
                 $self->{'ATTACH'}{'POINTS'} = $newpoints;
             }
     	}
-    	if (defined ($self->{'LIG'} and defined $self->{'LIG'}{'COVERAGE'} and !$self->{'LIG'}{'COVERAGE'}{'dontsort'} ))
+    	if (defined $self->{'LIG'} and defined $self->{'LIG'}{'COVERAGE'} and !$self->{'LIG'}{'COVERAGE'}{'dontsort'} )
     	{
     		my @map = $self->{'LIG'}{'COVERAGE'}->sort();
         	if (defined $self->{'LIG'}{'LIGS'})
@@ -348,6 +433,11 @@ sub update
                 { push @{$newligs}, $self->{'LIG'}{'LIGS'}[$map[$_]]; }
                 $self->{'LIG'}{'LIGS'} = $newligs;
             }
+    	}
+    	if (defined $self->{'MARKSETS'})
+    	{
+    		foreach (@{$self->{'MARKSETS'}})
+    		{$_->sort();}		# Don't care about map
     	}
     }
     

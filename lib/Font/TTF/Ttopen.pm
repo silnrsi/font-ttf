@@ -144,6 +144,10 @@ within the lookup
 
 Holds the lookup flag bits
 
+=item FILTER
+
+Holds the MarkFilteringSet (that is, the index into GDEF->MARKSETS) for the lookup.
+
 =item SUB
 
 This holds an array of subtables which are subclass specific. Each subtable must have
@@ -438,8 +442,12 @@ sub read
         $fh->read($dat, 6);
         ($l->{'TYPE'}, $l->{'FLAG'}, $nSub) = unpack("n3", $dat);
         $fh->read($dat, $nSub * 2);
-        $j = 0;
         my @offsets = unpack("n*", $dat);
+        if ($l->{'FLAG'} & 0x0010)
+        {
+        	$fh->read($dat, 2);
+        	$l->{'FILTER'} = unpack("n", $dat);
+        }
         my $isExtension = ($l->{'TYPE'} == $self->extension());
         for ($j = 0; $j < $nSub; $j++)
         {
@@ -656,6 +664,13 @@ sub out
         {
             $fh->print(pack("nnn", $tag->{'TYPE'}, $tag->{'FLAG'}, $nSub));
             $fh->print(pack("n", 0) x $nSub);
+            if (defined($tag->{'FILTER'}))
+            {
+            	$tag->{'FLAG'} |= 0x0010;
+            	$fh->print(pack("n", $tag->{'FILTER'}));
+            }
+            else
+            {	$tag->{'FLAG'} &= ~0x0010; }
         }
         else
         { $end = $tag->{' EXT_OFFSET'}; }
@@ -915,7 +930,7 @@ sub read_cover
 }
 
 
-=head2 ref_cache($obj, $cache, $offset)
+=head2 ref_cache($obj, $cache, $offset [, $template])
 
 Internal function to keep track of the local positioning of subobjects such as
 coverage and class definition tables, and their offsets.
@@ -931,12 +946,13 @@ Uses tricks for Tie::Refhash
 
 sub ref_cache
 {
-    my ($obj, $cache, $offset) = @_;
+    my ($obj, $cache, $offset, $template) = @_;
 
     return 0 unless defined $obj;
+    $template ||= 'n';
     unless (defined $cache->{"$obj"})
     { push (@{$cache->{''}}, $obj); }
-    push (@{$cache->{"$obj"}}, $offset);
+    push (@{$cache->{"$obj"}}, [$offset, $template]);
     return 0;
 }
 
@@ -986,8 +1002,11 @@ sub out_final
                     { $t->out($fh, 0); }
                 }
             }
-            foreach $s (@{$r->[0]{$str}})
-            { substr($out, $s, 2) = pack('n', $master_cache->{$str} - $offs); }
+            foreach (@{$r->[0]{$str}})
+            {
+            	$s = pack($_->[1], $master_cache->{$str} - $offs);
+            	substr($out, $_->[0], length($s)) = $s;
+            }
         }
     }
     if ($state)
