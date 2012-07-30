@@ -424,7 +424,10 @@ sub read
     		($name, $off, $zlen, $len, $check) = unpack("a4NNNN", $dat);
     		if ($off + $zlen > $woffLength || $zlen > $len)
 			{
-				warn "invalid WOFF '$name' table in $self->{' fname'}";
+				my $err;
+				$err = "Offset + compressed length > total length. " if $off + $zlen > $woffLength;
+				$err = "Compressed length > uncompressed length. " if $zlen > $len;
+				warn "invalid WOFF '$name' table in $self->{' fname'}: $err\n";
 				return undef;
 			}
     	}
