@@ -1,4 +1,35 @@
-0.45
+0.49
+
+* Major change to glyph creation/editing -- now utilizes ' isDirty' flag
+* Add support for:
+*    V4 OS/2 table
+*    Reading WOFF fonts
+*    MarkFilterSets in GDEF
+*    Feature parameters (for cvxx, ssxx and size features)
+*    Graphite Silf, Glac, and Gloc tables
+* Updated MS Lang IDs to Dec 2011
+* Finish implementation of coverage table sorting
+* Copyright and licensing updated to CPAN requirements
+* Bug fixes
+
+0.48  (r692, 2010-12-14)
+
+* Ensure coverage tables are properly sorted
+* Additional OT tags (from OpenType 1.6)
+* Bug fixes
+
+0.47  (r649, 2009-08-10)
+
+* Add support for Graphite Sill table
+* Handle kerning tables version > 0
+* Bug fixes
+
+0.46  (r577, 2009-01-26)
+
+* Bug fixes
+* Change Copyright to Artistic License 2.0
+
+0.45  (r527, 2008-06-11)
 
 * Introduce changelog
 * tidy up 0.44 package, fix README to be more accurate
