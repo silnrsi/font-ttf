@@ -240,7 +240,7 @@ sub new
 
 =head2 $g->read
 
-Reads the header component of the glyph (bounding box, etc.) and also the
+Reads the header component of the glyph (numberOfContours and bounding box) and also the
 glyph content, but into a data field rather than breaking it down into
 its constituent structures. Use read_dat for this.
 
@@ -264,8 +264,7 @@ sub read
 =head2 $g->read_dat
 
 Reads the contents of the glyph (components and curves, etc.) from the memory
-store C<DAT> into structures within the object. Then, to indicate where the
-master form of the data is, it deletes the C<DAT> instance variable.
+store C<DAT> into structures within the object. 
 
 =cut
 
@@ -480,13 +479,27 @@ sub XML_element
     $self;    
 }
 
+=head2 $g->dirty($val)
+
+This sets the dirty flag to the given value or 1 if no given value. It returns the
+value of the flag
+
+=cut
+
+sub dirty
+{
+    my ($self, $val) = @_;
+    my ($res) = $self->{' isDirty'};
+
+    $self->{' isDirty'} = defined $val ? $val : 1;
+    $res;
+}
 
 =head2 $g->update
 
 Generates a C<$self->{'DAT'}> from the internal structures, if the data has
 been read into structures in the first place. If you are building a glyph
-from scratch you will need to set the instance variable C<' read'> to 2 (or
-something > 1) for the update to work.
+from scratch you will need to set the instance variable C<' isDirty'>.
 
 =cut
 
@@ -495,8 +508,8 @@ sub update
     my ($self) = @_;
     my ($dat, $loc, $len, $flag, $x, $y, $i, $comp, $num, @rflags, $repeat);
 
-    return $self unless (defined $self->{' isDirty'} && $self->{' isDirty'} && defined $self->{' read'} && $self->{' read'} > 1);
-    $self->update_bbox;
+    return $self unless ($self->{' isDirty'});
+    $self->read_dat->update_bbox;
     $self->{' DAT'} = TTF_Out_Fields($self, \%fields, 10);
     $num = $self->{'numberOfContours'};
     if ($num > 0)
@@ -646,7 +659,7 @@ sub update_bbox
     my ($self) = @_;
     my ($num, $maxx, $minx, $maxy, $miny, $i, $comp, $x, $y, $compg);
 
-    return $self unless $self->{' read'} > 1;       # only if read_dat done
+    return $self unless (defined $self->{' read'} && $self->{' read'} > 1);       # only if read_dat done
     $miny = $minx = 65537; $maxx = $maxy = -65537;
     $num = $self->{'numberOfContours'};
     if ($num > 0)
