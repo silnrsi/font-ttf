@@ -196,16 +196,16 @@ storable time.
 sub getdate
 {
     my ($self, $is_create) = @_;
-    my ($arr) = $self->{$is_create ? 'created' : 'modified'};
+    my (@arr) = (@{$self->{$is_create ? 'created' : 'modified'}});
 
-    $arr->[1] -= 2082844800;        # seconds between 1/Jan/1904 and 1/Jan/1970 (midnight)
-    if ($arr->[1] < 0)
+    $arr[1] -= 2082844800;        # seconds between 1/Jan/1904 and 1/Jan/1970 (midnight)
+    if ($arr[1] < 0)
     {
-        $arr->[1] += 0xFFFFFFF; $arr->[1]++;
-        $arr->[0]--;
+        $arr[1] += 0xFFFFFFF; $arr[1]++;
+        $arr[0]--;
     }
-    return undef if $arr->[0] != 0;
-    return $arr->[1];
+    return undef if $arr[0] != 0;
+    return $arr[1];
 }
 
 
