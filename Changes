@@ -6,7 +6,7 @@
 *    Reading WOFF fonts
 *    MarkFilterSets in GDEF
 *    Feature parameters (for cvxx, ssxx and size features)
-*    Graphite Silf, Glac, and Gloc tables
+*    Additional Graphite tables (Silf, Glac, and Gloc)
 * Updated MS Lang IDs to Dec 2011
 * Finish implementation of coverage table sorting
 * Copyright and licensing updated to CPAN requirements
