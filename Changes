@@ -1,4 +1,4 @@
-0.49
+1.00
 
 * Major change to glyph creation/editing -- now utilizes ' isDirty' flag
 * Add support for:
