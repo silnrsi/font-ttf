@@ -195,8 +195,8 @@ sub print
 
 	$features = $self->{'features'};
 	foreach (@$features) {
-		$fh->printf("Feature %d, %s, default: %d name %d # '%s'\n",
-					$_->{'feature'},
+		$fh->printf("Feature %s, %s, default: %d name %d # '%s'\n",
+					$_->{'feature'} > 0x01000000 ? "\"" . get_feat_str($self, $_->{'feature'}) . "\"" : $_->{'feature'}, 
 					($_->{'exclusive'} ? "exclusive" : "additive"),
 					$_->{'default'}, 
 					$_->{'name'},
@@ -229,6 +229,49 @@ sub settingName
 				. (($setting & 1) == 0 ? " On" : " Off");
 
 	($featureName, $settingName);
+}
+
+=head2 $t->get_feat_num ($feat_str)
+
+Convert a feature id tag (string) to a number (32-bit).
+Tags are normally 4 chars with space padding on the right.
+If space padding is omitted, null padding on the right is provided.
+Only numbers should be stored in a font.
+
+=cut
+
+sub get_feat_num
+{
+	my ($self, $feat_str) = @_;
+	my $new_feat_num;
+	
+	if ($feat_str > 0)
+		{$new_feat_num = $feat_str;}
+	else
+		{$new_feat_num = unpack('N', pack('a4', $feat_str));} #adds null padding on right if less than 4 chars
+	
+	return $new_feat_num;
+}
+
+=head2 $t->get_feat_str ($feat_num)
+
+Convert a feature id number (32-bit) to a tag (string).
+Numbers are retrieved from a font.
+
+=cut
+
+sub get_feat_str
+{
+	my ($self, $feat_num) = @_;
+	my $new_feat_str;
+	
+	#if ($feat_num > 0x01000000)
+	if ($feat_num > 0)
+		{$new_feat_str = unpack('a4', pack('N', $feat_num));} #includes any null padding that was added
+	else
+		{$new_feat_str = $feat_num;}
+	
+	return $new_feat_str;
 }
 
 1;
