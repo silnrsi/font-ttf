@@ -1,5 +1,6 @@
+name: 'Font-TTF'
 author: [ 'Martin Hosken <martin_hosken@sil.org>' ]
-version: '0.45'
+version: '1.00'
 description:  "Font::TTF allows you to do almost anything to a TrueType/OpenType Font
 including modify and inspect nearly all tables."
 license: 'artistic2'
