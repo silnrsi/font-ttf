@@ -1,6 +1,7 @@
 package Font::TTF;
 
-$VERSION = '1.00';    # MJPH    21-Aug-2012      OS/2, OT & Graphite improvements; bug fixes
+$VERSION = '1.01';    # MJPH    30-Aug-2012      add IO::String prerequisite
+# $VERSION = '1.00';    # MJPH    21-Aug-2012      OS/2, OT & Graphite improvements; bug fixes
 # $VERSION = '0.48';    # MJPH    15-DEC-2010      Bug fixes
 # $VERSION = '0.47';    # MJPH     7-AUG-2009      Minor bug fix in Name.pm
 # $VERSION = '0.46';    # MJPH    26-JAN-2009      Various bug fixes, add Sill table

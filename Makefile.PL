@@ -106,6 +106,9 @@ my %makeinfo = (
         AUTHOR => "martin_hosken\@sil.org",
         ABSTRACT => "TTF font support for Perl",
         LICENSE => "artistic_2",
+        PREREQ_PM => {
+            'IO::String' => 0
+        },
         @extras
     );
 
