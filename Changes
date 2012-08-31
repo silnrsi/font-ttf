@@ -1,3 +1,7 @@
+1.02  (r862, 2012-08-30)
+
+* Fix typo in Useall to get case right
+
 1.01  (r859, 2012-08-30)
 
 * Add IO::String prerequisite to make BSD and other testing environments happy

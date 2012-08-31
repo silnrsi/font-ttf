@@ -226,10 +226,6 @@ The index to a lookup to be acted upon on the match string.
 
 =back
 
-=back
-
-=back
-
 =item CLASS
 
 For those lookups which use class categories rather than glyph ids for matching
@@ -243,6 +239,8 @@ This is the offset to the class definition for the before match glyphs
 =item POST_CLASS
 
 This is the offset to the class definition for the after match glyphs.
+
+=back
 
 =item ACTION_TYPE
 
@@ -272,6 +270,7 @@ are stored relative to another base within the subtable.
 
 =back
 
+=back
 
 =head1 METHODS
 
