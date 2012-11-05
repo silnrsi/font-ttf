@@ -1,5 +1,26 @@
 package Font::TTF::Glat;
 
+=head1 TITLE
+
+Font::TTF::Glat - Hold glyph attributes
+
+=head1 DESCRIPTION
+
+Holds glyph attributes associated with each glyph.
+
+=over 4
+
+=item Version
+
+Table format version
+
+=item attribs
+
+An array of hashes. On array entry for each glyph id. Since the glyph attributes are usually in a sparse
+array, they are stored in a hash keyed by the attribute id and with the value as attribute value.
+
+=cut
+
 use Font::TTF::Table;
 use Font::TTF::Utils;
 use strict;
@@ -63,6 +84,7 @@ sub out
     }
 
     $gloc->{'locations'} = [];
+    $fh->print(TTF_Pack('v', $self->{'Version'}));
     for ($i = 0; $i < $numGlyphs; $i++)
     {
         my (@a) = sort {$a <=> $b} keys %{$self->{'attribs'}[$i]};

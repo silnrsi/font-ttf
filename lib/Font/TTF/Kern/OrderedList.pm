@@ -74,15 +74,16 @@ Prints a human-readable representation of the table
 
 =cut
 
-sub dumpXML
+sub out_xml
 {
-    my ($self, $fh) = @_;
+    my ($self, $context, $depth, $k, $val) = @_;
+    my ($fh) = $context->{'fh'};
     
     my $postVal = $self->post()->{'VAL'};
     
     $fh = 'STDOUT' unless defined $fh;
     foreach (@{$self->{'kernPairs'}}) {
-        $fh->printf("<pair l=\"%s\" r=\"%s\" v=\"%s\"/>\n", $postVal->[$_->{'left'}], $postVal->[$_->{'right'}], $_->{'kern'});
+        $fh->printf("$depth$context->{'indent'}<pair l=\"%s\" r=\"%s\" v=\"%s\"/>\n", $postVal->[$_->{'left'}], $postVal->[$_->{'right'}], $_->{'kern'});
     }
 }
 

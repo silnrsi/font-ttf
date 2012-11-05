@@ -76,8 +76,7 @@ sub out
     $flags = 1 if ($self->{'locations'}[-1] > 0xFFFF);
     $flags |= 2 if ($self->{'names'});
     $fh->print(TTF_Pack("vSS", $self->{'Version'}, $flags, $num));
-    if ($flags & 1)
-    { $fh->write(pack(($flags & 1 ? "N" : "n") . $numGlyphs, @{$self->{'locations'}})); }
+    $fh->write(pack(($flags & 1 ? "N" : "n") . ($numGlyphs + 1), @{$self->{'locations'}}));
     if ($flags & 2)
     { $fh->write(pack("n$num", @{$self->{'names'}})); }
 }
