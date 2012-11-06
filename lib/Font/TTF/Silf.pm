@@ -296,7 +296,7 @@ our @opcodes = ( ["nop", 0, ""], ["push_byte", 1, "n"], ["push_byte_u", 1, "n"],
              ["put_glyph_8bit_obs", 1, "c"], ["put_subs_8bit_obs", 3, "scc"], ["put_copy", 1, "s"], ["insert", 0, ""],
              ["delete", 0, ""], ["assoc", -1, "v"], ["cntxt_item", 2, "so"], ["attr_set", 1, "S"],                          # 32
              ["attr_add", 1, "S"], ["attr_sub", 1, "S"], ["attr_set_slot", 1, "S"], ["iattr_set_slot", 2, "Sn"],
-             ["push_slot_attr", 2, "Ss"], ["push_glyph_attr_obs", "gs"], ["push_glyph_metric", 3, "msn"], ["push_feat", 2, "fs"],
+             ["push_slot_attr", 2, "Ss"], ["push_glyph_attr_obs", 2, "gs"], ["push_glyph_metric", 3, "msn"], ["push_feat", 2, "fs"],
              ["push_att_to_gattr_obs", 2, "gs"], ["push_att_to_glyph_metric", 3, "msn"], ["push_islot_attr", 3, "Ssn"], ["push_iglyph_attr", 3, "gsn"],
              ["pop_ret", 0, ""], ["ret_zero", 0, ""], ["ret_true", 0, ""], ["iattr_set", 2, "Sn"],                          # 48
              ["iattr_add", 2, "Sn"], ["iattr_sub", 2, "Sn"], ["push_proc_state", 1, "n"], ["push_version", 0, ""],
@@ -542,14 +542,14 @@ sub unpack_code
         ++$i;
         for ($j = 0; $j < @types; ++$j)
         {
-            my ($t) = $types[$j];
-            if ($t == 'v')
+            my ($t) = chr($types[$j]);
+            if ($t eq 'v')
             {
                 my ($n) = unpack('C', substr($str, $i, 1));
                 push (@args, unpack('C*', substr($str, $i + 1, $n)));
                 $i += $n + 1;
             }
-            elsif ($t == 'L' or $t == 'N' or $t == 'G' or $t == 'C')
+            elsif ($t eq 'L' or $t eq 'N' or $t eq 'G' or $t eq 'C')
             {
                 push (@args, unpack('n', substr($str, $i, 2)));
                 $i += 2;
@@ -557,7 +557,7 @@ sub unpack_code
             }
             else
             {
-                push (@args, unpack($t == 's' ? 'c' : 'C', substr($str, $i, 1)));
+                push (@args, unpack($t eq 's' ? 'c' : 'C', substr($str, $i, 1)));
                 $i++;
             }
         }
@@ -580,19 +580,19 @@ sub pack_code
         for (my $j = 0; $j < @types; $j++)
         {
             my ($t) = $types[$j];
-            if ($t == 'v')
+            if ($t eq 'v')
             {
                 my ($n) = $c->[$i];
                 $res .= pack('C*', @{$c}[$i .. $n + $i]);
                 $i += $n;
             }
-            elsif ($t == 'C' or $t == 'G' or $t == 'L' or $t == 'N')
+            elsif ($t eq 'C' or $t eq 'G' or $t eq 'L' or $t eq 'N')
             {
                 $res .= pack('n', $c->[$i]);
                 $j++;
             }
             else
-            { $res .= pack($t == 's' ? 'c' : 'C', $c->[$i]); }
+            { $res .= pack($t eq 's' ? 'c' : 'C', $c->[$i]); }
             $i++;
         }
     }
@@ -636,7 +636,7 @@ sub out_pass
     $fh->print($dat);
     $dat = "";
     $c = 0;
-    print "transitions = $pass->{'numTransitional'}, success = $pass->{'numSuccess'}, rows = $pass->{'numRows'}\n";
+#    print "transitions = $pass->{'numTransitional'}, success = $pass->{'numSuccess'}, rows = $pass->{'numRows'}\n";
     my ($sucbase) = $pass->{'numRows'} - $pass->{'numSuccess'};
     foreach (0 .. ($pass->{'numSuccess'} - 1))
     {
@@ -816,7 +816,7 @@ sub XML_element
     if ($k eq 'classes')
     {
         $fh->print("$depth<classes>\n");
-        foreach $i (0 .. @{$val})
+        foreach $i (0 .. $#{$val})
         {
             $fh->printf("$depth    <class num='%d'>\n", $i);
             foreach (sort {$a <=> $b} keys %{$val->[$i]})
@@ -828,22 +828,37 @@ sub XML_element
     elsif ($k eq 'fsm')
     {
         $fh->print("$depth<fsm>\n");
+        my ($i) = 0;
         foreach (@{$val})
-        { $fh->print("$depth    <row>" . join(" ", @{$_}) . "</row>\n"); }
+        { $fh->print("$depth    <row index='$i'>" . join(" ", @{$_}) . "</row>\n"); $i++; }
         $fh->print("$depth</fsm>\n");
     }
     elsif ($k eq 'colmap')
     {
         my ($i);
         $fh->print("$depth<colmap>");
-        while (my ($k, $v) = each %{$val})
+        foreach my $k (sort {$a <=> $b} keys %{$val})
         {
             if ($i++ % 8 == 0)
             { $fh->print("\n$depth  "); }
-            $fh->printf(" %d=%d", $k, $v);
+            $fh->printf(" %d=%d", $k, $val->{$k});
         }
         $fh->print("\n$depth</colmap>\n");
     }
+    elsif ($k eq 'constraintCode' or $k eq 'actionCode')
+    {
+        $fh->print("$depth<$k>\n");
+        foreach my $i (0 .. $#{$val})
+        {
+            my (@rules) = $self->unpack_code($val->[$i]);
+            next unless (@rules);
+            $fh->print("$depth  <elem index='$i' code='" . join(" ", unpack('C*', $val->[$i])) . "'>\n");
+            foreach my $r (@rules)
+            { $fh->print("$depth    $r->[0]: ". join(", ", @{$r}[1..$#{$r}]) . "\n"); }
+            $fh->print("$depth  </elem>\n");
+        }
+        $fh->print("$depth</$k>\n");
+    }       
     else
     { return $self->SUPER::XML_element($context, $depth, $k, $val); }
 
