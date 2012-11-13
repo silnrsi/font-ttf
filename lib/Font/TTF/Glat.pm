@@ -38,6 +38,7 @@ sub read
 
     $self->SUPER::read or return $self;
     $gloc->read;
+    $fh->seek($base, 0);
     $fh->read($dat, 4);
     ($self->{'Version'}) = TTF_Unpack('v', $dat);
 
@@ -48,18 +49,23 @@ sub read
         my ($first, $number, @vals);
         $fh->seek($base + $gloc->{'locations'}[$i], 0);
         $fh->read($dat, $num);
-        if ($self->{'Version'} > 1)
+        while ($j < $num)
         {
-            ($first, $number) = unpack("n2", substr($dat, $j, 4));
-            @vals = unpack("n$number", substr($dat, $j + 4, $number * 2));
+            if ($self->{'Version'} > 1)
+            {
+                ($first, $number) = unpack("n2", substr($dat, $j, 4));
+                @vals = unpack("n$number", substr($dat, $j + 4, $number * 2));
+                $j += ($number + 2) * 2;
+            }
+            else
+            {
+                ($first, $number) = unpack("C2", substr($dat, $j, 2));
+                @vals = unpack("n$number", substr($dat, $j + 2, $number * 2));
+                $j += $number * 2 + 2;
+            }
+            for (my $k = 0; $k < $number; $k++)
+            { $self->{'attribs'}[$i]{$first + $k} = $vals[$k]; }
         }
-        else
-        {
-            ($first, $number) = unpack("C2", substr($dat, $j, 2));
-            @vals = unpack("n$number", substr($dat, $j + 2, $number));
-        }
-        for (my $k = 0; $k < $number; $k++)
-        { $self->{'attribs'}[$i]{$first + $k} = $vals[$k]; }
     }
 }
 

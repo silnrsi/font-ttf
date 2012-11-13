@@ -223,7 +223,7 @@ There are maxRulePreContext - minRulePreContext + 1 of these.
 
 =item ruleSortKeys
 
-An array of sort keys one for each rule giving the length of the rule without its precontext.
+An array of sort keys one for each rule giving the length of the rule including its precontext.
 
 =item rulePreContexts
 
