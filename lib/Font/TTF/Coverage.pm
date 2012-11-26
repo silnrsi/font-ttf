@@ -31,6 +31,10 @@ is written out.
 A count of the elements in a coverage table for use with add. Each subsequent
 addition is added with the current count and increments the count.
 
+=item max
+
+Maximum class value in a class table.
+
 =head1 METHODS
 
 =cut
@@ -52,15 +56,16 @@ sub new
     my ($self) = {};
 
     $self->{'cover'} = $isCover;
-    $self->{'count'} = 0;
     if ($isCover)
     {
+        $self->{'count'} = 0;
         my ($v);
         foreach $v (@_)
         { $self->{'val'}{$v} = $self->{'count'}++; }
     }
     else
     {
+        $self->{'max'} = 0;
         $self->{'val'} = {@_};
         foreach (values %{$self->{'val'}}) {$self->{'max'} = $_ if $_ > $self->{'max'}}
     }
@@ -89,6 +94,7 @@ sub read
         {
             $fh->read($dat, $num << 1);
             map {$self->{'val'}{$_} = $i++} unpack("n*", $dat);
+            $self->{'count'} = $num;
         } elsif ($fmt == 2)
         {
             $fh->read($dat, $num * 6);
@@ -97,8 +103,8 @@ sub read
                 ($first, $last, $c) = unpack("n3", substr($dat, $i * 6, 6));
                 map {$self->{'val'}{$_} = $c++} ($first .. $last);
             }
+            $self->{'count'} = $c;
         }
-        $self->{'count'} = $num;
     } elsif ($fmt == 1)
     {
         $fh->read($dat, 2);
@@ -218,8 +224,8 @@ sub out
 
 =head2 $c->add($glyphid[, $class])
 
-Adds a glyph id to the coverage table incrementing the count so that each subsequent addition
-has the next sequential number. Returns the index number of the glyphid added
+Adds a glyph id to the coverage or class table. 
+Returns the index or class number of the glyphid added.
 
 =cut
 
