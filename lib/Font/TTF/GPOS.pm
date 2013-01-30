@@ -170,7 +170,7 @@ Device table for device specific adjustment of vertical advance
 
 =item XIdPlacement
 
-Horizontal placement metric id (for Multiple Master fonts - but that's all I know!)
+Horizontal placement metric id (for Multiple Master fonts - but that is all I know!)
 
 =item YIdPlacement
 
@@ -586,7 +586,7 @@ sub read_value
 
 =head2 $t->read_delta($offset, $base, $lookup, $fh)
 
-Reads a delta (device table) at the given offset if it hasn't already been read.
+Reads a delta (device table) at the given offset if it hasn not already been read.
 Store the offset and item in the lookup cache ($lookup->{' CACHE'})
 
 =cut
@@ -610,7 +610,7 @@ sub read_delta
 
 =head2 $t->read_anchor($offset, $base, $lookup, $fh)
 
-Reads an Anchor table at the given offset if it hasn't already been read.
+Reads an Anchor table at the given offset if it has not already been read.
 
 =cut
 
