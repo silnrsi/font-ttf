@@ -411,6 +411,7 @@ sub read
         }
         foreach $lTag (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
         {
+        	# Make copies of referenced languages for each reference. 
             next unless $l->{$tag}{$lTag}{' REFTAG'};
             $temp = $l->{$tag}{$lTag}{' REFTAG'};
             $l->{$tag}{$lTag} = &copy($l->{$tag}{$temp});
@@ -863,9 +864,8 @@ sub update
 
     # Find my sibling (GSUB or GPOS, depending on which I am)
     my $sibling = ref($self) eq 'Font::TTF::GSUB' ? 'GPOS' : ref($self) eq 'Font::TTF::GPOS' ? 'GSUB' : undef;
-    return $self unless $sibling && exists $self->{' PARENT'}{$sibling};
+    return $self unless $sibling && defined $self->{' PARENT'}{$sibling};
     $sibling = $self->{' PARENT'}{$sibling};
-    next unless defined $sibling;
     
     # Look through scripts defined in sibling:
     for my $sTag (grep {length($_) == 4} keys %{$sibling->{'SCRIPTS'}})
@@ -887,10 +887,11 @@ sub update
             push @{$myScript->{'LANG_TAGS'}}, $lTag;
             $myScript->{$lTag} = { 'FEATURES' => [] };
         }
-        unless (defined $myScript->{'DEFAULT'})
+
+        if (defined $sibScript->{'DEFAULT'} && !defined $myScript->{'DEFAULT'})
         {
-            # Create default lang for this script. Link to 'dflt' if it exists
-            $myScript->{'DEFAULT'} = exists $myScript->{'dflt'} ? {' REFTAG' => 'dflt'} : { 'FEATURES' => [] };
+            # Create default lang for this script.
+            $myScript->{'DEFAULT'} = { 'FEATURES' => [] };
         }
     }
     $self;
