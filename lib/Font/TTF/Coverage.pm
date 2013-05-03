@@ -278,7 +278,7 @@ if (0)
     { vec($vec, $_, $size) = $self->{'val'}{$_} > $range ? $range : $self->{'val'}{$_}; }
     length($vec) . ":" . $vec;
 }
-    $vec = join(";", map{"$_,$self->{'val'}{$_}"} keys %{$self->{'val'}});
+    $vec = join(";", map{"$_,$self->{'val'}{$_}"} sort { $a <=> $b} keys %{$self->{'val'}});
 }
 
 =head2 @map=$c->sort
