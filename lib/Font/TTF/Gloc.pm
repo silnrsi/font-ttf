@@ -39,7 +39,7 @@ sub read
 {
     my ($self) = @_;
     my ($fh) = $self->{' INFILE'};
-    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
+    my ($numGlyphs);
     my ($dat, $flags);
 
     $self->SUPER::read or return $self;
@@ -47,6 +47,8 @@ sub read
     ($self->{'Version'}) = TTF_Unpack("v", $dat);
     $fh->read($dat, 4);
     ($flags, $self->{'numAttrib'}) = TTF_Unpack("SS", $dat);
+    $numGlyphs = ($self->{' LENGTH'} - 8 - ($flags & 2 ? $self->{'numAttrib'} * 2 : 0)) / (($flags & 1) ? 4 : 2) - 1;
+    $self->{'numGlyphs'} = $numGlyphs;
     if ($flags & 1)
     {
         $fh->read($dat, 4 * ($numGlyphs + 1));

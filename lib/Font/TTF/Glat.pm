@@ -32,12 +32,13 @@ sub read
     my ($self) = @_;
     my ($gloc) = $self->{' PARENT'}{'Gloc'};
     my ($fh) = $self->{' INFILE'};
-    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
+    my ($numGlyphs);
     my ($base) = $self->{' OFFSET'};
     my ($dat, $i);
 
     $self->SUPER::read or return $self;
     $gloc->read;
+    $numGlyphs = $gloc->{'numGlyphs'};
     $fh->seek($base, 0);
     $fh->read($dat, 4);
     ($self->{'Version'}) = TTF_Unpack('v', $dat);
