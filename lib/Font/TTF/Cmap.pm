@@ -181,11 +181,11 @@ sub read
                     else
                     { $id = unpack("n", substr($dat, ($j << 1) + $num * 6 +
                                         2 + ($k - $start) * 2 + $range, 2)) + $delta; }
-                            $id -= 65536 if $id >= 65536;
+                    $id -= 65536 if $id >= 65536;
                     $s->{'val'}{$k} = $id if ($id);
                 }
             }
-        } elsif ($form == 8 || $form == 12)
+        } elsif ($form == 8 || $form == 12 || $form == 13)
         {
             $fh->read($dat, 10);
             ($len, $s->{'Ver'}) = unpack('x2N2', $dat);
@@ -203,7 +203,7 @@ sub read
             {
                 ($start, $end, $sg) = unpack("N3", substr($dat, $j * 12, 12));
                 for ($k = $start; $k <= $end; $k++)
-                { $s->{'val'}{$k} = $sg++; }
+                { $s->{'val'}{$k} = $form == 13 ? $sg : $sg++; }
             }
         } elsif ($form == 10)
         {
@@ -468,7 +468,7 @@ sub out
                 next if ($range[$j] == 0);
                 $fh->print(pack("n*", map {$_ || 0} @{$s->{'val'}}{$starts[$j] .. $ends[$j]}));
             }
-        } elsif ($s->{'Format'} == 8 || $s->{'Format'} == 12)
+        } elsif ($s->{'Format'} == 8 || $s->{'Format'} == 12 || $s->{'Format'} == 13)
         {
             my (@jobs, $start, $current, $curr_glyf, $map);
             
@@ -476,21 +476,21 @@ sub out
             $map = "\000" x 8192;
             foreach $j (@keys)
             {
-                if ($j > 0xFFFF)
+                if ($j > 0xFFFF && $s->{'Format'} == 8)
                 {
                     if (defined $s->{'val'}{$j >> 16})
                     { $s->{'Format'} = 12; }
                     vec($map, $j >> 16, 1) = 1;
                 }
-                if ($j != $current + 1 || $s->{'val'}{$j} != $curr_glyf + 1)
+                if ($j != $current + 1 || $s->{'val'}{$j} != ($s->{'Format'} == 13 ? $curr_glyf : $curr_glyf + 1))
                 {
-                    push (@jobs, [$start, $current, $curr_glyf - ($current - $start)]) if (defined $start);
+                    push (@jobs, [$start, $current, $s->{'Format'} == 13 ? $curr_glyf : $curr_glyf - ($current - $start)]) if (defined $start);
                     $start = $j; $current = $j; $curr_glyf = $s->{'val'}{$j};
                 }
                 $current = $j;
                 $curr_glyf = $s->{'val'}{$j};
             }
-            push (@jobs, [$start, $current, $curr_glyf - ($current - $start)]) if (defined $start);
+            push (@jobs, [$start, $current, $s->{'Format'} == 13 ? $curr_glyf : $curr_glyf - ($current - $start)]) if (defined $start);
             $fh->print($map) if ($s->{'Format'} == 8);
             $fh->print(pack('N', $#jobs + 1));
             foreach $j (@jobs)
@@ -644,7 +644,7 @@ sub is_unicode
 
 =item *
 
-No support for format 2 tables (MBCS)
+Format 4 cmaps can grow larger than 65k bytes resulting in corrupt font.
 
 =back
 
