@@ -161,7 +161,7 @@ sub out
         }
     }
 #    if ($self->{'cover'})
-    { $fmt = 2 if ($eff / $grp > 3); }
+    { $fmt = 2 if ($eff / $grp > 3 || scalar (@gids) == 0); }
 #    else
 #    { $fmt = 2 if ($grp > 1); }
     
@@ -205,9 +205,12 @@ sub out
             $end++;
             $num++;
         }
-        &$shipout(pack("n3", $gids[$start], $gids[$end],
-                $self->{'val'}{$gids[$start]}));
-        $num++;
+        if (scalar(@gids))
+        {
+	        &$shipout(pack("n3", $gids[$start], $gids[$end],
+	                $self->{'val'}{$gids[$start]}));
+	        $num++;
+	    }
         if ($state)
         { substr($out, 2, 2) = pack('n', $num); }
         else
