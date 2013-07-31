@@ -159,11 +159,15 @@ sub read_subtable
     ($t->{'Version'}, $len, $cov) = unpack("n3", $dat);
     $t->{'coverage'} = $cov & 255;
     $t->{'type'} = $cov >> 8;
-    $fh->read($dat, $len - 6);
     if ($t->{'Version'} == 0)
     {
+    	# NB: Cambria is an example of a font that plays an unsual trick: The
+    	# kern table is much larger than can be represented by the header $len
+    	# would allow. So we use the number of pairs to figure out how much to read. 
+        $fh->read($dat, 8);
         $t->{'Num'} = unpack("n", $dat);
-        my (@vals) = unpack("n*", substr($dat, 8, $t->{'Num'} * 6));
+        $fh->read($dat, $t->{'Num'} * 6);
+        my (@vals) = unpack("n*", $dat);
         for (0 .. ($t->{'Num'} - 1))
         {
             my ($f, $l, $v);
@@ -177,6 +181,7 @@ sub read_subtable
     {
         my ($wid, $off, $numg, $maxl, $maxr, $j);
         
+        $fh->read($dat, $len - 6);
         $wid = unpack("n", $dat);
         $off = unpack("n", substr($dat, 2));
         ($t->{'left_first'}, $numg) = unpack("n2", substr($dat, $off));
