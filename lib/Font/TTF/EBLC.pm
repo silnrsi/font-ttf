@@ -12,33 +12,50 @@ glyph bitmap data in indexSubTables for EBDT.
 Possibly contains glyph metrics information.
 
 =head1 INSTANCE VARIABLES
+
 The information specified 'B<(R)>ead only' is read only, those
 are calculated from EBDT, when it is 'update'-ed.
 
 =over 4
 
 =item bitmapSizeTable
+
 An array of tables of following information
 
 =over 8
+
 =item indexSubTableArrayOffset (R)
+
 =item indexTablesSize (R)
+
 =item numberOfIndexSubTables (R)
+
 =item colorRef
+
 =item hori
+
 =item vert
+
 =item startGlyphIndex (R)
+
 =item endGlyphIndex (R)
+
 =item ppemX
+
 =item ppemY
+
 =item bitDepth
+
 =item flags
+
 =back
 
 =item indexSubTableArray (R)
+
 An array which contains range information.
 
 =item indexSubTable (R)
+
 An array which contains offsets of EBDT table.
 
 =back
@@ -63,6 +80,7 @@ Reads the location information of embedded bitmap from the TTF file into memory
 sub read
 {
     my ($self) = @_;
+
     $self->SUPER::read or return $self;
 
     my ($fh) = $self->{' INFILE'};
@@ -168,6 +186,9 @@ sub out
 {
     my ($self, $fh) = @_;
     my ($i);
+
+    return $self->SUPER::out($fh) unless $self->{' read'};
+
     my ($bst_array) = $self->{'bitmapSizeTable'};
 
     $fh->print(pack("N", 0x00020000));

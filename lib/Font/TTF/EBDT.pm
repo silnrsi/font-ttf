@@ -19,16 +19,27 @@ of metric information and image data.
 =item bitmap object
 
 =over 8
+
 =item format
+
 Only 7 is supported.
+
 =item height
+
 =item width
+
 =item horiBearingX
+
 =item horiBearingY
+
 =item horiAdvance
+
 =item vertBearingX
+
 =item vertBearingY
+
 =item vertAdvance
+
 =item imageData
 
 =back
@@ -241,6 +252,9 @@ Outputs the bitmap data of embedded bitmap for this font.
 sub out
 {
     my ($self, $fh) = @_;
+
+    return $self->SUPER::out($fh) unless $self->{' read'};
+
     my ($eblc) = $self->{' PARENT'}->{'EBLC'};
     my ($i);
     my ($bitmap_array) = $self->{'bitmap'};
