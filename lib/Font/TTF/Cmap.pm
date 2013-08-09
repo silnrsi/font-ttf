@@ -682,7 +682,7 @@ sub is_unicode
 
 =item *
 
-Format 4 cmaps can grow larger than 65k bytes resulting in corrupt font.
+Format 14 (Unicode Variation Sequences) cmaps are not supported.
 
 =back
 

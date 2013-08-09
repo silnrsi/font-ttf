@@ -235,6 +235,10 @@ sub out_sub
     $out;
 }
 
+=head1 BUGS
+
+Does not yet support lookup type 8 (Reverse Chaining Contextual Single Substitution)
+
 =head1 AUTHOR
 
 Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
