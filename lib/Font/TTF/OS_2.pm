@@ -420,12 +420,12 @@ sub guessRangeBits
             {
                 $u = $codepages[$j][$_];
                 next if $u == 0xFFFD;   # Ignore undefined things in codepage
-                next if $j > 0 && $u == $codepages[0][$j];  # also ignore if same as cp1252
+                next if $j > 0 && $u == $codepages[0][$_];  # also ignore if same as cp1252
                 $total++;
                 $present++ if exists $ucmap->{$u} && $ucmap->{$u} > 0;
             }
-            #printf STDERR "DBG: Got $present / $total (%0.3f%%) in codepages $j\n", $present * 100 / $total;
-            #print STDERR "DBG: setting $codepages[$j]\n" if ($count * 100 / scalar(@range)) >= $threshold;
+            #printf STDERR "DBG: Got $present / $total (%0.3f%%) in codepage bit $j\n", $present * 100 / $total;
+            #print STDERR "DBG: setting bit $j\n" if $cp_threshold == 0 ? ($present > 0) : (($present * 100 / $total) >= $cp_threshold);
             vec($cpr, $j, 1) = 1 if $cp_threshold == 0 ? ($present > 0) : (($present * 100 / $total) >= $cp_threshold);
             #print STDERR "\n";
         }
