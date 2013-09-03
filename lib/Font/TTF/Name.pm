@@ -165,7 +165,8 @@ sub out
 {
     my ($self, $fh) = @_;
     my ($pid, $eid, $lid, $nid, $todo, @todo);
-    my ($len, $offset, $loc, $stroff, $endloc, $str_trans);
+    my ($len, $loc, $stroff, $endloc, $str_trans);
+    my (%dedup, @strings, @offsets, $strcount);
 
     return $self->SUPER::out($fh) unless $self->{' read'};
 
@@ -195,21 +196,25 @@ sub out
                         elsif ($pid == 0 || $pid == 3 || ($pid == 2 && $eid == 1))
                         { $str_trans = TTF_utf8_word($str_trans); }
                     }
-                    push (@todo, [$pid, $eid, $lid, $nid, $str_trans]);
+                    my ($str_ind);
+                    unless (defined $dedup{$str_trans})
+                    {
+                        $dedup{$str_trans} = $strcount;
+                        $strings[$strcount] = $str_trans;
+                        $strcount++;
+                        $offsets[$strcount] = $offsets[$strcount-1] + len($str_trans);
+                    }
+                    $str_ind = $dedup{$str_trans};
+                    push (@todo, [$pid, $eid, $lid, $nid, $str_ind]);
                 }
             }
         }
     }
 
-    $offset = 0;
     @todo = (sort {$a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] || $a->[2] <=> $b->[2]
             || $a->[3] <=> $b->[3]} @todo);
     foreach $todo (@todo)
-    {
-        $len = length($todo->[4]);
-        $fh->print(pack("n6", @{$todo}[0..3], $len, $offset));
-        $offset += $len;
-    }
+    { $fh->print(pack("n6", @{$todo}[0..3], $offsets[$todo->[4]+1] - $offsets[$todo->[4]], $todo->[4])); }
     
     $stroff = $fh->tell() - $loc;
     foreach $todo (@todo)
