@@ -170,6 +170,8 @@ sub out
 
     return $self->SUPER::out($fh) unless $self->{' read'};
 
+    $strcount = 0;
+    $offsets[0] = 0;
     $loc = $fh->tell();
     $fh->print(pack("n3", 0, 0, 0));
     foreach $nid (0 .. $#{$self->{'strings'}})
@@ -199,10 +201,11 @@ sub out
                     my ($str_ind);
                     unless (defined $dedup{$str_trans})
                     {
+                        use bytes;
                         $dedup{$str_trans} = $strcount;
                         $strings[$strcount] = $str_trans;
                         $strcount++;
-                        $offsets[$strcount] = $offsets[$strcount-1] + len($str_trans);
+                        $offsets[$strcount] = $offsets[$strcount-1] + bytes::length($str_trans);
                     }
                     $str_ind = $dedup{$str_trans};
                     push (@todo, [$pid, $eid, $lid, $nid, $str_ind]);
@@ -214,11 +217,11 @@ sub out
     @todo = (sort {$a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] || $a->[2] <=> $b->[2]
             || $a->[3] <=> $b->[3]} @todo);
     foreach $todo (@todo)
-    { $fh->print(pack("n6", @{$todo}[0..3], $offsets[$todo->[4]+1] - $offsets[$todo->[4]], $todo->[4])); }
+    { $fh->print(pack("n6", @{$todo}[0..3], $offsets[$todo->[4]+1] - $offsets[$todo->[4]], $offsets[$todo->[4]])); }
     
     $stroff = $fh->tell() - $loc;
-    foreach $todo (@todo)
-    { $fh->print($todo->[4]); }
+    foreach my $str (@strings)
+    { $fh->print($str); }
 
     $endloc = $fh->tell();
     $fh->seek($loc, 0);
