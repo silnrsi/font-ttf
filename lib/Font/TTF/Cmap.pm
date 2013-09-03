@@ -253,7 +253,7 @@ sub find_ms
         if ($s->{'Platform'} == 3)
         {
             $self->{' mstable'} = $s;
-            last if ($s->{'Encoding'} == 10);
+            return $s if ($s->{'Encoding'} == 10);
             $found = 1 if ($s->{'Encoding'} == 1);
         } elsif ($s->{'Platform'} == 0 || ($s->{'Platform'} == 2 && $s->{'Encoding'} == 1))
         { $alt = $s; }

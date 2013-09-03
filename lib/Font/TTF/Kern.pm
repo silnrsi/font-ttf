@@ -185,7 +185,7 @@ sub read_subtable
         $wid = unpack("n", $dat);
         $off = unpack("n", substr($dat, 2));
         ($t->{'left_first'}, $numg) = unpack("n2", substr($dat, $off));
-        $t->{'left'} = [unpack("C$numg", substr($dat, $off + 4))];
+        $t->{'left'} = [unpack("n$numg", substr($dat, $off + 4))];
         foreach (@{$t->{'left'}})
         {
             $_ /= $wid;
@@ -195,7 +195,7 @@ sub read_subtable
 
         $off = unpack("n", substr($dat, 4));
         ($t->{'right_first'}, $numg) = unpack("n2", substr($dat, $off));
-        $t->{'right'} = [unpack("C$numg", substr($dat, $off + 4))];
+        $t->{'right'} = [unpack("n$numg", substr($dat, $off + 4))];
         foreach (@{$t->{'right'}})
         {
             $_ >>= 1;
