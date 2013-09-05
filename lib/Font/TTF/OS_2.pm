@@ -407,7 +407,6 @@ sub guessRangeBits
 
     if ($cp_threshold >= 0)
     {
-        my (@range) = (0xC0 .. 0xFF);   # Range of chars we're going to look at
         my $cpr;    # codepage range vector
         $cp_threshold = 100 if $cp_threshold > 100;
         vec($cpr, 63 ,1) = 0;   # Get all 64 bits into the vector
@@ -416,11 +415,13 @@ sub guessRangeBits
             # Count the number of chars from @range part of codepage that are present in the font
             my $present = 0;
             my $total = 0;
-            foreach (@range)
+            foreach (0x20 .. 0xFF)
             {
                 $u = $codepages[$j][$_];
                 next if $u == 0xFFFD;   # Ignore undefined things in codepage
-                next if $j > 0 && $u == $codepages[0][$_];  # also ignore if same as cp1252
+                # For codepage 1252, ignore upper ansi altogether
+                # For other codepages, ignore characters that are same as in 1252.
+                next if $j > 0 ? $u == $codepages[0][$_] : $u > 0x007F;
                 $total++;
                 $present++ if exists $ucmap->{$u} && $ucmap->{$u} > 0;
             }
