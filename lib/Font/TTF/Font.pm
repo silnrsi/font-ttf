@@ -355,89 +355,89 @@ sub read
     my ($self) = @_;
     my ($fh) = $self->{' INFILE'};
     my ($dat, $i, $ver, $dir_num, $type, $name, $check, $off, $len, $t);
-    my ($iswoff, $woffLength, $sfntSize, $zlen);	# needed for WOFF files
+    my ($iswoff, $woffLength, $sfntSize, $zlen);    # needed for WOFF files
 
     $fh->seek($self->{' OFFSET'}, 0);
     $fh->read($dat, 4);
     $ver = unpack("N", $dat);
     $iswoff = ($ver == unpack('N', 'wOFF'));
-	if ($iswoff)
-	{
-		require Font::TTF::Woff;
-		my $woff = Font::TTF::Woff->new(PARENT  => $self);
-		$fh->read($dat, 32);
-		($ver, $woffLength, $dir_num, undef, $sfntSize, $woff->{'majorVersion'}, $woff->{'minorVersion'}, 
-		    $off, $zlen, $len) = unpack('NNnnNnnNNN', $dat);
-		# TODO: According to WOFF spec we should verify $woffLength and $sfntSize, and fail if the values are wrong.
-		if ($off)
-		{
-			# Font has metadata
-			if ($off + $zlen > $woffLength)
-			{
-				warn "invalid WOFF header in $self->{' fname'}: meta data beyond end.";
-				return undef;
-			}
-			require Font::TTF::Woff::MetaData;
-			$woff->{'metaData'} = Font::TTF::Woff::MetaData->new(
-				PARENT     => $woff,
-				INFILE     => $fh,
-	            OFFSET     => $off,
-	            LENGTH     => $len,
-	            ZLENGTH    => $zlen);
-	    }
-			
-		$fh->read($dat, 8);
-		($off, $len) = unpack('NN', $dat);
-		if ($off)
-		{
-			# Font has private data
-			if ($off + $len > $woffLength)
-			{
-				warn "invalid WOFF header in $self->{' fname'}: private data beyond end.";
-				return undef;
-			}
-			require Font::TTF::Woff::PrivateData;
-			$woff->{'privateData'} = Font::TTF::Woff::PrivateData->new(
-				PARENT     => $woff,
-				INFILE     => $fh,
-	            OFFSET     => $off,
-	            LENGTH     => $len);
-	    } 
-		
-		$self->{' WOFF'} = $woff;
-	}
-	else
-	{
-		$fh->read($dat, 8);
-	    $dir_num = unpack("n", $dat);
-	}
-	
-    $ver == 1 << 16 				# TrueType outlines
-    || $ver == unpack('N', 'OTTO') 	# 0x4F54544F CFF outlines
-    || $ver == unpack('N', 'true')	# 0x74727565 Mac sfnts
-    or return undef;  			# else unrecognized type
+    if ($iswoff)
+    {
+        require Font::TTF::Woff;
+        my $woff = Font::TTF::Woff->new(PARENT  => $self);
+        $fh->read($dat, 32);
+        ($ver, $woffLength, $dir_num, undef, $sfntSize, $woff->{'majorVersion'}, $woff->{'minorVersion'}, 
+            $off, $zlen, $len) = unpack('NNnnNnnNNN', $dat);
+        # TODO: According to WOFF spec we should verify $woffLength and $sfntSize, and fail if the values are wrong.
+        if ($off)
+        {
+            # Font has metadata
+            if ($off + $zlen > $woffLength)
+            {
+                warn "invalid WOFF header in $self->{' fname'}: meta data beyond end.";
+                return undef;
+            }
+            require Font::TTF::Woff::MetaData;
+            $woff->{'metaData'} = Font::TTF::Woff::MetaData->new(
+                PARENT     => $woff,
+                INFILE     => $fh,
+                OFFSET     => $off,
+                LENGTH     => $len,
+                ZLENGTH    => $zlen);
+        }
+            
+        $fh->read($dat, 8);
+        ($off, $len) = unpack('NN', $dat);
+        if ($off)
+        {
+            # Font has private data
+            if ($off + $len > $woffLength)
+            {
+                warn "invalid WOFF header in $self->{' fname'}: private data beyond end.";
+                return undef;
+            }
+            require Font::TTF::Woff::PrivateData;
+            $woff->{'privateData'} = Font::TTF::Woff::PrivateData->new(
+                PARENT     => $woff,
+                INFILE     => $fh,
+                OFFSET     => $off,
+                LENGTH     => $len);
+        } 
+        
+        $self->{' WOFF'} = $woff;
+    }
+    else
+    {
+        $fh->read($dat, 8);
+        $dir_num = unpack("n", $dat);
+    }
+    
+    $ver == 1 << 16                 # TrueType outlines
+    || $ver == unpack('N', 'OTTO')  # 0x4F54544F CFF outlines
+    || $ver == unpack('N', 'true')  # 0x74727565 Mac sfnts
+    or return undef;            # else unrecognized type
     
     
     for ($i = 0; $i < $dir_num; $i++)
     {
-    	$fh->read($dat, $iswoff ? 20 : 16) || die "Reading table entry";
-    	if ($iswoff)
-    	{
-    		($name, $off, $zlen, $len, $check) = unpack("a4NNNN", $dat);
-    		if ($off + $zlen > $woffLength || $zlen > $len)
-			{
-				my $err;
-				$err = "Offset + compressed length > total length. " if $off + $zlen > $woffLength;
-				$err = "Compressed length > uncompressed length. " if $zlen > $len;
-				warn "invalid WOFF '$name' table in $self->{' fname'}: $err\n";
-				return undef;
-			}
-    	}
-    	else
-    	{
-    		($name, $check, $off, $len) = unpack("a4NNN", $dat);
-    		$zlen = $len;
-    	}
+        $fh->read($dat, $iswoff ? 20 : 16) || die "Reading table entry";
+        if ($iswoff)
+        {
+            ($name, $off, $zlen, $len, $check) = unpack("a4NNNN", $dat);
+            if ($off + $zlen > $woffLength || $zlen > $len)
+            {
+                my $err;
+                $err = "Offset + compressed length > total length. " if $off + $zlen > $woffLength;
+                $err = "Compressed length > uncompressed length. " if $zlen > $len;
+                warn "invalid WOFF '$name' table in $self->{' fname'}: $err\n";
+                return undef;
+            }
+        }
+        else
+        {
+            ($name, $check, $off, $len) = unpack("a4NNN", $dat);
+            $zlen = $len;
+        }
         $self->{$name} = $self->{' PARENT'}->find($self, $name, $check, $off, $len) && next
                 if (defined $self->{' PARENT'});
         $type = $tables{$name} || 'Font::TTF::Table';
@@ -487,7 +487,7 @@ sub out
     my (%dir, $k, $mloc, $count);
     my ($csum, $lsum, $msum, $loc, $oldloc, $len, $shift);
 
-    my ($iswoff); # , $woffLength, $sfntSize, $zlen);	# needed for WOFF files
+    my ($iswoff); # , $woffLength, $sfntSize, $zlen);   # needed for WOFF files
 
     unless (ref($fname))
     {
@@ -521,11 +521,11 @@ sub out
     }
     else
     {
-	    ($numTables, $sRange, $eSel, $shift) = Font::TTF::Utils::TTF_bininfo($numTables, 16);
-	    $dat = pack("Nnnnn", 1 << 16, $numTables, $sRange, $eSel, $shift);
-	    $fh->print($dat);
-	    $msum = unpack("%32N*", $dat);
-	}
+        ($numTables, $sRange, $eSel, $shift) = Font::TTF::Utils::TTF_bininfo($numTables, 16);
+        $dat = pack("Nnnnn", 1 << 16, $numTables, $sRange, $eSel, $shift);
+        $fh->print($dat);
+        $msum = unpack("%32N*", $dat);
+    }
 
 # reserve place holders for each directory entry
     foreach $k (@tlist)
@@ -547,51 +547,51 @@ sub out
     {
         $oldloc = $loc;
         if ($iswoff && $havezlib &&
-        	# output font is WOFF -- should we try to compress this table?
-        	exists ($self->{$k}->{' nocompress'}) ? $self->{$k}->{' nocompress'} != -1 :
-        	ref($self->{' nocompress'}) eq 'ARRAY' ? !exists($self->{' nocompress'}{$k}) :
-        	ref($self->{' nocompress'}) eq 'SCALAR' && $self->{' nocompress'} != -1)
+            # output font is WOFF -- should we try to compress this table?
+            exists ($self->{$k}->{' nocompress'}) ? $self->{$k}->{' nocompress'} != -1 :
+            ref($self->{' nocompress'}) eq 'ARRAY' ? !exists($self->{' nocompress'}{$k}) :
+            ref($self->{' nocompress'}) eq 'SCALAR' && $self->{' nocompress'} != -1)
         {
-        	# Yes -- we may want to compress this table.
-        	# Create string file handle to hold uncompressed table
-        	my $dat;
-        	my $fh2 = IO::String->new($dat);
-        	binmode $fh2;
-        	$self->{$k}->out($fh2);
-        	$len = $fh2->tell();
-        	close $fh2;
-        	
-        	# Is table long enough to try compression?
-        	unless (
-        		exists ($self->{$k}->{' nocompress'}) && $len <= $self->{$k}->{' nocompress'} ||
-        		ref($self->{' nocompress'}) eq 'SCALAR' && $len <= $self->{' nocompress'})
-        	{
-	        	# Yes -- so compress and check lengths:
-	        	my $zdat = Compress::Zlib::compress($dat);
-	        	my $zlen = bytes::length($zdat);
-	        	if ($zlen < $len)
-	        	{
-	        		# write the compressed $zdat
-	        		
-	        	}
-	        	else
-	        	{
-	        		# write the uncompressed $dat
-	        	}
-	        }
-	        else
-	        {
-	        	# write uncompressed $dat
-	        }
-        	
-        	
+            # Yes -- we may want to compress this table.
+            # Create string file handle to hold uncompressed table
+            my $dat;
+            my $fh2 = IO::String->new($dat);
+            binmode $fh2;
+            $self->{$k}->out($fh2);
+            $len = $fh2->tell();
+            close $fh2;
+            
+            # Is table long enough to try compression?
+            unless (
+                exists ($self->{$k}->{' nocompress'}) && $len <= $self->{$k}->{' nocompress'} ||
+                ref($self->{' nocompress'}) eq 'SCALAR' && $len <= $self->{' nocompress'})
+            {
+                # Yes -- so compress and check lengths:
+                my $zdat = Compress::Zlib::compress($dat);
+                my $zlen = bytes::length($zdat);
+                if ($zlen < $len)
+                {
+                    # write the compressed $zdat
+                    
+                }
+                else
+                {
+                    # write the uncompressed $dat
+                }
+            }
+            else
+            {
+                # write uncompressed $dat
+            }
+            
+            
         }
         else
         {
-        	# Output table normally
-        	$self->{$k}->out($fh);
-        	$loc = $fh->tell();
-        	$len = $loc - $oldloc;
+            # Output table normally
+            $self->{$k}->out($fh);
+            $loc = $fh->tell();
+            $len = $loc - $oldloc;
         }
         if ($loc & 3)
         {
