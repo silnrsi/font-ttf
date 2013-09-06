@@ -117,6 +117,19 @@ sub out
 }
 
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 54;
+}
+
+
 =head2 $t->XML_element($context, $depth, $key, $value)
 
 Handles date process for the XML exporter

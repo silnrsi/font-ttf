@@ -1,6 +1,7 @@
 package Font::TTF;
 
-$VERSION = '1.02';    # MJPH    30-Aug-2012      Fix case typo in Useall
+$VERSION = '1.03';    # MJPH     5-Sep-2013      Add $t->minsize()
+# $VERSION = '1.02';    # MJPH    30-Aug-2012      Fix case typo in Useall
 # $VERSION = '1.01';    # MJPH    30-Aug-2012      add IO::String prerequisite
 # $VERSION = '1.00';    # MJPH    21-Aug-2012      OS/2, OT & Graphite improvements; bug fixes
 # $VERSION = '0.48';    # MJPH    15-DEC-2010      Bug fixes

@@ -83,5 +83,17 @@ sub out
     { $fh->write(pack("n$num", @{$self->{'names'}})); }
 }
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 8;
+}
+
 1;
 

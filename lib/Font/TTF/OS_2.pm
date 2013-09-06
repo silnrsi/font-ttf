@@ -236,6 +236,18 @@ sub XML_end
     { return $self->SUPER::XML_end(@_); }
 }
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 78;
+}
+
 =head2 $t->update
 
 Updates the OS/2 table by getting information from other sources:

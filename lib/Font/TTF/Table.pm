@@ -287,6 +287,18 @@ sub XML_end
 }
     
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 0;
+}
+
 =head2 $t->dirty($val)
 
 This sets the dirty flag to the given value or 1 if no given value. It returns the

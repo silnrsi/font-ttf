@@ -67,6 +67,18 @@ sub out
     }
 }
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 8;
+}
+
 =head2 $t->print($fh)
 
 Prints a human-readable representation of the table

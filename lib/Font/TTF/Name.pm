@@ -291,6 +291,18 @@ sub XML_end
     { return $self->SUPER::XML_end(@_); }
 }
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 6;
+}
+
 =head2 is_utf8($pid, $eid)
 
 Returns whether a string of a given platform and encoding is going to be in UTF8

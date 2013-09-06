@@ -106,6 +106,18 @@ sub out
     $fh->print(TTF_Out_Fields($self, \%fields, 54));
 }
 
+=head2 $t->minsize()
+
+Returns the minimum size this table can be. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 54;
+}
+
 1;
 
 =head1 BUGS

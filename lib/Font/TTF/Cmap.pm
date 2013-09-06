@@ -579,6 +579,20 @@ sub XML_element
     $self;
 }
 
+
+=head2 $t->minsize()
+
+Returns the minimum size this table can be in bytes. If it is smaller than this, then the table
+must be bad and should be deleted or whatever.
+
+=cut
+
+sub minsize
+{
+    return 4;
+}
+
+
 =head2 $t->update
 
 Tidies the cmap table.
