@@ -225,7 +225,7 @@ Output a particular element based on its contents.
 
 sub XML_element
 {
-    my ($self, $context, $depth, $k, $dat) = @_;
+    my ($self, $context, $depth, $k, $dat, $ind) = @_;
     my ($fh) = $context->{'fh'};
     my ($ndepth, $d);
 
@@ -237,15 +237,19 @@ sub XML_element
         return $self;
     }
 
-    $fh->printf("%s<%s>\n", $depth, $k);
+    if ($ind)
+    { $fh->printf("%s<%s i='%d'>\n", $depth, $k, $ind); }
+    else
+    { $fh->printf("%s<%s>\n", $depth, $k); }
     $ndepth = $depth . $context->{'indent'};
 
     if (ref($dat) eq 'SCALAR')
     { $self->XML_element($context, $ndepth, 'scalar', $$dat); }
     elsif (ref($dat) eq 'ARRAY')
     {
+        my ($c) = 1;
         foreach $d (@{$dat})
-        { $self->XML_element($context, $ndepth, 'elem', $d); }
+        { $self->XML_element($context, $ndepth, 'elem', $d, $c++); }
     }
     elsif (ref($dat) eq 'HASH')
     {

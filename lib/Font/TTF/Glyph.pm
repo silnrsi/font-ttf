@@ -425,12 +425,12 @@ sub out_xml
 
     if ($context->{'addresses'}{$addr})
     {
-        $context->{'fh'}->printf("%s<glyph gid='%s' id_ref='%s'/>\n", $depth, $context->{'gid'}, $addr);
+        $context->{'fh'}->printf("%s<glyph gid='%s' id_ref='%s'/>\n", $depth, $context->{'gid'}, $context->{'addresses'}{$addr});
         return $self;
     }
     else
     {
-        $context->{'fh'}->printf("%s<glyph gid='%s' id='%s'>\n", $depth, $context->{'gid'}, $addr);
+        $context->{'fh'}->printf("%s<glyph gid='%s'>\n", $depth, $context->{'gid'});
     }
     
     $ndepth = $depth . $context->{'indent'};

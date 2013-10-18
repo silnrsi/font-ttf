@@ -193,7 +193,7 @@ sub out_xml
     $self->read;
 
     for ($i = 0; $i < $numg; $i++)
-    { $fh->print("$depth$context->{'indent'}<width adv='$self->{'advance'}[$i]' lsb='$self->{'lsb'}[$i]'/>\n"); }
+    { $fh->print("$depth$context->{'indent'}<width gid='$i' adv='$self->{'advance'}[$i]' lsb='$self->{'lsb'}[$i]'/>\n"); }
 
     $fh->print("$depth</$context->{'name'}>\n");
     $self;

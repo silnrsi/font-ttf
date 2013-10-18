@@ -70,7 +70,7 @@ sub read
 sub out
 {
     my ($self, $fh) = @_;
-    my ($numGlyphs) = $self->{' PARENT'}{'maxp'}{'numGlyphs'};
+    my ($numGlyphs) = scalar @{$self->{' PARENT'}{'Glat'}{'attribs'}};
     my ($flags, $num);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
