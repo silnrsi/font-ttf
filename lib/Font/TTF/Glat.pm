@@ -74,11 +74,12 @@ sub out
 {
     my ($self, $fh) = @_;
     my ($gloc) = $self->{' PARENT'}{'Gloc'};
-    my ($numGlyphs) = scalar @{$self->{'attribs'}};
+    my ($numGlyphs) = 0;
     my ($base) = $fh->tell();
     my ($i, $type);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
+    $numGlyphs = scalar @{$self->{'attribs'}};
     if ($gloc->{'numAttrib'} > 256)
     {
         $self->{'Version'} = 2;

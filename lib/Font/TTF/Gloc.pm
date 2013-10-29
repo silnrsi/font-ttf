@@ -70,10 +70,11 @@ sub read
 sub out
 {
     my ($self, $fh) = @_;
-    my ($numGlyphs) = scalar @{$self->{' PARENT'}{'Glat'}{'attribs'}};
+    my ($numGlyphs) = 0;
     my ($flags, $num);
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
+    $numGlyphs = scalar @{$self->{' PARENT'}{'Glat'}{'attribs'}};
     $num = $self->{'numAttrib'};
     $flags = 1 if ($self->{'locations'}[-1] > 0xFFFF);
     $flags |= 2 if ($self->{'names'});
