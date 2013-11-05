@@ -1202,6 +1202,11 @@ sub readtagsfile
     return 1;	
 }
 
-
-
 1;
+
+=head1 AUTHOR
+
+Bob Hallissy. See L<Font::TTF::Font> for copyright and
+licensing.
+
+=cut

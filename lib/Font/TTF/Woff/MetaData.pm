@@ -22,5 +22,10 @@ require Font::TTF::Table;
 @ISA = qw(Font::TTF::Table);
 
 1;
-        
-        
+
+=head1 AUTHOR
+
+Bob Hallissy. See L<Font::TTF::Font> for copyright and
+licensing.
+
+=cut

@@ -6,7 +6,7 @@ Font::TTF::Dumper - Debug dump of a font datastructure, avoiding recursion on ' 
 
 =head1 SYNOPSIS
 
-    Font::TTF::Dumper;
+    use Font::TTF::Dumper;
     
     # Print a table from the font structure:
     print ttfdump($font->{$tag});
@@ -72,8 +72,10 @@ sub myfilter
 
 1;
 
-=head1 See also
 
-L<Font::TTF::Font>
+=head1 AUTHOR
+
+Bob Hallissy. See L<Font::TTF::Font> for copyright and
+licensing.
 
 =cut

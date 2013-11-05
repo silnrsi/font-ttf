@@ -1,3 +1,12 @@
+1.03
+
+* Add $t->minsize() to all tables for assisting with font subsetting
+* Add deduping to Name table writing
+* Add OS/2 table method to guess at Unicode and Codepage range bits.
+* Add support for cmap format 13 subtables
+* Expunge notion of 'dflt' language tag from Ttopen.pm
+* Bug fixes
+
 1.02  (r862, 2012-08-30)
 
 * Fix typo in Useall to get case right
@@ -43,3 +52,5 @@
 * tidy up 0.44 package, fix README to be more accurate
 * tests failing on perl 5.8.2 and before due to no use Exporter qw(import);
   Fix OTTags accordingly.
+
+Some previous changes documented in lib/Font/TTF/Changes.old

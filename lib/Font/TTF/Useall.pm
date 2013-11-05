@@ -1,3 +1,18 @@
+=head1 NAME
+
+Font::TTF::Useall - shortcut to 'use' all the Font::TTF modules
+
+=head1 SYNOPSIS
+
+    use Font::TTF::Useall;
+
+=head1 DESCRIPTION
+
+Useful for debugging, this module simply does a 'use' on all the other
+modules that are part of Font::TTF.
+
+=cut
+
 use Font::TTF::Ttc;
 use Font::TTF::PSNames;
 use Font::TTF::OTTags;
@@ -68,3 +83,10 @@ use Font::TTF::Gloc;
 use Font::TTF::Dumper;
 
 1;
+
+=head1 AUTHOR
+
+Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
+licensing.
+
+=cut

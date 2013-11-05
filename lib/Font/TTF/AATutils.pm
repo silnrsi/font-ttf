@@ -688,3 +688,9 @@ sub AAT_write_lookup
 
 1;
 
+=head1 AUTHOR
+
+Jonathan Kew L<Jonathan_Kew@sil.org>. See L<Font::TTF::Font> for copyright and
+licensing.
+
+=cut

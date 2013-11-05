@@ -28,3 +28,9 @@ Font::TTF - Perl module for TrueType Font hacking
 This module allows you to do almost anything to a TrueType/OpenType Font
 including modify and inspect nearly all tables.
 
+=head1 AUTHOR
+
+Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
+licensing.
+
+=cut

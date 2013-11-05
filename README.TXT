@@ -1,4 +1,4 @@
-Perl Module Font::TTF is Copyright (c) 1998-2012, Martin Hosken (SIL International)
+Perl Module Font::TTF is Copyright (c) 1998-2013 SIL International
 
 =head1 INTRODUCTION
 
@@ -81,6 +81,8 @@ Or using the install feature in tools like WinZip.
 
 =head1 CHANGES
 
+See Changes for an overview of recent changes. 
+
 =head2 Future Changes
 
 I do not anticipate any more restructuring changes (but reserve the right to do so).
@@ -89,7 +91,7 @@ I do not anticipate any more restructuring changes (but reserve the right to do 
 
 Martin Hosken L<Martin_Hosken@sil.org>
 
-Copyright (c) 1998-2012, Martin Hosken (SIL International)
+Copyright (c) 1998-2013 SIL International 
 (see CONTRIBUTORS for other authors).
 
 No warranty or expression of effectiveness for anything, least of all anyone's

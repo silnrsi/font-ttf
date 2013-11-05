@@ -908,7 +908,7 @@ For more details see the appropriate class files.
 
 Martin Hosken L<Martin_Hosken@sil.org>
 
-Copyright (c) 1998-2012, Martin Hosken (SIL International)
+Copyright (c) 1998-2013 SIL International 
 (see CONTRIBUTORS for other authors).
 
 No warranty or expression of effectiveness for anything, least of all anyone's

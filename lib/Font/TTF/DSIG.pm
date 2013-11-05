@@ -62,4 +62,11 @@ sub out
     }
     $self;
 }
-   
+
+
+=head1 AUTHOR
+
+Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
+licensing.
+
+=cut
