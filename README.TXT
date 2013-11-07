@@ -90,11 +90,14 @@ I do not anticipate any more restructuring changes (but reserve the right to do 
 Martin Hosken L<Martin_Hosken@sil.org>
 (see CONTRIBUTORS for other authors).
 
+=head1 LICENSING
+
 Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
 
-=head1 LICENSE INFORMATION
-
-This module is free software; you can redistribute it and/or modify it under the terms of the
-Artistic License 2.0. For details, see the full text of the license in the file LICENSE.
+This module is released under the terms of the Artistic License 2.0. 
+For details, see the full text of the license in the file LICENSE.
 
 The test suite contains test fonts released under the Open Font License v1.1, see OFL.txt.
+
+=cut
+

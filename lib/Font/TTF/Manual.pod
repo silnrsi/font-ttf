@@ -1,4 +1,3 @@
-
 =head1 NAME
 
 Font::TTF::Manual - Information regarding the whole module set
@@ -207,8 +206,17 @@ information we need (and there is lots more that you could add) then we simply
 
 =head1 AUTHOR
 
-Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
-licensing.
+Martin Hosken L<Martin_Hosken@sil.org>
+(see CONTRIBUTORS for other authors).
+
+=head1 LICENSING
+
+Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
+
+This module is released under the terms of the Artistic License 2.0. 
+For details, see the full text of the license in the file LICENSE.
+
+The test suite contains test fonts released under the Open Font License v1.1, see OFL.txt.
 
 =cut
 
