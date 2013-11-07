@@ -907,12 +907,9 @@ For more details see the appropriate class files.
 =head1 AUTHOR
 
 Martin Hosken L<Martin_Hosken@sil.org>
-
-Copyright (c) 1998-2013 SIL International 
 (see CONTRIBUTORS for other authors).
 
-No warranty or expression of effectiveness for anything, least of all anyone's
-safety, is implied in this software or documentation.
+Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
 
 =head1 LICENSE INFORMATION
 
