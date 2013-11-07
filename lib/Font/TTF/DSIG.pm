@@ -63,6 +63,7 @@ sub out
     $self;
 }
 
+1;
 
 =head1 AUTHOR
 
