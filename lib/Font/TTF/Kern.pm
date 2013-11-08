@@ -35,14 +35,13 @@ Number of subtables in the kerning table
 
 Array of subtables in the kerning table
 
-=over 4
-
-Each subtable has a number of instance variables.
+=over 
 
 =item kern
 
+Each subtable has a number of instance variables.
+
 A two level hash array containing kerning values. The indexing is left
-value and then right value. In the case of type 2 tables, the indexing
 is via left class and right class. It may seem using hashes is strange,
 but most tables are not type 2 and this method saves empty array values.
 
@@ -349,8 +348,17 @@ No real support functions to I<do> anything with the kerning tables yet.
 
 =head1 AUTHOR
 
-Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
-licensing.
+Martin Hosken L<Martin_Hosken@sil.org>. 
+
+
+=head1 LICENSING
+
+Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
+
+This module is released under the terms of the Artistic License 2.0. 
+For details, see the full text of the license in the file LICENSE.
+
+The test suite contains test fonts released under the SIL Open Font License 1.1, see OFL.txt.
 
 =cut
 

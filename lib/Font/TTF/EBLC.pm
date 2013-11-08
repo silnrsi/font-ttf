@@ -241,10 +241,19 @@ Only indexFormat ==1 is implemented.  XML output is not supported (yet).
 
 =head1 AUTHOR
 
-NIIBE Yutaka L<gniibe@fsij.org>.  See L<Font::TTF::Font> for copyright and
-licensing.
-
+NIIBE Yutaka L<gniibe@fsij.org>.  
 This was written at the CodeFest Akihabara 2006 hosted by FSIJ.
+
+Patch sent with licensing requirements??
+
+=head1 LICENSING
+
+Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
+
+This module is released under the terms of the Artistic License 2.0. 
+For details, see the full text of the license in the file LICENSE.
+
+The test suite contains test fonts released under the SIL Open Font License 1.1, see OFL.txt.
 
 =cut
 

@@ -12,6 +12,8 @@ say that a coverage table is a class definition in which the class definition
 for each glyph is the corresponding index in the coverage table. The resulting
 data structure is that a Coverage table has the following fields:
 
+=over 
+
 =item cover
 
 A boolean to indicate whether this table is a coverage table (TRUE) or a
@@ -34,6 +36,8 @@ addition is added with the current count and increments the count.
 =item max
 
 Maximum class value in a class table.
+
+=back
 
 =head1 METHODS
 
@@ -330,10 +334,18 @@ sub release
 
 =head1 AUTHOR
 
-Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
-licensing.
+Martin Hosken L<Martin_Hosken@sil.org>. 
+
+
+=head1 LICENSING
+
+Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
+
+This module is released under the terms of the Artistic License 2.0. 
+For details, see the full text of the license in the file LICENSE.
+
+The test suite contains test fonts released under the SIL Open Font License 1.1, see OFL.txt.
 
 =cut
 
 1;
-

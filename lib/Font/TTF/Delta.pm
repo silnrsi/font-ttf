@@ -9,6 +9,8 @@ Font::TTF::Delta - Opentype Device tables
 Each device table corresponds to a set of deltas for a particular point over
 a range of ppem values.
 
+=over 
+
 =item first
 
 The first ppem value in the range
@@ -26,6 +28,8 @@ first and last inclusive.
 
 This is the fmt used (log2 of number bits per value) when the device table was
 read. It is recalculated on output.
+
+=back 
 
 =head1 METHODS
 
@@ -164,10 +168,17 @@ sub out_xml
 
 =head1 AUTHOR
 
-Martin Hosken Martin_Hosken@sil.org. See L<Font::TTF::Font> for copyright and
-licensing.
+Martin Hosken L<Martin_Hosken@sil.org>. 
+
+
+=head1 LICENSING
+
+Copyright (c) 1998-2013, SIL International (http://www.sil.org) 
+
+This module is released under the terms of the Artistic License 2.0. 
+For details, see the full text of the license in the file LICENSE.
+
+The test suite contains test fonts released under the SIL Open Font License 1.1, see OFL.txt.
 
 =cut
-
-1;
 
