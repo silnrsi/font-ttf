@@ -235,6 +235,8 @@ sub out_sub
     $out;
 }
 
+1;
+
 =head1 BUGS
 
 Does not yet support lookup type 8 (Reverse Chaining Contextual Single Substitution)
@@ -254,6 +256,4 @@ For details, see the full text of the license in the file LICENSE.
 The test suite contains test fonts released under the SIL Open Font License 1.1, see OFL.txt.
 
 =cut
-
-1;
 

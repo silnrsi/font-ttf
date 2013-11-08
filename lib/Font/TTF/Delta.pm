@@ -166,6 +166,8 @@ sub out_xml
     $fh->print("$depth</delta>\n");
 }
 
+1;
+
 =head1 AUTHOR
 
 Martin Hosken L<Martin_Hosken@sil.org>. 

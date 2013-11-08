@@ -151,6 +151,8 @@ sub DESTROY
     undef;
 }
 
+1;
+
 =head1 BUGS
 
 No known bugs, but then not ever executed!

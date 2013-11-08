@@ -82,6 +82,9 @@ use Font::TTF::Glat;
 use Font::TTF::Gloc;
 use Font::TTF::Dumper;
 
+
+1;
+
 =head1 AUTHOR
 
 Martin Hosken L<Martin_Hosken@sil.org>. 
@@ -97,5 +100,3 @@ For details, see the full text of the license in the file LICENSE.
 The test suite contains test fonts released under the SIL Open Font License 1.1, see OFL.txt.
 
 =cut
-
-1;

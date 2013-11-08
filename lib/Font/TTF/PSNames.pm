@@ -4437,6 +4437,8 @@ sub parse
 #	}
 # }
 
+1;
+
 =head1 AUTHOR
 
 Martin Hosken L<Martin_Hosken@sil.org>. 
@@ -4454,4 +4456,3 @@ The test suite contains test fonts released under the SIL Open Font License 1.1,
 =cut
 
 
-1;

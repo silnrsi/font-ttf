@@ -331,6 +331,7 @@ sub out_xml
 sub release
 { }
 
+1;
 
 =head1 AUTHOR
 
@@ -348,4 +349,3 @@ The test suite contains test fonts released under the SIL Open Font License 1.1,
 
 =cut
 
-1;

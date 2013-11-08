@@ -110,6 +110,7 @@ sub new
     bless $self, $class;
 }
 
+1;
 
 =head1 AUTHOR
 
