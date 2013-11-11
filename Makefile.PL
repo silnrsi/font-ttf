@@ -62,22 +62,32 @@ elsif ($^O eq 'linux')
 		my ($sign) = '--auto-debsign' if ($opt_r);
 	    my ($fpackage);
 	
-	    $svn =~ s/[0-9]*://og;
-	    $svn =~ s/\s+$//o;
-	    $package =~ s/::/-/;
+        $svn =~ s/\s+$//o;
+        if ($svn and $svn ne "exported")
+        {
+    	    $svn =~ s/[0-9]*://og;
+        }
+        else
+        {
+            $svn = `hg identify -n`;
+            $svn =~ s/\+?\s+$//o;
+        }
+	    $package =~ s/::/-/g;
 	    $package = "lib${package}-perl";
 	    $pversion .= "+$svn" unless ($opt_r);
 	    $fpackage = "$package-$pversion";
 	
 	    $res = <<"EOT";
-deb-base: dist
+debsrc: dist
 	rm -fr $self->{'DISTVNAME'}
+	rm -fr $package
 	rm -fr $fpackage
 	tar xvzf $self->{'DISTVNAME'}.tar.gz
-	mv $self->{'DISTVNAME'} $fpackage
-	tar cfz "${package}_$pversion.orig.tar.gz" $fpackage
+	cp -r $self->{'DISTVNAME'} $package
+	tar cvzf ${package}_${pversion}.orig.tar.gz $package
+	cp -r $package $fpackage
 	cp -a debian $fpackage
-	cd $fpackage && find . -name .svn | xargs rm -rf
+	cd $fpackage && dch -v $pversion "interim dev release" && dpkg-buildpackage -S
 
 # make deb builds an interim deb from svn source for release
 deb: deb-base
