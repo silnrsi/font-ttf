@@ -173,3 +173,17 @@ foreach my $tag (sort keys(%iso639list))
 	printf "    '$tag' => '$iso639list{$tag}',\n";
 }
 print ");\n";
+
+=head1 AUTHOR
+
+Bob Hallissy L<Bob_Hallissy@sil.org>
+
+=head1 LICENSING
+
+Copyright (c) 1998-2013, SIL International (http://www.sil.org)
+
+This script is released under the terms of the Artistic License 2.0.
+For details, see the full text of the license in the file LICENSE.
+
+=cut 
+
