@@ -438,7 +438,7 @@ sub read
             ($name, $check, $off, $len) = unpack("a4NNN", $dat);
             $zlen = $len;
         }
-        $self->{$name} = $self->{' PARENT'}->find($self, $name, $check, $off, $len) && next
+        $self->{$name} = $self->{' PARENT'}->find($self, $name, $check, $off, $len) and next
                 if (defined $self->{' PARENT'});
         $type = $tables{$name} || 'Font::TTF::Table';
         $t = $type;
