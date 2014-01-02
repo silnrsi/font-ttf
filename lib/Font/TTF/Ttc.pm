@@ -147,7 +147,7 @@ Closees any opened files by us
 sub DESTROY
 {
     my ($self) = @_;
-    close ($self->{' INFILE'});
+    close ($self->{' INFILE'}) if $self->{' INFILE'};
     undef;
 }
 
