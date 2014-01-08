@@ -327,11 +327,11 @@ sub out
             
         if ($s->{'Format'} == 0)
         {
-            $fh->print(pack("C256", @{$s->{'val'}}{0 .. 255}));
+            $fh->print(pack("C256", map {defined $_ ? $_ : 0} @{$s->{'val'}}{0 .. 255}));
         } elsif ($s->{'Format'} == 6)
         {
             $fh->print(pack("n2", $keys[0], $keys[-1] - $keys[0] + 1));
-            $fh->print(pack("n*", @{$s->{'val'}}{$keys[0] .. $keys[-1]}));
+            $fh->print(pack("n*", map {defined $_ ? $_ : 0} @{$s->{'val'}}{$keys[0] .. $keys[-1]}));
         } elsif ($s->{'Format'} == 2)       # Contributed by Huw Rogers
         {
             my ($g, $k, $h, $l, $m, $n);
