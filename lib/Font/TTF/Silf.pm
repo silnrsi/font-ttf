@@ -665,8 +665,9 @@ sub out_pass
     $fh->print(pack("n*", @{$pass->{'ruleSortKeys'}}));
     $fh->print(pack("C*", @{$pass->{'rulePreContexts'}}));
     $fh->print(TTF_Pack("CS", 0, $pass->{'passConstraintLen'}));
-    my ($oconstraints, $dat) = packcode($pass->{'constraintCode'});
-    my ($oactions, $actiondat) = packcode($pass->{'actionCode'});
+    my ($oconstraints, $oactions);
+    ($oconstraints, $dat) = packcode($pass->{'constraintCode'});
+    ($oactions, $actiondat) = packcode($pass->{'actionCode'});
 #    printf "constraint offsets @ %X\n", $fh->tell();
     $fh->print(pack("n*", @{$oconstraints}));
 #    printf "action offsets @ %X\n", $fh->tell();

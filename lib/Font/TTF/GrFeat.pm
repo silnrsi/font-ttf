@@ -87,7 +87,7 @@ sub read
 		else #version == 2
 			{($feature, $nSettings, $reserved, $settingTable, $featureFlags, $nameIndex)
 				= TTF_Unpack("LSSLSS", substr($self->{' dat'}, 12 + ($_ - 1) * 16, 16))};
-		my $feature = 
+		$feature = 
 			{
 				'feature'	=> $feature,
 				'name'		=> $nameIndex,
@@ -100,7 +100,7 @@ sub read
 		if ($featureFlags & 0x4000)
 			{$feature->{'default'} = $featureFlags & 0x00FF;}
 		else
-			{$feature->{'default'} = @settings[0];}
+			{$feature->{'default'} = $settings[0];}
 		$feature->{'settings'} = {@settings};
 		
 		push(@$features, $feature);
@@ -128,7 +128,7 @@ sub out
 
 	$features = $self->{'features'};
 	$numFeatures = @$features;
-	$featuresData, $settingsData = ('', '');
+	$featuresData = $settingsData = '';
 
 	foreach (@$features) {
 		$settings = $_->{'settings'};

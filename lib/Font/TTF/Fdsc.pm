@@ -74,7 +74,7 @@ sub out
     
     $fh->print(TTF_Pack("v", $self->{'version'}));
     
-    $descs = $self->{'descriptors'} or {};
+    $descs = $self->{'descriptors'} || {};
     
     $fh->print(pack("N", scalar keys %$descs));    
     foreach (sort keys %$descs) {

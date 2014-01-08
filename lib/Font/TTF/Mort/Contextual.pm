@@ -12,10 +12,9 @@ use strict;
 use vars qw(@ISA);
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
-use Font::TTF::Mort::Subtable;
 use IO::File;
 
-@ISA = qw(Font::TTF::AAT::Mort::Subtable);
+@ISA = qw(Font::TTF::Mort::Subtable);
 
 sub new
 {

@@ -69,7 +69,7 @@ sub out
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
     $fh->print(TTF_Pack("vSSSS", $self->{'version'}, $num, $range, $select, $shift));
-    foreach $k (sort (keys %{$self->{'langs'}}), '+1')
+    foreach $k ((sort keys %{$self->{'langs'}}), '+1')
     {
         my ($numf) = scalar @{$self->{'langs'}{$k}} unless ($k eq '+1');
         $fh->print(pack("a4nn", $k, $numf, $offset));
