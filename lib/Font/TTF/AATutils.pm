@@ -1,5 +1,11 @@
 package Font::TTF::AATutils;
 
+=head1 NAME
+
+Font::TTF::AATutils - Utility functions for AAT tables
+
+=cut
+
 use strict;
 use vars qw(@ISA @EXPORT);
 require Exporter;

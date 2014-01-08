@@ -33,13 +33,13 @@ Number of subtables in the kerning table
 
 =item tables
 
-Array of subtables in the kerning table
-
-=over 
-
-=item kern
+Array of subtables in the kerning table 
 
 Each subtable has a number of instance variables.
+
+=over 4
+
+=item kern
 
 A two level hash array containing kerning values. The indexing is left
 is via left class and right class. It may seem using hashes is strange,

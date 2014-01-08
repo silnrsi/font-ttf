@@ -1,6 +1,6 @@
 package Font::TTF::Gloc;
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::Gloc - Offsets into Glat table for the start of the attributes for each glyph
 

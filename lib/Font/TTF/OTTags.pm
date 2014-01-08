@@ -18,16 +18,22 @@ Font::TTF::OTTags - Utilities for TrueType/OpenType tags
   	
   # Read latest tags file to add to built-in definitions
   readtagsfile ("C:\\Program Files\\Microsoft VOLT\\TAGS.txt");
-  
+
 First-level keys to %tttags and %ttnames are:
 
 =over
 
-'SCRIPT' -- retrieve script tag or name
+=item SCRIPT
 
-'LANGUAGE' -- retrieve language tag or name
+retrieve script tag or name
 
-'FEATURE' -- retrieve feature tag or name
+=item LANGUAGE 
+
+retrieve language tag or name
+
+=item FEATURE 
+
+retrieve feature tag or name
 
 =back
 

@@ -15,7 +15,7 @@ Note that C<$code> should be a true value (0x1234) rather than a string represen
 
 =head1 INSTANCE VARIABLES
 
-The instance variables listed here are not preceeded by a space due to their
+The instance variables listed here are not preceded by a space due to their
 emulating structural information in the font.
 
 =over 4
@@ -31,7 +31,7 @@ An array of subtables ([0..Num-1])
 =back
 
 Each subtables also has its own instance variables which are, again, not
-preceeded by a space.
+preceded by a space.
 
 =over 4
 
@@ -240,6 +240,7 @@ Finds the a Unicode table, giving preference to the Microsoft one, and sets the 
 to it if found. Returns the table it finds.
 
 =cut
+
 sub find_ms
 {
     my ($self) = @_;

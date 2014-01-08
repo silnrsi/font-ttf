@@ -30,7 +30,7 @@ $t->{'SCRIPTS'}{$tag}) has information below it.
 
 =item OFFSET
 
-This variable is preceeded by a space and gives the offset from the start of the
+This variable is preceded by a space and gives the offset from the start of the
 table (not the table section) to the script table for this script
 
 =item REFTAG
@@ -59,7 +59,7 @@ Each language is a hash containing its information:
 
 =item OFFSET
 
-This variable is preceeded by a a space and gives the offset from the start of
+This variable is preceded by a a space and gives the offset from the start of
 the whole table to the language table for this language
 
 =item REFTAG
@@ -105,7 +105,7 @@ each feature. Each feature has the following structure:
 
 =item OFFSET
 
-This attribute is preceeded by a space and gives the offset relative to the start of the whole
+This attribute is preceded by a space and gives the offset relative to the start of the whole
 table of this particular feature.
 
 =item PARMS
@@ -132,7 +132,7 @@ script. Each lookup contains subtables and other information:
 
 =item OFFSET
 
-This name is preceeded by a space and contains the offset from the start of the table to this
+This name is preceded by a space and contains the offset from the start of the table to this
 particular lookup
 
 =item TYPE
@@ -158,7 +158,7 @@ GSUB and GPOS tables which are the target subclasses of this class.
 
 =item OFFSET
 
-This is preceeded by a space and gives the offset relative to the start of the table for this
+This is preceded by a space and gives the offset relative to the start of the table for this
 subtable
 
 =item FORMAT
@@ -197,7 +197,7 @@ how the different element types are marked.
 
 =item PRE
 
-This array holds the sequence of elements preceeding the first match element
+This array holds the sequence of elements preceding the first match element
 and has the same form as the MATCH array.
 
 =item POST
