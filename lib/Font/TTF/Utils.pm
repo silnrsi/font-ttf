@@ -247,7 +247,7 @@ sub TTF_Pack
                 }
                 else
                 { $frac = 0; }
-                $dat .= pack('nn', $res, eval("0x$frac"));
+                $dat .= pack('nn', $res, hex($frac));
             }
             elsif ($type eq "F")
             {
