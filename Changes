@@ -1,4 +1,12 @@
-1.03
+1.04  (r994, 2014-01-09)
+
+* Bug fixes:
+*    Fix rt.cpan.org 80671, 80672; simplify fix for #42553 per OP
+*    Shared tables in TTC weren't working
+*    Quiet a cleanup warning in TTC processing
+*    Update licensing info for test fonts to OFL
+
+1.03  (r969, 2013-11-10)
 
 * Add $t->minsize() to all tables for assisting with font subsetting
 * Add deduping to Name table writing
