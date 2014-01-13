@@ -61,4 +61,4 @@
 * tests failing on perl 5.8.2 and before due to no use Exporter qw(import);
   Fix OTTags accordingly.
 
-Some previous changes documented in lib/Font/TTF/Changes.old
+Some previous changes documented in lib/Font/TTF/Changes_old.txt

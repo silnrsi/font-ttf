@@ -1,7 +1,9 @@
 blib/
 \.\$\$\$
 \.tmp
+\.temp
 \.bak
+\.patch
 CVS/
 \.tar
 \.tgz
@@ -22,6 +24,7 @@ dev/
 build/
 ^build(?!utils)
 dists/
+dest-deb/
 ^libfont-
 description-pak
 ^doc
