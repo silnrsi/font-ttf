@@ -1,6 +1,6 @@
 package Font::TTF::Glat;
 
-=head1 TITLE
+=head1 NAME
 
 Font::TTF::Glat - Hold glyph attributes
 
