@@ -416,7 +416,14 @@ sub out
         {
             my (@starts, @ends, @deltas, @range);
 
-            push(@keys, 0xFFFF) unless ($keys[-1] == 0xFFFF);
+            # There appears to be a bug in Windows that requires the final 0xFFFF (sentry)
+            # to be in a segment by itself -- otherwise Windows 7 and 8 (at least) won't install
+            # or preview the font, complaining that it doesn't appear to be a valid font.
+            # Therefore we can't just add 0XFFFF to the USV list as we used to do:
+            # push(@keys, 0xFFFF) unless ($keys[-1] == 0xFFFF);
+            # Instead, for now *remove* 0xFFFF from the USV list, and add a segement
+            # for it after all the other segments are computed.
+            pop @keys if $keys[-1] == 0xFFFF;
             
             # Step 1: divide into maximal length idDelta runs
             
@@ -473,6 +480,12 @@ sub out
                 # Finished with this macro-range
                 $start = $end;
             }
+
+            # Ok, add the final segment containing the sentry value
+            push(@keys, 0xFFFF);
+            push @starts, 0xFFFF;
+            push @ends, 0xFFFF;
+            push @range, 0;
             
             # What is left is a collection of segments that will represent the cmap in mimimum-sized format 4 subtable
             
