@@ -28,9 +28,7 @@ Number of subtables in this table
 
 An array of subtables ([0..Num-1])
 
-=back
-
-Each subtables also has its own instance variables which are, again, not
+Each subtable also has its own instance variables which are, again, not
 preceded by a space.
 
 =over 4
@@ -57,6 +55,21 @@ A hash keyed by the codepoint value (not a string) storing the glyph id
 
 =back
 
+=back
+
+The following cmap options are controlled by instance variables that start with a space:
+
+=over 4
+
+=item allowholes
+
+By default, when generating format 4 cmap subtables character codes that point to glyph zero
+(normally called .notdef) are not included in the subtable. In some cases including some of these
+character codes can result in a smaller format 4 subtable. To enable this behavior, set allowholes 
+to non-zero. 
+
+=back
+
 =head1 METHODS
 
 =cut
@@ -78,7 +91,7 @@ fill in the segmented array accordingly.
 
 sub read
 {
-    my ($self) = @_;
+    my ($self, $keepzeros) = @_;
     $self->SUPER::read or return $self;
 
     my ($dat, $i, $j, $k, $id, @ids, $s);
@@ -182,7 +195,7 @@ sub read
                     { $id = unpack("n", substr($dat, ($j << 1) + $num * 6 +
                                         2 + ($k - $start) * 2 + $range, 2)) + $delta; }
                     $id -= 65536 if $id >= 65536;
-                    $s->{'val'}{$k} = $id if ($id);
+                    $s->{'val'}{$k} = $id if ($id || $keepzeros);
                 }
             }
         } elsif ($form == 8 || $form == 12 || $form == 13)
@@ -451,7 +464,7 @@ sub out
                 next if $ends[$start] - $starts[$start]  >  7;      # if count > 8, we always treat this as a run unto itself
                 for ($end = $start+1; $end <= $#starts; $end++)
                 {
-                    last if $starts[$end] - $ends[$end-1] > 4 || $ends[$end] - $starts[$end] > 7;   # gap > 4 or count > 8 so $end is beyond end of macro-range
+                    last if $starts[$end] - $ends[$end-1] > ($self->{' allowholes'} ? 4 : 0) || $ends[$end] - $starts[$end] > 7;   # gap > 4 or count > 8 so $end is beyond end of macro-range
                 }
                 $end--; #Ending index of this macro-range
                 
