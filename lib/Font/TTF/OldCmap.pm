@@ -269,7 +269,7 @@ sub out
             for ($j = 0; $j < $num; $j++)
             {
                 $delta = $segs->[$j]{'VAL'}[0]; $flat = 1;
-                for ($k = $k < $segs->[$j]{'LEN'}; $k++)
+                for ($k = 1; $k < $segs->[$j]{'LEN'}; $k++)
                 {
                     if ($segs->[$j]{'VAL'}[$k] == 0)
                     { $flat = 0; }
