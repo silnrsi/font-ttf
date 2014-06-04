@@ -68,7 +68,7 @@ use IO::String;
 $VERSION = 0.0001;
 
 my $havezlib = eval {require Compress::Zlib};
-	
+    
 =head2 Font::TTF::Table->new(%parms)
 
 Creates a new table or subclass. Table instance variables are passed in
@@ -107,12 +107,12 @@ sub read
     $self->{' INFILE'}->seek($self->{' OFFSET'}, 0);
     if (0 < $self->{' ZLENGTH'} && $self->{' ZLENGTH'} < $self->{' LENGTH'})
     {
-    	# WOFF table is compressed. Uncompress it to memory and create new fh
-    	die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
-    	my $dat;
-    	$self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
-    	$dat = Compress::Zlib::uncompress($dat);
-    	warn "$self->{' NAME'} table decompressed to wrong length" if $self->{' LENGTH'} != bytes::length($dat);
+        # WOFF table is compressed. Uncompress it to memory and create new fh
+        die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
+        my $dat;
+        $self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
+        $dat = Compress::Zlib::uncompress($dat);
+        warn "$self->{' NAME'} table decompressed to wrong length" if $self->{' LENGTH'} != bytes::length($dat);
         $self->{' INFILE'} = IO::String->new($dat);
         binmode $self->{' INFILE'};
         $self->{' OFFSET'} = 0;
@@ -140,18 +140,18 @@ sub read_dat
     $self->{' INFILE'}->seek($self->{' OFFSET'}, 0);
     if (0 < $self->{' ZLENGTH'} && $self->{' ZLENGTH'} < $self->{' LENGTH'})
     {
-    	# WOFF table is compressed. Uncompress it directly to ' dat'
-    	die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
-    	my $dat;
-    	$self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
-    	$dat = Compress::Zlib::uncompress($dat);
-    	warn "$self->{' NAME'} table decompressed to wrong length" if $self->{' LENGTH'} != bytes::length($dat);
-    	$self->{' dat'} = $dat;
- 	}
- 	else
- 	{
-	    $self->{' INFILE'}->read($self->{' dat'}, $self->{' LENGTH'});
-	}
+        # WOFF table is compressed. Uncompress it directly to ' dat'
+        die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
+        my $dat;
+        $self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
+        $dat = Compress::Zlib::uncompress($dat);
+        warn "$self->{' NAME'} table decompressed to wrong length" if $self->{' LENGTH'} != bytes::length($dat);
+        $self->{' dat'} = $dat;
+    }
+    else
+    {
+        $self->{' INFILE'}->read($self->{' dat'}, $self->{' LENGTH'});
+    }
     $self;
 }
 
@@ -175,6 +175,20 @@ sub out
     }
 
     return undef unless defined $self->{' INFILE'};
+    
+    if (0 < $self->{' ZLENGTH'} && $self->{' ZLENGTH'} < $self->{' LENGTH'})
+    {
+        # WOFF table is compressed. Have to uncompress first
+        $self->read_dat;
+        $fh->print($self->{' dat'});
+        return $self;
+    }
+
+    # We don't really have to keep the following code... we could have 
+    # just always done a full read_dat() on the table. But the following
+    # is more memory-friendly so I've kept it for the more common case 
+    # of non-compressed tables.
+
     $self->{' INFILE'}->seek($self->{' OFFSET'}, 0);
     $len = $self->{' LENGTH'};
     while ($len > 0)
