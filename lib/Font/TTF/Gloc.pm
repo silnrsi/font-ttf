@@ -38,11 +38,12 @@ use vars qw(@ISA);
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($fh) = $self->{' INFILE'};
     my ($numGlyphs);
     my ($dat, $flags);
 
-    $self->SUPER::read or return $self;
     $fh->read($dat, 4);
     ($self->{'Version'}) = TTF_Unpack("v", $dat);
     $fh->read($dat, 4);

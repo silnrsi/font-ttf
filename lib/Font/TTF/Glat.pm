@@ -30,13 +30,14 @@ use vars qw(@ISA);
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($gloc) = $self->{' PARENT'}{'Gloc'};
     my ($fh) = $self->{' INFILE'};
     my ($numGlyphs);
     my ($base) = $self->{' OFFSET'};
     my ($dat, $i);
 
-    $self->SUPER::read or return $self;
     $gloc->read;
     $numGlyphs = $gloc->{'numGlyphs'};
     $fh->seek($base, 0);

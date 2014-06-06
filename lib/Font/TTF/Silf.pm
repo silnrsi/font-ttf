@@ -315,12 +315,13 @@ Reads the Silf table into the internal data structure
 sub read
 {
     my ($self) = @_;
+    $self->SUPER::read or return $self;
+
     my ($dat, $d);
     my ($fh) = $self->{' INFILE'};
     my ($moff) = $self->{' OFFSET'};
     my ($numsilf, @silfo);
     
-    $self->SUPER::read or return $self;
     $fh->read($dat, 4);
     ($self->{'Version'}) = TTF_Unpack("v", $dat);
     if ($self->{'Version'} >= 3)
