@@ -41,6 +41,11 @@ sub read
     $self;
 }
 
+sub isempty
+{
+    my ($self) = @_;
+    return $self->read->{'numtables'} == 0;
+}
 
 sub out
 {
