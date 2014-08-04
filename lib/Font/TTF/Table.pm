@@ -68,7 +68,7 @@ use IO::String;
 $VERSION = 0.0001;
 
 my $havezlib = eval {require Compress::Zlib};
-    
+
 =head2 Font::TTF::Table->new(%parms)
 
 Creates a new table or subclass. Table instance variables are passed in
@@ -88,13 +88,17 @@ sub new
     bless $self, $class;
 }
 
-
 =head2 $t->read
 
 Reads the table from the input file. Acts as a superclass to all true tables.
 This method marks the table as read and then just sets the input file pointer
 but does not read any data. If the table has already been read, then returns
 C<undef> else returns C<$self>
+
+For WOFF-compressed tables, the table is first decompressed and a
+replacement file handle is created for reading the decompressed data. In this
+case ORIGINALOFFSET will preserve the original value of OFFSET for 
+applications that care.
 
 =cut
 
@@ -109,6 +113,7 @@ sub read
     {
         # WOFF table is compressed. Uncompress it to memory and create new fh
         die ("Cannot uncompress WOFF data: Compress::Zlib not present.\n") unless $havezlib;
+        $self->{' ORIGINALOFFSET'} = $self->{' OFFSET'};    # Preserve this for those who care
         my $dat;
         $self->{' INFILE'}->read($dat, $self->{' ZLENGTH'}); 
         $dat = Compress::Zlib::uncompress($dat);
