@@ -177,8 +177,9 @@ match.
 
 =item RULES
 
-The rules are a complex array. Each element of the array corresponds to an
-element in the coverage table (governed by the coverage index). If there is
+The rules are a complex array. In most cases, each element of the array 
+corresponds to an element in the coverage table (governed by the coverage index). 
+In a few caess, such as when there is
 no coverage table, then there is considered to be only one element in the rules
 array. Each element of the array is itself an array corresponding to the
 possibly multiple string matches which may follow the initial glyph. Each
@@ -240,8 +241,6 @@ This is the offset to the class definition for the before match glyphs
 
 This is the offset to the class definition for the after match glyphs.
 
-=back
-
 =item ACTION_TYPE
 
 This string holds the type of information held in the ACTION variable of a RULE.
@@ -267,6 +266,8 @@ Note that the documentation is particularly
 unhelpful here in that such tables are given as offsets relative to the
 beginning of the subtable not the whole GSUB table. This includes those items which
 are stored relative to another base within the subtable.
+
+=back
 
 =back
 

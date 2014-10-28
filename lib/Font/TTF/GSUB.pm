@@ -44,6 +44,12 @@ The action array is empty (in fact there is no rule array for this type of
 rule) and the ADJUST value should be added to the glyph id to find the replacement
 glyph id value
 
+=item r
+
+The action array is a list of replacement glyphs in coverage order. This ACTION_TYPE
+is used only for Type 8 Reverse Chaining lookups which, by design, are single glyph
+substitution.
+
 =back
 
 =item MATCH_TYPE
@@ -73,11 +79,11 @@ The array holds offsets to coverage tables
 =head1 CORRESPONDANCE TO LAYOUT TYPES
 
 The following table gives the values for ACTION_TYPE and MATCH_TYPE for each
-of the 11 different lookup types found in the GSUB table definition I have:
+of the 12 different lookup types found in the GSUB table definition:
 
-                1.1 1.2 2   3   4   5.1 5.2 5.3 6.1 6.2 6.3
-  ACTION_TYPE    o   g  g   a   g    l   l   l   l   l   l
-  MATCH_TYPE                    g    g   c   o   g   c   o
+                1.1 1.2  2  3  4  5.1 5.2 5.3  6.1 6.2 6.3  8
+  ACTION_TYPE    o   g   g  a  g   l   l   l    l   l   l   r
+  MATCH_TYPE                   g   g   c   o    g   c   o   o
 
 Hopefully, the rest of the uses of the variables should make sense from this
 table.
@@ -173,6 +179,34 @@ sub read_sub
         }
         $lookup->{'ACTION_TYPE'} = 'g';
         $lookup->{'MATCH_TYPE'} = 'g';
+    } elsif ($type == 8)
+    {
+        $t = {};
+        unless ($count == 0)
+        {
+            @subst = ();
+            $fh->read($dat, $count << 1);
+            foreach $s (TTF_Unpack('S*', $dat))
+            { push(@subst, $self->read_cover($s, $loc, $lookup, $fh, 1)); }
+            $t->{'PRE'} = [@subst];
+        }
+        $fh->read($dat, 2);
+        $count = TTF_Unpack('S', $dat);
+        unless ($count == 0)
+        {
+            @subst = ();
+            $fh->read($dat, $count << 1);
+            foreach $s (TTF_Unpack('S*', $dat))
+            { push(@subst, $self->read_cover($s, $loc, $lookup, $fh, 1)); }
+            $t->{'POST'} = [@subst];
+        }
+        $fh->read($dat, 2);
+        $count = TTF_Unpack('S', $dat);
+        $fh->read($dat, $count << 1);
+        $t->{'ACTION'} = [TTF_Unpack('S*', $dat)];
+        $lookup->{'RULES'} = [[$t]];
+        $lookup->{'ACTION_TYPE'} = 'r';
+        $lookup->{'MATCH_TYPE'} = 'o';
     } elsif ($type == 5 || $type == 6)
     { $self->read_context($lookup, $fh, $type, $fmt, $cover, $count, $loc); }
     $lookup;
@@ -229,6 +263,17 @@ sub out_sub
             substr($out, ($i << 1) + 6, 2) = pack('n', $offc);
             $offc = length($out);
         }
+    } elsif ($type == 8)
+    {
+        $out = pack("nn", $fmt, Font::TTF::Ttopen::ref_cache($lookup->{'COVERAGE'}, $ctables, 2 + $base));
+        $r = $lookup->{'RULES'}[0][0];
+        $out .= pack('n', defined $r->{'PRE'} ? scalar @{$r->{'PRE'}} : 0);
+        foreach $t (@{$r->{'PRE'}})
+        { $out .= pack('n', Font::TTF::Ttopen::ref_cache($t, $ctables, length($out) + $base)); }
+        $out .= pack('n', defined $r->{'POST'} ? scalar @{$r->{'POST'}} : 0);
+        foreach $t (@{$r->{'POST'}})
+        { $out .= pack('n', Font::TTF::Ttopen::ref_cache($t, $ctables, length($out) + $base)); }
+        $out .= pack("n*", $#{$r->{'ACTION'}} + 1, @{$r->{'ACTION'}});
     } elsif ($type == 4 || $type == 5 || $type == 6)
     { $out = $self->out_context($lookup, $fh, $type, $fmt, $ctables, $out, $num, $base); }
 #    Font::TTF::Ttopen::out_final($fh, $out, [[$ctables, 0]]);
@@ -237,14 +282,9 @@ sub out_sub
 
 1;
 
-=head1 BUGS
-
-Does not yet support lookup type 8 (Reverse Chaining Contextual Single Substitution)
-
 =head1 AUTHOR
 
 Martin Hosken L<Martin_Hosken@sil.org>
-
 
 =head1 LICENSING
 
