@@ -412,7 +412,7 @@ sub read
         }
         foreach $lTag (@{$l->{$tag}{'LANG_TAGS'}}, 'DEFAULT')
         {
-        	# Make copies of referenced languages for each reference. 
+            # Make copies of referenced languages for each reference. 
             next unless $l->{$tag}{$lTag}{' REFTAG'};
             $temp = $l->{$tag}{$lTag}{' REFTAG'};
             $l->{$tag}{$lTag} = &copy($l->{$tag}{$temp});

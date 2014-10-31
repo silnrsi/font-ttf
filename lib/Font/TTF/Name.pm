@@ -504,30 +504,30 @@ Useful for creating @cover parameter to set_name().
 
 sub pe_list
 {
-	my ($self) = @_;
-	my (@cover, %ids);
+    my ($self) = @_;
+    my (@cover, %ids);
 
-	foreach my $nid (0 .. $#{$self->{'strings'}})
-	{
-		if (defined $self->{'strings'}[$nid])
-		{
-    		foreach my $pid (0 .. $#{$self->{'strings'}[$nid]})
-    		{
-    			if (defined $self->{'strings'}[$nid][$pid])
-    			{
-    				foreach my $eid (0 .. $#{$self->{'strings'}[$nid][$pid]})
-	    			{
-	    				if (defined $self->{'strings'}[$nid][$pid][$eid] && !$ids{$pid}{$eid})
-	    				{
-	    					$ids{$pid}{$eid} = 1;
-	    					push @cover, [$pid, $eid];
-	    				}
-	    			}
-	    		}
-    		}
-    	}
+    foreach my $nid (0 .. $#{$self->{'strings'}})
+    {
+        if (defined $self->{'strings'}[$nid])
+        {
+            foreach my $pid (0 .. $#{$self->{'strings'}[$nid]})
+            {
+                if (defined $self->{'strings'}[$nid][$pid])
+                {
+                    foreach my $eid (0 .. $#{$self->{'strings'}[$nid][$pid]})
+                    {
+                        if (defined $self->{'strings'}[$nid][$pid][$eid] && !$ids{$pid}{$eid})
+                        {
+                            $ids{$pid}{$eid} = 1;
+                            push @cover, [$pid, $eid];
+                        }
+                    }
+                }
+            }
+        }
     }
-	return @cover;
+    return @cover;
 }
 
 

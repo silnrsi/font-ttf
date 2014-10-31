@@ -160,9 +160,9 @@ sub read_subtable
     $t->{'type'} = $cov >> 8;
     if ($t->{'Version'} == 0)
     {
-    	# NB: Cambria is an example of a font that plays an unsual trick: The
-    	# kern table is much larger than can be represented by the header $len
-    	# would allow. So we use the number of pairs to figure out how much to read. 
+        # NB: Cambria is an example of a font that plays an unsual trick: The
+        # kern table is much larger than can be represented by the header $len
+        # would allow. So we use the number of pairs to figure out how much to read. 
         $fh->read($dat, 8);
         $t->{'Num'} = unpack("n", $dat);
         $fh->read($dat, $t->{'Num'} * 6);

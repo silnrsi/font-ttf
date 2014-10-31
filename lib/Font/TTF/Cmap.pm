@@ -465,7 +465,7 @@ sub out
                 for ($end = $start+1; $end <= $#starts; $end++)
                 {
                     last if $starts[$end] - $ends[$end-1] > ($self->{' allowholes'} ? 5 : 1) 
-                    	|| $ends[$end] - $starts[$end] > 7;   # gap > 4 or count > 8 so $end is beyond end of macro-range
+                        || $ends[$end] - $starts[$end] > 7;   # gap > 4 or count > 8 so $end is beyond end of macro-range
                 }
                 $end--; #Ending index of this macro-range
                 

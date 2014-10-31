@@ -545,26 +545,26 @@ sub update
             }
             if ($i > 0 && $rflags[-1] == $flag && $repeat < 255)
             {
-            	$repeat++;
+                $repeat++;
             } else
             {
-            	if ($repeat)
-            	{
-            		$rflags[-1] |= 8;
-            		push @rflags, $repeat;
-            	}
-            	push @rflags, $flag;
-            	$repeat = 0;
+                if ($repeat)
+                {
+                    $rflags[-1] |= 8;
+                    push @rflags, $repeat;
+                }
+                push @rflags, $flag;
+                $repeat = 0;
             } 
             $self->{'flags'}[$i] = $flag;
         }
-		# Add final repeat if needed, then pack up the flag bytes:
-    	if ($repeat)
-    	{
-    		$rflags[-1] |= 8;
-    		push @rflags, $repeat;
-    	}
-        $self->{' DAT'} .= pack("C*", @rflags);	
+        # Add final repeat if needed, then pack up the flag bytes:
+        if ($repeat)
+        {
+            $rflags[-1] |= 8;
+            push @rflags, $repeat;
+        }
+        $self->{' DAT'} .= pack("C*", @rflags); 
         for ($i = 0; $i < $self->{'numPoints'}; $i++)
         {
             $flag = $self->{'flags'}[$i];

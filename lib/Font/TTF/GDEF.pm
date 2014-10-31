@@ -99,10 +99,10 @@ use Font::TTF::Ttopen;
 use vars qw(@ISA $new_gdef);
 
 @ISA = qw(Font::TTF::Table);
-$new_gdef = 1;	# Prior to 2012-07, this config variable did more than it does today.
-				# Currently all it does is force the GDEF to include a field in the
-				# header for the MARKS class definition. That is, it makes sure the
-				# font is compatible with at least the OT 1.2 specification.
+$new_gdef = 1;  # Prior to 2012-07, this config variable did more than it does today.
+                # Currently all it does is force the GDEF to include a field in the
+                # header for the MARKS class definition. That is, it makes sure the
+                # font is compatible with at least the OT 1.2 specification.
 
 =head2 $t->read
 
@@ -135,37 +135,37 @@ sub read
     
     if ($self->{'Version'} > 0x00010000)
     {
-    	# Ok, header guaranteed to have both MarAttachClassDef MarkGlyphSetsDef
+        # Ok, header guaranteed to have both MarAttachClassDef MarkGlyphSetsDef
         $fh->read($dat, 4);
         ($macoff, $mgsoff) = TTF_Unpack('S2', $dat);
     }
     else
     {
-    	# What I've seen in other code (examples:
-    	#     http://skia.googlecode.com/svn/trunk/third_party/harfbuzz/src/harfbuzz-gdef.c and
-    	#     http://doxygen.reactos.org/d0/d55/otvalid_8h_a0487daffceceb98ba425bbf2806fbaff.html
-    	# ) is to read GPOS and GDEF and see if any lookups have a
-    	# MarkAttachType in the upper byte of their flag word and if so then assume that the
-    	# MarkAttachClassDef field is in the header. While this is probably the most 
-    	# reliable way to do it, it would require us to read GSUB and GPOS. 
-    	# Prior to 2012-07 what we did is depend on our $new_gdef class variable to tell us
-    	# whether to assume a MarkAttachClassDef. 
-    	# What we do now is see if the header actually has room for the MarkAttachClassDef field.
-    	
-    	my $minOffset = $self->{' LENGTH'};
-    	foreach ($goff, $aoff, $loff)
-    	{
-    		$minOffset = $_ if $_ > 0 && $_ < $minOffset;
-    	}
-    	if ($minOffset >= 12)
-    	{
-    		# There is room for the field, so read it:
-		    $fh->read($dat, 2);
-		    ($macoff) = TTF_Unpack('S', $dat);
-		    # Sanity check:
-		    $macoff = 0 if $macoff >= $self->{' LENGTH'};
-		}
-	}
+        # What I've seen in other code (examples:
+        #     http://skia.googlecode.com/svn/trunk/third_party/harfbuzz/src/harfbuzz-gdef.c and
+        #     http://doxygen.reactos.org/d0/d55/otvalid_8h_a0487daffceceb98ba425bbf2806fbaff.html
+        # ) is to read GPOS and GDEF and see if any lookups have a
+        # MarkAttachType in the upper byte of their flag word and if so then assume that the
+        # MarkAttachClassDef field is in the header. While this is probably the most 
+        # reliable way to do it, it would require us to read GSUB and GPOS. 
+        # Prior to 2012-07 what we did is depend on our $new_gdef class variable to tell us
+        # whether to assume a MarkAttachClassDef. 
+        # What we do now is see if the header actually has room for the MarkAttachClassDef field.
+        
+        my $minOffset = $self->{' LENGTH'};
+        foreach ($goff, $aoff, $loff)
+        {
+            $minOffset = $_ if $_ > 0 && $_ < $minOffset;
+        }
+        if ($minOffset >= 12)
+        {
+            # There is room for the field, so read it:
+            $fh->read($dat, 2);
+            ($macoff) = TTF_Unpack('S', $dat);
+            # Sanity check:
+            $macoff = 0 if $macoff >= $self->{' LENGTH'};
+        }
+    }
 
     if ($goff > 0)
     {
@@ -253,22 +253,22 @@ sub read
     
     if ($mgsoff > 0)
     {
-    	my ($fmt, $count, $off);
-    	$fh->seek($mgsoff + $boff, 0);
-    	$fh->read($dat, 4);
-    	($fmt, $count) = TTF_Unpack('SS', $dat);
-    	# Sanity check opportunity: Could verify $fmt == 1, but I don't.
-    	$self->{'MARKSETS'} = [];
-    	$fh->read($dat, $count << 2);	# NB: These offets are ULONGs!
-    	foreach $off (TTF_Unpack('L*', $dat))
-    	{
+        my ($fmt, $count, $off);
+        $fh->seek($mgsoff + $boff, 0);
+        $fh->read($dat, 4);
+        ($fmt, $count) = TTF_Unpack('SS', $dat);
+        # Sanity check opportunity: Could verify $fmt == 1, but I don't.
+        $self->{'MARKSETS'} = [];
+        $fh->read($dat, $count << 2);   # NB: These offets are ULONGs!
+        foreach $off (TTF_Unpack('L*', $dat))
+        {
             unless (defined $self->{' CACHE'}{$off + $mgsoff})
             {
                 $fh->seek($off + $mgsoff + $boff, 0);
                 $self->{' CACHE'}{$off + $mgsoff} = Font::TTF::Coverage->new(1)->read($fh);
             }
             push @{$self->{'MARKSETS'}}, $self->{' CACHE'}{$off + $mgsoff};
-    	}
+        }
     }
 
     $self;
@@ -291,17 +291,17 @@ sub out
     $loc = $fh->tell();
     if (defined $self->{'MARKSETS'} && @{$self->{'MARKSETS'}} > 0)
     {
-    	$self->{'Version'} = 0x00010002;
-    	$fh->print(TTF_Pack('LSSSSS', $self->{'Version'}, 0, 0, 0, 0, 0));
+        $self->{'Version'} = 0x00010002;
+        $fh->print(TTF_Pack('LSSSSS', $self->{'Version'}, 0, 0, 0, 0, 0));
     }
     else
     {
-    	$self->{'Version'} = 0x00010000;
-	    if ($new_gdef || defined $self->{'MARKS'})
-	    { $fh->print(TTF_Pack('LSSSS', $self->{'Version'}, 0, 0, 0, 0)); }
-	    else
-	    { $fh->print(TTF_Pack('LSSS', $self->{'Version'}, 0, 0, 0)); }
-	}
+        $self->{'Version'} = 0x00010000;
+        if ($new_gdef || defined $self->{'MARKS'})
+        { $fh->print(TTF_Pack('LSSSS', $self->{'Version'}, 0, 0, 0, 0)); }
+        else
+        { $fh->print(TTF_Pack('LSSS', $self->{'Version'}, 0, 0, 0)); }
+    }
 
     if (defined $self->{'GLYPH'})
     {
@@ -372,15 +372,15 @@ sub out
     {
 
         my (@reftables, $ctables, $c, $out); 
-    	$ctables = {};    	
-    	$mgsoff = $fh->tell() - $loc;
-    	$out = TTF_Pack('SS', 1, $#{$self->{'MARKSETS'}}+1);
-    	foreach $c (@{$self->{'MARKSETS'}})
-		{
-			$out .= pack('N', Font::TTF::Ttopen::ref_cache($c, $ctables, length($out), 'N'));
-		}
-		push (@reftables, [$ctables, 0]);
-		Font::TTF::Ttopen::out_final($fh, $out, \@reftables);
+        $ctables = {};      
+        $mgsoff = $fh->tell() - $loc;
+        $out = TTF_Pack('SS', 1, $#{$self->{'MARKSETS'}}+1);
+        foreach $c (@{$self->{'MARKSETS'}})
+        {
+            $out .= pack('N', Font::TTF::Ttopen::ref_cache($c, $ctables, length($out), 'N'));
+        }
+        push (@reftables, [$ctables, 0]);
+        Font::TTF::Ttopen::out_final($fh, $out, \@reftables);
     }
 
     $loc1 = $fh->tell();
@@ -423,40 +423,40 @@ sub update
     
     unless ($Font::TTF::Coverage::dontsort)
     {
-    	if (defined $self->{'ATTACH'} and defined $self->{'ATTACH'}{'COVERAGE'} and !$self->{'ATTACH'}{'COVERAGE'}{'dontsort'} )
-    	{
-    		my @map = $self->{'ATTACH'}{'COVERAGE'}->sort();
-        	if (defined $self->{'ATTACH'}{'POINTS'})
-        	{
-				# And also a POINTS array which now needs to be re-sorted
+        if (defined $self->{'ATTACH'} and defined $self->{'ATTACH'}{'COVERAGE'} and !$self->{'ATTACH'}{'COVERAGE'}{'dontsort'} )
+        {
+            my @map = $self->{'ATTACH'}{'COVERAGE'}->sort();
+            if (defined $self->{'ATTACH'}{'POINTS'})
+            {
+                # And also a POINTS array which now needs to be re-sorted
                 my $newpoints = [];
                 foreach (0 .. $#map)
                 { push @{$newpoints}, $self->{'ATTACH'}{'POINTS'}[$map[$_]]; }
                 $self->{'ATTACH'}{'POINTS'} = $newpoints;
             }
-    	}
-    	if (defined $self->{'LIG'} and defined $self->{'LIG'}{'COVERAGE'} and !$self->{'LIG'}{'COVERAGE'}{'dontsort'} )
-    	{
-    		my @map = $self->{'LIG'}{'COVERAGE'}->sort();
-        	if (defined $self->{'LIG'}{'LIGS'})
-        	{
-				# And also a LIGS array which now needs to be re-sorted
+        }
+        if (defined $self->{'LIG'} and defined $self->{'LIG'}{'COVERAGE'} and !$self->{'LIG'}{'COVERAGE'}{'dontsort'} )
+        {
+            my @map = $self->{'LIG'}{'COVERAGE'}->sort();
+            if (defined $self->{'LIG'}{'LIGS'})
+            {
+                # And also a LIGS array which now needs to be re-sorted
                 my $newligs = [];
                 foreach (0 .. $#map)
                 { push @{$newligs}, $self->{'LIG'}{'LIGS'}[$map[$_]]; }
                 $self->{'LIG'}{'LIGS'} = $newligs;
             }
-    	}
-    	if (defined $self->{'MARKSETS'})
-    	{
-    		foreach (@{$self->{'MARKSETS'}})
-    		{$_->sort();}		# Don't care about map
-    	}
+        }
+        if (defined $self->{'MARKSETS'})
+        {
+            foreach (@{$self->{'MARKSETS'}})
+            {$_->sort();}       # Don't care about map
+        }
     }
     
     $self;
 }
-    	
+
 1;
 
 =head1 AUTHOR

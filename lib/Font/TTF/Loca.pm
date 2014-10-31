@@ -71,7 +71,7 @@ sub read
 {
     my ($self) = @_;
 
-	# Do this before $self->SUPER::read because this can alter the file pointer:
+    # Do this before $self->SUPER::read because this can alter the file pointer:
     my ($glyfLoc) = $self->{' PARENT'}{'glyf'}->_read->{' OFFSET'};		# May seek on $fh!
 
     $self->SUPER::read or return $self;
