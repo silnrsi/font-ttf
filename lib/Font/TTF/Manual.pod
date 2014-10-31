@@ -62,7 +62,7 @@ To help with using the system, each module (or table) will not only describe the
 methods it supports, which are relatively few, but also the instance variables
 it supports, which are many. Most of the variables directly reflect table
 attributes as specified in the OpenType specification, available from Microsoft
-(L<http::/www.microsoft.com/typography>), Adobe and Apple. A list of the names
+(L<http://www.microsoft.com/typography>), Adobe and Apple. A list of the names
 used is also given in each module, but not necessarily with any further
 description. After all, this code is not a TrueType manual as well!
 
@@ -174,7 +174,6 @@ and C<Font> at the top:
  name--
 
  post--
- 
 There is an important universal dependency which it is up to the user to
 keep up to date. This is C<maxp/numOfGlyphs> which is used to iterate over all
 the glyphs. Note that the glyphs themselves are not held in the C<glyph> table
