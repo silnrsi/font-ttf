@@ -19,10 +19,10 @@ what I guess most people will want to do).
 
 By default, C<$Font::TTF::Name::utf8> is set to 1, and strings will be stored as UTF8 wherever
 possible. The method C<is_utf8> can be used to find out if a string in a particular
-platform and encoding will be returned as UTF8. 
+platform and encoding will be returned as UTF8. Unicode strings are always
+converted if utf8 is requested. Otherwise, strings are stored according to platform:
 
-You now have to set <$Font::TTF::Name::utf8> to 0 to get the old behaviour, in which case 
-strings are stored according to platform:
+You now have to set <$Font::TTF::Name::utf8> to 0 to get the old behaviour.
 
 =over 4
 
@@ -64,13 +64,12 @@ An array of arrays, etc.
 =cut
 
 use strict;
-use vars qw(@ISA $VERSION @apple_encs @apple_encodings $utf8 $dedupe $cp_1252 @cp_1252 %win_langs %langs_win %langs_mac @ms_langids @mac_langs);
+use vars qw(@ISA $VERSION @apple_encs @apple_encodings $utf8 $cp_1252 @cp_1252 %win_langs %langs_win %langs_mac @ms_langids @mac_langs);
 use Font::TTF::Table;
 use Font::TTF::Utils;
 @ISA = qw(Font::TTF::Table);
 
 $utf8 = 1;
-$dedupe = 0;
 
 {
     my ($count, $i);
@@ -160,12 +159,6 @@ sub read
 
 Writes out all the strings
 
-By default, each string is stored separately in the name table even if some of the
-strings are identical. Setting C<$Font::TTF::Name::dedupe> to non-zero will
-cause only a single instance of each unique string to be stored. While this can
-reduce the size of the name table, it may also cause Windows font installer to reject
-the font.
-
 =cut
 
 sub out
@@ -206,7 +199,7 @@ sub out
                         { $str_trans = TTF_utf8_word($str_trans); }
                     }
                     my ($str_ind);
-                    unless (defined $dedup{$str_trans} && $dedupe)
+                    unless (defined $dedup{$str_trans})
                     {
                         use bytes;
                         $dedup{$str_trans} = $strcount;
