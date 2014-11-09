@@ -8,7 +8,7 @@ ok($tttags{'SCRIPT'}{'Cypriot Syllabary'} eq 'cprt', 'tttags{SCRIPT}');
 
 ok($ttnames{'LANGUAGE'}{'AFK '} eq 'Afrikaans', 'ttnames{LANGUAGE}');
 
-ok($ttnames{'LANGUAGE'}{'DHV '} eq 'Dhivehi (deprecated)' && $ttnames{'LANGUAGE'}{'DIV '} eq 'Dhivehi', 'ttnames{LANGUAGE} Dhivehi');
+ok($ttnames{'LANGUAGE'}{'DHV '} eq 'Divehi (Dhivehi, Maldivian) (deprecated)' && $ttnames{'LANGUAGE'}{'DIV '} eq 'Divehi (Dhivehi, Maldivian)', 'ttnames{LANGUAGE} Dhivehi');
 
 ok($ttnames{'FEATURE'}{'cv01'} eq 'Character Variants 01', 'ttnames{FEATURE}');
 
