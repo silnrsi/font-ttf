@@ -873,10 +873,14 @@ somewhat spurious results for this table type.
 
 Only type 0 & type 2 tables are supported (type 1 & type 3 yet to come).
 
-=item TTC
+=item TTC and WOFF
 
 The current Font::TTF::Font::out method does not support the writing of TrueType
-Collections.
+Collections or WOFF files.
+
+=item DSIG
+
+Haven't figured out how to correctly calculate and output digital signature (DSIG) table
 
 =back
 
