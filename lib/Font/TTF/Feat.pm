@@ -198,7 +198,7 @@ None known
 
 =head1 AUTHOR
 
-Jonathan Kew L<Jonathan_Kew@sil.org>. 
+Jonathan Kew L<http://scripts.sil.org/FontUtils>. 
 
 
 =head1 LICENSING

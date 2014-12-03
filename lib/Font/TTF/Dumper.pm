@@ -75,7 +75,7 @@ sub myfilter
 
 =head1 AUTHOR
 
-Bob Hallissy L<Bob_Hallissy@sil.org>
+Bob Hallissy L<http://scripts.sil.org/FontUtils>.
 
 
 =head1 LICENSING

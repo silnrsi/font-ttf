@@ -291,7 +291,7 @@ Only Format 7 is implemented.  XML output is not supported (yet).
 
 =head1 AUTHOR
 
-NIIBE Yutaka L<gniibe@fsij.org>.  
+NIIBE Yutaka L<mailto:gniibe@fsij.org>.  
 This was written at the CodeFest Akihabara 2006 hosted by FSIJ.
 
 ?? patch sent with licensing requirements or not?

@@ -900,7 +900,7 @@ once Perl 5.6 has been released and I can find all the mapping tables, etc.
 
 =head1 AUTHOR
 
-Martin Hosken L<Martin_Hosken@sil.org>. 
+Martin Hosken L<http://scripts.sil.org/FontUtils>. 
 
 
 =head1 LICENSING

@@ -241,7 +241,7 @@ Only indexFormat ==1 is implemented.  XML output is not supported (yet).
 
 =head1 AUTHOR
 
-NIIBE Yutaka L<gniibe@fsij.org>.  
+NIIBE Yutaka L<mailto:gniibe@fsij.org>.  
 This was written at the CodeFest Akihabara 2006 hosted by FSIJ.
 
 Patch sent with licensing requirements??

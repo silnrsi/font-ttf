@@ -348,7 +348,7 @@ No real support functions to I<do> anything with the kerning tables yet.
 
 =head1 AUTHOR
 
-Martin Hosken L<Martin_Hosken@sil.org>. 
+Martin Hosken L<http://scripts.sil.org/FontUtils>. 
 
 
 =head1 LICENSING

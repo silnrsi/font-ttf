@@ -118,8 +118,7 @@ sub out_xml
 
 =head1 AUTHOR
 
-David Raymond David_Raymond@sil.org. 
-
+David Raymond L<http://scripts.sil.org/FontUtils>. 
 
 =head1 LICENSING
 
@@ -127,8 +126,6 @@ Copyright (c) 1998-2014, SIL International (http://www.sil.org)
 
 This module is released under the terms of the Artistic License 2.0. 
 For details, see the full text of the license in the file LICENSE.
-
-
 
 =cut
 

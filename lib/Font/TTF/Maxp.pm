@@ -183,7 +183,7 @@ None known
 
 =head1 AUTHOR
 
-Martin Hosken L<Martin_Hosken@sil.org>. 
+Martin Hosken L<http://scripts.sil.org/FontUtils>. 
 
 
 =head1 LICENSING
