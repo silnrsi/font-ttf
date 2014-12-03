@@ -791,6 +791,7 @@ order as per the order in the directory:
 
 May optionally take a list of table names in which case func is called
 for each of them in the given order.
+
 =cut
 
 sub tables_do
