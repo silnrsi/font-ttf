@@ -88,6 +88,10 @@ sub new
     bless $self, $class;
 }
 
+sub out_xml
+{
+}
+
 1;
 
 =head1 AUTHOR
