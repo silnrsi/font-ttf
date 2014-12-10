@@ -1,3 +1,15 @@
+1.05 (date TBD)
+
+* Add support for GSUB Type 8 Reverse-chaining substitution
+* OpenType script/lang/feature tags now based on ISO/IEC 14496-22
+*
+* Bug fixes:
+*    Fix rt.cpan.org 92150, 93597
+*	 Force 0xFFFF sentry to be in a segment by itself in format 4 cmap subtables
+*    Less aggressive cmap format 4 optimization to eliminate USV holes
+*    Fix various issues reading WOFF-compressed font tables
+*    Fix reading DSIG
+
 1.04  (r994, 2014-01-09)
 
 * Bug fixes:
