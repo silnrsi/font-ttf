@@ -1,6 +1,7 @@
 package Font::TTF;
 
-$VERSION = '1.04';    # MJPH     8-Jan-2014      License, POD, and perl -w tidying; bug fixes
+$VERSION = '1.04_90';   # MJPH    11-Dec-2014      Bug fixes; updated OT tags; GSUB Lookup Type 8 support
+# $VERSION = '1.04';    # MJPH     8-Jan-2014      License, POD, and perl -w tidying; bug fixes
 # $VERSION = '1.03';    # MJPH     5-Sep-2013      Add $t->minsize()
 # $VERSION = '1.02';    # MJPH    30-Aug-2012      Fix case typo in Useall
 # $VERSION = '1.01';    # MJPH    30-Aug-2012      add IO::String prerequisite
@@ -31,7 +32,7 @@ including modify and inspect nearly all tables.
 
 =head1 AUTHOR
 
-Martin Hosken L<Martin_Hosken@sil.org>
+Martin Hosken L<http://scripts.sil.org/FontUtils>.
 (see CONTRIBUTORS for other authors).
 
 =head1 LICENSING
