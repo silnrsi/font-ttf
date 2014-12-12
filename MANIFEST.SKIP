@@ -31,3 +31,4 @@ description-pak
 ^doc-pak
 \.swp
 ^\.hg/
+^MYMETA\..*$
