@@ -1,4 +1,4 @@
-1.04_90 (2014-12-11)
+1.05 (r1063, 2015-01-19)
 
 * Add support for GSUB Type 8 Reverse-chaining substitution
 * OpenType script/lang/feature tags now based on ISO/IEC 14496-22
