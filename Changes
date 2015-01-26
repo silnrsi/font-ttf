@@ -1,7 +1,8 @@
-1.05 (r1063, 2015-01-19)
+1.05 (r1069, 2015-01-26)
 
 * Add support for GSUB Type 8 Reverse-chaining substitution
 * OpenType script/lang/feature tags now based on ISO/IEC 14496-22
+* Remove deprecated GDL_old.pm 
 *
 * Bug fixes:
 *    Fix rt.cpan.org 92150, 93597
