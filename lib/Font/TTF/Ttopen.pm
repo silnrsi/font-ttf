@@ -651,7 +651,7 @@ sub out
                 $tag->{' OFFSET'} = $fh->tell() - $base - $oLook; # offset to this extension lookup
                 # LookupTable (including actual offsets to subtables)
                 $fh->print(pack("nnn", $ext, $tag->{'FLAG'}, $nSub));
-                $fh->print(pack("n*", map {6 + $nSub * 2 + $_ * 8 + $tag->{'FLAG'} & 0x0010 ? 2 : 0 } (0 .. $nSub-1)));
+                $fh->print(pack("n*", map {6 + $nSub * 2 + $_ * 8 + ($tag->{'FLAG'} & 0x0010 ? 2 : 0) } (0 .. $nSub-1)));
                 $fh->print(pack("n", $tag->{'FILTER'})) if $tag->{'FLAG'} & 0x0010;
                 $tag->{' EXT_OFFSET'} = $fh->tell();    # = first extension lookup subtable
                 for ($k = 0; $k < $nSub; $k++)
