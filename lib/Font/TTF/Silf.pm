@@ -767,12 +767,14 @@ sub out
         my (@nonlinclasses);
         for ($i = $numlin; $i < @{$silf->{'classes'}}; $i++)
         {
-            my (@c, $a, $b);
+            my (@c, $d, @d);
+            my $c = $silf->{'classes'}[$i];
             push (@coffsets, $cbase);
-            while (($a, $b) = each @{$silf->{'classes'}[$i]})
-            { push (@c, $b, $a) if (defined $b); }
-            push (@nonlinclasses, [@c]);
-            my ($len) = scalar @c;
+            @c = sort {$c->[$a] <=> $c->[$b]} (0 .. $#{$c});
+            foreach $d (@c)
+            { push (@d, $c->[$d], $d); }
+            push (@nonlinclasses, [@d]);
+            my ($len) = scalar @d;
             $cbase += 8 + 2 * $len;
         }
         push (@coffsets, $cbase);
