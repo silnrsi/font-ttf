@@ -842,9 +842,9 @@ Returns an array of all the glyph ids that are used to make up this glyph. That
 is all the compounds and their references and so on. If this glyph is not a
 compound, then returns an empty array.
 
-Please note the warning about bad fonts that reference nonexistant glyphs
+Please note the warning about bad fonts that reference nonexistent glyphs
 under INSTANCE VARIABLES above.  This function will not attempt to 
-filter out nonexistant glyph numbers.
+filter out nonexistent glyph numbers.
 
 =cut
 
