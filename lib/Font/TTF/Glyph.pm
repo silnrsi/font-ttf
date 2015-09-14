@@ -267,8 +267,8 @@ sub read
     return $self if (defined $self->{' read'} && $self->{' read'} > 0);
     $self->{' read'} = 1;
     $fh->seek($self->{' LOC'} + $self->{' BASE'}, 0);
-    $fh->read($self->{' DAT'}, $self->{' LEN'});
-    TTF_Read_Fields($self, $self->{' DAT'}, \%fields);
+    $fh->read($dat, $self->{' LEN'});
+    TTF_Read_Fields($self, $self->{' DAT'} = $dat, \%fields);
     $self;
 }
 
