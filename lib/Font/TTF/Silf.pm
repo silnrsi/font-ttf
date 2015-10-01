@@ -718,12 +718,12 @@ sub out
     {
         my ($subbase) = $fh->tell();
         my ($numlin, $i, @opasses, $oPasses, $oPseudo, $ooPasses);
-        if ($self->{'Version'} > 3)
+        if ($self->{'Version'} >= 3)
         {
             $fh->seek($base + 12 + $silfc * 4, 0);
             $fh->print(pack('N', $subbase - $base));
             $fh->seek($subbase, 0);
-            $fh->print(TTF_Pack("vSS", $silf->{'Version'}, $oPasses, $oPseudo));
+            $fh->print(TTF_Pack("vSS", $silf->{'Version'}, $ooPasses, $oPseudo));
         }
         else
         {
@@ -749,9 +749,9 @@ sub out
         $fh->print(TTF_Pack("S", $silf->{'lbGID'}));
         $ooPasses = $fh->tell();
         if ($silf->{'PASS'}) { $fh->print(pack("N*", (0) x (@{$silf->{'PASS'}} + 1)));}
+        $oPseudo = $fh->tell() - $subbase;
         my (@pskeys) = keys %{$silf->{'pseudos'}};
         $fh->print(TTF_Pack("SSSS", TTF_bininfo(scalar @pskeys, 6)));
-        $oPseudo = $fh->tell() - $subbase;
         foreach my $k (sort {$a <=> $b} @pskeys)
         { $fh->print(TTF_Pack("Ls", $k, $silf->{'pseudos'}{$k})); }
         $numlin = $silf->{'numLinearClasses'};
@@ -786,7 +786,7 @@ sub out
         {
             
             my ($num) = scalar @{$nonlinclasses[$i-$numlin]};
-            my (@bin) = TTF_bininfo($num/2, 1);
+            my (@bin) = TTF_bininfo($num/2, 4);
             $fh->print(TTF_Pack("SSSS", @bin));
             $fh->print(pack("n*", @{$nonlinclasses[$i-$numlin]}));
         }
@@ -801,7 +801,7 @@ sub out
         if ($self->{'Version'} >= 3)
         {
             $fh->seek($subbase + 4, 0);
-            $fh->print(TTF_Pack("SS", $oPasses, $oPseudo));
+            $fh->print(TTF_Pack("SS", $ooPasses - $subbase, $oPseudo));
         }
         $fh->seek($end, 0);
         $silfc++;
