@@ -291,12 +291,12 @@ sub out
     $loc = $fh->tell();
     if (defined $self->{'MARKSETS'} && @{$self->{'MARKSETS'}} > 0)
     {
-        $self->{'Version'} = 0x00010002;
+        $self->{'Version'} = 0x00010002 if ($self->{'Version'} < 0x00010002);
         $fh->print(TTF_Pack('LSSSSS', $self->{'Version'}, 0, 0, 0, 0, 0));
     }
     else
     {
-        $self->{'Version'} = 0x00010000;
+        $self->{'Version'} = 0x00010000 if ($self->{'Version'} > 0x00010000);
         if ($new_gdef || defined $self->{'MARKS'})
         { $fh->print(TTF_Pack('LSSSS', $self->{'Version'}, 0, 0, 0, 0)); }
         else
