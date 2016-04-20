@@ -424,13 +424,13 @@ sub read
 
 sub chopcode
 {
-    my ($dest, $dat, $offsets) = @_;
+    my ($dest, $dat, $offsets, $isconstraint) = @_;
     my ($last) = $offsets->[-1];
     my ($i);
 
     for ($i = $#{$offsets} - 1; $i >= 0; $i--)
     {
-        if ($offsets->[$i] or $i == 0)
+        if ((!$isconstraint || $offsets->[$i]) && $offsets->[$i] != $last)
         {
             unshift(@{$dest}, substr($dat, $offsets->[$i], $last - $offsets->[$i]));
             $last = $offsets->[$i];
@@ -491,10 +491,10 @@ sub read_pass
     { $fh->read($pass->{'passConstraintCode'}, $pass->{'passConstraintLen'}); }
     $fh->read($dat, $oconstraints[-1]);
     $pass->{'constraintCode'} = [];
-    chopcode($pass->{'constraintCode'}, $dat, \@oconstraints);
+    chopcode($pass->{'constraintCode'}, $dat, \@oconstraints, 1);
     $fh->read($dat, $oactions[-1]);
     $pass->{'actionCode'} = [];
-    chopcode($pass->{'actionCode'}, $dat, \@oactions);
+    chopcode($pass->{'actionCode'}, $dat, \@oactions, 0);
     return $pass;
 }
 
@@ -607,9 +607,11 @@ sub pack_code
 
 sub packcode
 {
-    my ($code) = @_;
+    my ($code, $isconstraint) = @_;
     my ($dat, $c, $res);
 
+    $c = 1;
+    $dat = "\000";
     foreach (@{$code})
     {
         if ($_)
@@ -619,7 +621,7 @@ sub packcode
             $c += length($_);
         }
         else
-        { push(@{$res}, 0); }
+        { push(@{$res}, $isconstraint ? 0 : $c); }
     }
     push(@{$res}, $c);
     return ($res, $dat);
@@ -669,8 +671,8 @@ sub out_pass
     $fh->print(pack("C*", @{$pass->{'rulePreContexts'}}));
     $fh->print(TTF_Pack("CS", 0, $pass->{'passConstraintLen'}));
     my ($oconstraints, $oactions);
-    ($oconstraints, $dat) = packcode($pass->{'constraintCode'});
-    ($oactions, $actiondat) = packcode($pass->{'actionCode'});
+    ($oconstraints, $dat) = packcode($pass->{'constraintCode'}, 1);
+    ($oactions, $actiondat) = packcode($pass->{'actionCode'}, 0);
 #    printf "constraint offsets @ %X\n", $fh->tell();
     $fh->print(pack("n*", @{$oconstraints}));
 #    printf "action offsets @ %X\n", $fh->tell();
@@ -786,7 +788,7 @@ sub out
         {
             
             my ($num) = scalar @{$nonlinclasses[$i-$numlin]};
-            my (@bin) = TTF_bininfo($num/2, 4);
+            my (@bin) = TTF_bininfo($num/2, 1);
             $fh->print(TTF_Pack("SSSS", @bin));
             $fh->print(pack("n*", @{$nonlinclasses[$i-$numlin]}));
         }
