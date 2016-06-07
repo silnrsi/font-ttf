@@ -296,7 +296,7 @@ sub out
     }
     else
     {
-        $self->{'Version'} = 0x00010000 if ($self->{'Version'} > 0x00010000);
+        $self->{'Version'} = 0x00010000;
         if ($new_gdef || defined $self->{'MARKS'})
         { $fh->print(TTF_Pack('LSSSS', $self->{'Version'}, 0, 0, 0, 0)); }
         else
