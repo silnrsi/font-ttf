@@ -70,12 +70,7 @@ To tidy up, type:
 
     make realclean
 
-Win32 users should use pmake instead of make. Alternatively installation can be
-done on Win32 by typing:
-
-    Setup
-
-Or using the install feature in tools like WinZip.
+Windows users should use dmake instead of make.
 
 =head1 CHANGES
 
@@ -92,7 +87,7 @@ Martin Hosken L<http://scripts.sil.org/FontUtils>.
 
 =head1 LICENSING
 
-Copyright (c) 1998-2014, SIL International (http://www.sil.org) 
+Copyright (c) 1998-2016, SIL International (http://www.sil.org) 
 
 This module is released under the terms of the Artistic License 2.0. 
 For details, see the full text of the license in the file LICENSE.
