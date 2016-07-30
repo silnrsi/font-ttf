@@ -57,15 +57,15 @@ if ($^O eq 'linux')
     
         $res = <<"EOT";
 debsrc: dist
-    rm -fr $self->{'DISTVNAME'}
-    rm -fr $package
-    rm -fr $fpackage
-    tar xvzf $self->{'DISTVNAME'}.tar.gz
-    cp -r $self->{'DISTVNAME'} $package
-    tar cvzf ${package}_${pversion}.orig.tar.gz $package
-    cp -r $package $fpackage
-    cp -a debian $fpackage
-    cd $fpackage && dch -v $pversion "interim dev release" && dpkg-buildpackage -S
+	rm -fr $self->{'DISTVNAME'}
+	rm -fr $package
+	rm -fr $fpackage
+	tar xvzf $self->{'DISTVNAME'}.tar.gz
+	cp -r $self->{'DISTVNAME'} $package
+	tar cvzf ${package}_${pversion}.orig.tar.gz $package
+	cp -r $package $fpackage
+	cp -a debian $fpackage
+	cd $fpackage && dch -v $pversion "interim dev release" && dpkg-buildpackage -S
 
 # make deb builds an interim deb from svn source for release
 deb: deb-base
@@ -74,9 +74,9 @@ EOT
         foreach my $d (split(' ', $opt_d))
         {
             $res .= <<"EOT";
-    mkdir -p dists/$d   
-    dch -D $d -v $pversion-$opt_v -m -b -c $fpackage/debian/changelog "Auto build from perl for $d"
-    cd $fpackage && pdebuild --buildresult ../dists/$d -- --basetgz /var/cache/pbuilder/base-$d.tgz $pbuilderopts{$d}
+	mkdir -p dists/$d   
+	dch -D $d -v $pversion-$opt_v -m -b -c $fpackage/debian/changelog "Auto build from perl for $d"
+	cd $fpackage && pdebuild --buildresult ../dists/$d -- --basetgz /var/cache/pbuilder/base-$d.tgz $pbuilderopts{$d}
 EOT
         }
     
