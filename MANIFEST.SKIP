@@ -1,4 +1,5 @@
 blib/
+.git/
 \.\$\$\$
 \.tmp
 \.temp
