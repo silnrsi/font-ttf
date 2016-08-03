@@ -88,7 +88,6 @@ EOT
 my %makeinfo = (
         NAME => 'Font::TTF',
         VERSION_FROM => 'lib/Font/TTF.pm',
-#        VERSION => "0.38",
 #        HTMLLIBPODS => {map {my $t = $_; $t=~s/\..*?$/.html/o; $t='blib/Html/'.$t; $_ => $t;} @theselibs},
 #        HTMLSCRIPTPODS => {map {my $t=$_; $t=~s/\..*?$/.html/o; $t='blib/Html/'.$t; $_ => $t;} @scripts},
         AUTHOR => "martin_hosken\@sil.org",
@@ -96,6 +95,16 @@ my %makeinfo = (
         LICENSE => "artistic_2",
         PREREQ_PM => {
             'IO::String' => 0
+        },
+        META_MERGE => {
+          'meta-spec' => { version => 2 },
+          resources => {
+            repository => {
+              type => 'git',
+              url => 'https://github.com/silnrsi/font-ttf.git',
+              web => 'https://github.com/silnrsi/font-ttf',
+            }
+          }
         },
         @extras
     );

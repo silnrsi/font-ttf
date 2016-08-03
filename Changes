@@ -1,10 +1,11 @@
 1.06 (in development)
 
 * Source repo moved from Subversion to Github
+* OpenType script and lang tags updated from ISO/IEC 14496-22:2015, draft amendment 2
 * Various POD improvements
 * Add deepcopy mode to Dumper::ttfdump()
 * Bug fixes
-*    Now installs on Windows Perl 5.22 and up
+*    Wasn't installing on Windows Perl 5.22 and up
 *    Reading mark-to-ligature lookups would crash if anchors were omitted
 *    Incorrect extension lookup structure
 *    Multiple fixes in Silf table processing
