@@ -1,0 +1,19 @@
+# Common perl text files
+*.t text
+*.pl text
+*.pm text
+*.pod text
+*.txt text
+*.TXT text
+Makefile.* text
+MANIFEST.* text
+
+# Specials related to font tools
+*.gdl text
+*.gdh text
+*.fea text
+*.vtp text
+*.xsl text
+*.xml text
+*.cfg text
+*.rmp text
