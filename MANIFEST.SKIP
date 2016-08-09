@@ -13,7 +13,7 @@ Build/
 exes/
 \.cvsignore
 ^#
-\.git/
+(^|/)\.git
 \.svn/
 Makefile$
 \.par$
