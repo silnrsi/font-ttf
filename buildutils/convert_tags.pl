@@ -33,7 +33,7 @@ while (<>)
         my ($type, $name, $tag) = ($1, $2, $3);
         print "\n\n//$type\n\n" if $type != $which;
         $which = $type;
-        print "    \"$name\" => \"$tag\",\n";
+        print "    \"$name\" => '$tag',\n";
     }
 	
 	elsif (/^'(.{1,4})'\s+(.*)$/o)
@@ -41,7 +41,7 @@ while (<>)
 		# Special reverse formatting for feature names
 		my ($name, $tag) = ($2, $1);
 		$tag .= " " x (4 - length($tag));	# pad tag
-		print "    \"$name\" => \"$tag\",\n";
+		print "    \"$name\" => '$tag',\n";
 	}
 	
 	elsif (/^'(.{1,4})-(.{1,4})'\s+(.*)$/o)
@@ -53,7 +53,7 @@ while (<>)
 			$tag =~ /(\d+)$/;
 			my $index = $1;
 			$tag .= " " x (4 - length($tag));	# pad tag
-			print "    \"$name $index\" => \"$tag\",\n";
+			print "    \"$name $index\" => '$tag',\n";
 		}
 	}
 	elsif (/^([^\t]*)\t([\w]{2,4})(?: +(\([^\t]*\)))?(?:\t(.*))?$/o)
@@ -63,7 +63,7 @@ while (<>)
 		$name =~ s/\s*\(Standard\)\s*//oi;	# Remove "(Standard)" from French and German entries
 		$name .= " $extra" if defined $extra;   # Dhivehi has "(deprecated)" after the "DHV " tag -- move it to name.
 		$tag .= " " x (4 - length($tag)); 	# pad tag
-		print "    \"$name\" => \"$tag\",\n";
+		print "    \"$name\" => '$tag',\n";
 		if (defined $iso639list)
 		{
 			$iso639list =~ s/,//g;
@@ -79,7 +79,7 @@ while (<>)
 print "\n";
 foreach my $tag (sort keys(%iso639list))
 {
-	printf "    \"$tag\" => \"$iso639list{$tag}\",\n";
+	printf "    '$tag' => '$iso639list{$tag}',\n";
 }
 
 =head1 AUTHOR
