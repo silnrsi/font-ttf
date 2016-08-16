@@ -9,6 +9,7 @@ Build.bat
 .last_cover_stats
 /Makefile
 /Makefile.old
+/MANIFEST
 /META.yml
 /META.json
 /MYMETA.yml
@@ -22,3 +23,5 @@ nytprof.out
 *.zip
 *.tar
 *.tar.gz
+*.swp
+.DS_Store
