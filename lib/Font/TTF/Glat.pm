@@ -27,6 +27,18 @@ use strict;
 use vars qw(@ISA);
 @ISA = qw(Font::TTF::Table);
 
+sub bitcount
+{
+    my ($val) = @_;
+    my ($res) = 0;
+    while ($val > 0)
+    {
+        $res ++ if ($val & 1);
+        $val >>= 1;
+    }
+    return $res;
+}
+
 sub read
 {
     my ($self) = @_;
@@ -43,6 +55,12 @@ sub read
     $fh->seek($base, 0);
     $fh->read($dat, 4);
     ($self->{'Version'}) = TTF_Unpack('v', $dat);
+    if ($self->{'Version'} >= 3)
+    {
+        $fh->read($dat, 4);
+        my ($flags) = unpack('N', $dat);
+        $self->{'hasOctaboxes'} = $flags & 1;
+    }
 
     for ($i = 0; $i < $numGlyphs; $i++)
     {
@@ -51,20 +69,39 @@ sub read
         my ($first, $number, @vals);
         $fh->seek($base + $gloc->{'locations'}[$i], 0);
         $fh->read($dat, $num);
+        if ($self->{'Version'} >= 3 and $self->{'hasOctaboxes'})
+        {
+            my ($bmap, $si, $sa, $di, $da) = unpack("nC4", substr($dat, $j, 6));
+            my $o = {};
+            $self->{'octaboxes'}[$i] = $o;
+            $o->{'bitmap'} = $bmap;
+            $o->{'si'} = $si;
+            $o->{'sa'} = $sa;
+            $o->{'di'} = $di;
+            $o->{'da'} = $da;
+            $j += 6;
+            my $numsubs = bitcount($bmap);
+            for (my $k = 0; $k < $numsubs; $k++)
+            {
+                push @{$o->{'subboxes'}}, [unpack("C8", substr($dat, $j, 8))];
+                $j += 8;
+            }
+        }
         while ($j < $num)
         {
-            if ($self->{'Version'} > 1)
-            {
-                ($first, $number) = unpack("n2", substr($dat, $j, 4));
-                @vals = unpack("n$number", substr($dat, $j + 4, $number * 2));
-                $j += ($number + 2) * 2;
-            }
-            else
+            if ($self->{'Version'} < 2)
             {
                 ($first, $number) = unpack("C2", substr($dat, $j, 2));
                 @vals = unpack("n$number", substr($dat, $j + 2, $number * 2));
                 $j += $number * 2 + 2;
             }
+            else
+            {
+                ($first, $number) = unpack("n2", substr($dat, $j, 4));
+                @vals = unpack("n$number", substr($dat, $j + 4, $number * 2));
+                $j += ($number + 2) * 2;
+            }
+        
             for (my $k = 0; $k < $number; $k++)
             { $self->{'attribs'}[$i]{$first + $k} = $vals[$k]; }
         }
@@ -81,7 +118,12 @@ sub out
 
     return $self->SUPER::out($fh) unless ($self->{' read'});
     $numGlyphs = scalar @{$self->{'attribs'}};
-    if ($gloc->{'numAttrib'} > 256)
+    if ($self->{'hasOctaboxes'})
+    {
+        $self->{'Version'} = 3;
+        $type = "n";
+    }
+    elsif ($gloc->{'numAttrib'} > 256)
     {
         $self->{'Version'} = 2;
         $type = "n";
@@ -94,9 +136,18 @@ sub out
 
     $gloc->{'locations'} = [];
     $fh->print(TTF_Pack('v', $self->{'Version'}));
+    if ($self->{'Version'} >= 3)
+    { $fh->print(pack('N', $self->{'hasOctaboxes'})); }
     for ($i = 0; $i < $numGlyphs; $i++)
     {
-        my (@a) = sort {$a <=> $b} keys %{$self->{'attribs'}[$i]};
+        if ($self->{'hasOctaboxes'})
+        {
+            my $o = $self->{'octaboxes'}[$i];
+            $fh->print(pack("nC4", $o->{'bitmap'}, $o->{'si'}, $o->{'sa'}, $o->{'di'}, $o->{'da'}));
+            foreach my $s (@{$o->{'subboxes'}})
+            { $fh->print(pack("C8", @{$s})); }
+        }
+        my (@a) = grep {$_ != 0} sort {$a <=> $b} keys %{$self->{'attribs'}[$i]};
         push(@{$gloc->{'locations'}}, $fh->tell() - $base);
         while (@a)
         {
@@ -107,7 +158,7 @@ sub out
             { $next = shift(@a); }
             for ($j = $first; $j <= $next; $j++)
             { push (@v, $self->{'attribs'}[$i]{$j}); }
-            { $fh->print(pack("${type}2n*", $first, $next - $first + 1, @v)); }
+            $fh->print(pack("${type}2n*", $first, $next - $first + 1, @v));
         }
     }
     push(@{$gloc->{'locations'}}, $fh->tell() - $base);
