@@ -69,7 +69,7 @@ sub read
         my ($first, $number, @vals);
         $fh->seek($base + $gloc->{'locations'}[$i], 0);
         $fh->read($dat, $num);
-        if ($self->{'Version'} >= 3 and $self->{'hasOctaboxes'})
+        if ($self->{'Version'} >= 3 and $self->{'hasOctaboxes'} and $num > 5)
         {
             my ($bmap, $si, $sa, $di, $da) = unpack("nC4", substr($dat, $j, 6));
             my $o = {};
@@ -140,6 +140,7 @@ sub out
     { $fh->print(pack('N', $self->{'hasOctaboxes'})); }
     for ($i = 0; $i < $numGlyphs; $i++)
     {
+        push(@{$gloc->{'locations'}}, $fh->tell() - $base);
         if ($self->{'hasOctaboxes'})
         {
             my $o = $self->{'octaboxes'}[$i];
@@ -148,7 +149,6 @@ sub out
             { $fh->print(pack("C8", @{$s})); }
         }
         my (@a) = grep {$_ != 0} sort {$a <=> $b} keys %{$self->{'attribs'}[$i]};
-        push(@{$gloc->{'locations'}}, $fh->tell() - $base);
         while (@a)
         {
             my ($first) = shift(@a);
