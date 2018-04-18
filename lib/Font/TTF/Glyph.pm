@@ -210,6 +210,7 @@ use strict;
 use vars qw(%fields @field_info);
 use Font::TTF::Utils;
 use Font::TTF::Table;
+use POSIX qw(round);
 
 @field_info = (
     'numberOfContours' => 's', 
@@ -721,10 +722,10 @@ sub update_bbox
             $miny = $gny if $gny < $miny;
         }
     }
-    $self->{'xMax'} = $maxx;
-    $self->{'xMin'} = $minx;
-    $self->{'yMax'} = $maxy;
-    $self->{'yMin'} = $miny;
+    $self->{'xMax'} = round($maxx);
+    $self->{'xMin'} = round($minx);
+    $self->{'yMax'} = round($maxy);
+    $self->{'yMin'} = round($miny);
     $self;
 }
 
