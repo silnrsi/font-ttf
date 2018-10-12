@@ -4417,6 +4417,12 @@ sub parse
 			{
 				push @USVs, unpack ('U*', $agl{$gname});
 			}
+			else
+			{
+			    # Non-conformant name
+			    undef @USVs;
+			    last;
+			}
 		}
 	}
 	return \@USVs unless wantarray;
