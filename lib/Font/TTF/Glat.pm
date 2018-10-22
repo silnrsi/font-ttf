@@ -48,7 +48,7 @@ sub read
     my ($fh) = $self->{' INFILE'};
     my ($numGlyphs);
     my ($base) = $self->{' OFFSET'};
-    my ($dat, $i);
+    my ($tabledat, $dat, $i);
 
     $gloc->read;
     $numGlyphs = $gloc->{'numGlyphs'};
@@ -59,7 +59,27 @@ sub read
     {
         $fh->read($dat, 4);
         my ($flags) = unpack('N', $dat);
+        if (($flags >> 27) != 0)
+        {
+            require Compress::LZ4;
+            Compress::LZ4->import( qw(decompress) );
+            $fh->read($dat, $self->{' LENGTH'} - 8);
+            $tabledat = decompress($dat, $flags & 0x7FFFFFF);
+            if (length($tabledat) != ($flags & 0x7FFFFFF))
+            { die ("Bad table decompression of table length: " . length($tabledat) . " wanting " . ($flags & 0x7FFFFFF)); }
+            $flags = unpack('N', substr($tabledat, 4, 4));
+            $tabledat = substr($tabledat, 8);
+        }
+        else
+        {
+            $fh->read($tabledat, $self->{' LENGTH'} - 8);
+        }
         $self->{'hasOctaboxes'} = $flags & 1;
+
+    }
+    else
+    {
+        $fh->read($tabledat, $self->{' LENGTH'} - 4);
     }
 
     for ($i = 0; $i < $numGlyphs; $i++)
@@ -67,8 +87,9 @@ sub read
         my ($j) = 0;
         my ($num) = $gloc->{'locations'}[$i + 1] - $gloc->{'locations'}[$i];
         my ($first, $number, @vals);
-        $fh->seek($base + $gloc->{'locations'}[$i], 0);
-        $fh->read($dat, $num);
+        #$fh->seek($base + $gloc->{'locations'}[$i], 0);
+        #$fh->read($dat, $num);
+        $dat = substr($tabledat, $gloc->{'locations'}[$i] - ($self->{'Version'} >= 3 ? 8 : 4), $num);
         if ($self->{'Version'} >= 3 and $self->{'hasOctaboxes'} and $num > 5)
         {
             my ($bmap, $si, $sa, $di, $da) = unpack("nC4", substr($dat, $j, 6));
