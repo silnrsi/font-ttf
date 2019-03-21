@@ -522,7 +522,8 @@ sub out
     else
     {
         ($numTables, $sRange, $eSel, $shift) = Font::TTF::Utils::TTF_bininfo($numTables, 16);
-        $dat = pack("Nnnnn", 1 << 16, $numTables, $sRange, $eSel, $shift);
+        $dat = defined $self->{'CFF '} ? pack("A4", "OTTO") : pack("N", 1 <<16);
+        $dat .= pack("nnnn", $numTables, $sRange, $eSel, $shift);
         $fh->print($dat);
         $msum = unpack("%32N*", $dat);
     }
