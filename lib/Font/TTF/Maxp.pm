@@ -39,6 +39,7 @@ No others beyond those specified in the standard:
 
 use strict;
 use vars qw(@ISA %fields @field_info);
+require Font::TTF::Table;
 use Font::TTF::Utils;
 
 @ISA = qw(Font::TTF::Table);

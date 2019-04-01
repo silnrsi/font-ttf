@@ -28,6 +28,7 @@ Hash of property values keyed by glyph number
 
 use strict;
 use vars qw(@ISA);
+require Font::TTF::Table;
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
 use Font::TTF::Segarr;

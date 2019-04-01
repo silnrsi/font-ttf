@@ -13,6 +13,7 @@ for fpgm type information for those processes brave enough to address hinting.
 
 use strict;
 use vars qw(@ISA $VERSION);
+require Font::TTF::Table;
 
 @ISA = qw(Font::TTF::Table);
 

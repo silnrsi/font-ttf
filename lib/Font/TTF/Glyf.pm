@@ -24,6 +24,8 @@ This class is used when writing the glyphs though.
 
 use strict;
 use vars qw(@ISA);
+require Font::TTF::Table;
+
 @ISA = qw(Font::TTF::Table);
 
 =head2 $t->read

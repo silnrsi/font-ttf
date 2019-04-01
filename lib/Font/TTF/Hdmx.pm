@@ -32,6 +32,7 @@ Number of device tables.
 
 use strict;
 use vars qw(@ISA);
+require Font::TTF::Table;
 
 @ISA = qw(Font::TTF::Table);
 

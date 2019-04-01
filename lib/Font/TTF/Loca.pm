@@ -41,6 +41,8 @@ defaults to L<Font::TTF::Glyph>.
 
 use strict;
 use vars qw(@ISA);
+require Font::TTF::Table;
+
 @ISA = qw(Font::TTF::Table);
 
 require Font::TTF::Glyph;

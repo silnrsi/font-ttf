@@ -13,6 +13,7 @@ for prep type information for those processes brave enough to address hinting.
 
 use strict;
 use vars qw(@ISA $VERSION);
+require Font::TTF::Table;
 use Font::TTF::Utils;
 
 @ISA = qw(Font::TTF::Table);

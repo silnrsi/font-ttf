@@ -121,6 +121,7 @@ Insertion table:
 
 use strict;
 use vars qw(@ISA);
+require Font::TTF::Table;
 use Font::TTF::Utils;
 use Font::TTF::AATutils;
 use IO::File;

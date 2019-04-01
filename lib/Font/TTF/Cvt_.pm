@@ -27,6 +27,7 @@ This is an array of CVT values. Thus access to the CVT is via:
 
 use strict;
 use vars qw(@ISA $VERSION);
+require Font::TTF::Table;
 use Font::TTF::Utils;
 
 @ISA = qw(Font::TTF::Table);

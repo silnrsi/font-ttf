@@ -24,6 +24,7 @@ Hash keyed by descriptor tags
 
 use strict;
 use vars qw(@ISA %fields);
+require Font::TTF::Table;
 use Font::TTF::Utils;
 
 @ISA = qw(Font::TTF::Table);

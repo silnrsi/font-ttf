@@ -46,7 +46,6 @@ use strict;
 use vars qw(@ISA);
 
 use Font::TTF::Utils;
-
 require Font::TTF::Table;
 
 @ISA = qw(Font::TTF::Table);
