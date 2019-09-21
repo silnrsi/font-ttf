@@ -225,6 +225,49 @@ sub read
             $fh->read($dat, $num << 1);
             for ($j = 0; $j < $num; $j++)
             { $s->{'val'}{$start + $j} = unpack("n", substr($dat, $j << 1, 2)); }
+        } elsif ($form == 14)
+        {
+            $fh->read($dat, 8);
+            my ($len, $num) = unpack('N2', $dat);
+            my $pos = $fh->tell() - $s->{LOC};
+            $fh->seek($s->{'LOC'}, 0);
+            $fh->read($dat, $len);
+            for (1 .. $num)
+            {
+                # VariationSelector Record
+                my @uvs = unpack("C3", substr($dat, $pos, 3)); $pos += 3;
+                my @pos = unpack("N2", substr($dat, $pos, 8)); $pos += 8;
+                my $uvs = $uvs[0] << 16 | $uvs[1] << 8 | $uvs[2];
+
+                # Default UVS Table
+                if (my $j = $pos[0])
+                {
+                    my ($n) = unpack("N1", substr($dat, $j, 4)); $j += 4;
+                    for (1 .. $n)
+                    {
+                        last if $j >= length $dat;
+                        my @st = unpack("C3", substr($dat, $j, 3)); $j += 3;
+                        my $ac = unpack("C1", substr($dat, $j, 1)); $j += 1;
+                        my $st = ($st[0] << 8 | $st[1]) << 8 | $st[2];
+                        $s->{'val'}{$st + $_, $uvs} = 0 for 0 .. $ac;
+                    }
+                }
+
+                # Non-Default UVS Table
+                if (my $j = $pos[1])
+                {
+                    my ($n) = unpack("N1", substr($dat, $j, 4)); $j += 4;
+                    for (1 .. $n)
+                    {
+                        last if $j >= length $dat;
+                        my @uv = unpack("C3", substr($dat, $j, 3)); $j += 3;
+                        my @id = unpack("C2", substr($dat, $j, 2)); $j += 2;
+                        my $uv = ($uv[0] << 8 | $uv[1]) << 8 | $uv[2];
+                        my $id = ($id[0] << 8 | $id[1]);
+                        $s->{'val'}{$uv, $uvs} = $id;
+                    }
+                }
+            }
         }
     }
     $self;
@@ -297,6 +340,57 @@ sub ms_enc
         return $s->{'Encoding'} if ($s->{'Platform'} == 3);
     }
     return undef;
+}
+
+
+=head2 $t->uvs_lookup($uni, [$uvs])
+
+Finds $uni with $uvs in a UVS table.  $uni and $uvs can be passed
+individually, but can also be passed as a single argument connected
+with "$;" that is equivalent to key of a $hash{$uni, $uvs}.
+
+=cut
+
+sub uvs_lookup
+{
+    my ($self, $uni, $uvs) = @_;
+
+    $self->find_uvs || return undef unless (defined $self->{' uvstable'});
+    ($uni, $uvs) = split $;, $uni unless $uvs;
+    if ($uvs) {
+        my $gid = $self->{' uvstable'}{'val'}{$uni, $uvs};
+        return $gid if $gid || !defined $gid;
+    }
+    # use ms_lookup for default uvs if gid is 0 and gid defined
+    return $self->ms_lookup($uni);
+}
+
+
+=head2 $t->find_uvs
+
+=cut
+
+sub find_uvs
+{
+    my ($self) = @_;
+    my ($i, $s, $alt, $found);
+
+    return $self->{' uvstable'} if defined $self->{' uvstable'};
+    $self->read;
+    for ($i = 0; $i < $self->{'Num'}; $i++)
+    {
+        $s = $self->{'Tables'}[$i];
+        next unless $s->{'Format'} == 14; # uvs
+        if ($s->{'Platform'} == 3)
+        {
+            $self->{' uvstable'} = $s;
+            return $s if ($s->{'Encoding'} == 10);
+            $found = 1 if ($s->{'Encoding'} == 1);
+        } elsif ($s->{'Platform'} == 0 || ($s->{'Platform'} == 2 && $s->{'Encoding'} == 1))
+        { $alt = $s; }
+    }
+    $self->{' uvstable'} = $alt if ($alt && !$found);
+    $self->{' uvstable'};
 }
 
 
