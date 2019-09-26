@@ -13,6 +13,11 @@ a hash against codepoint. Thus for a given table:
 
 Note that C<$code> should be a true value (0x1234) rather than a string representation.
 
+Use code and selector as hash keys in the Format 14 Unicode Variation
+Sequences table:
+
+    $gid = $font->{'cmap'}->{'Tables'}[0]{'val'}{$code, $selector};
+
 =head1 INSTANCE VARIABLES
 
 The instance variables listed here are not preceded by a space due to their
@@ -229,15 +234,14 @@ sub read
         {
             $fh->read($dat, 8);
             my ($len, $num) = unpack('N2', $dat);
-            my $pos = $fh->tell() - $s->{LOC};
+            my $pos = $fh->tell() - $s->{'LOC'};
             $fh->seek($s->{'LOC'}, 0);
             $fh->read($dat, $len);
             for (1 .. $num)
             {
                 # VariationSelector Record
-                my @uvs = unpack("C3", substr($dat, $pos, 3)); $pos += 3;
+                my $uvs = unpack("N1", "\0".substr($dat, $pos, 3)); $pos += 3;
                 my @pos = unpack("N2", substr($dat, $pos, 8)); $pos += 8;
-                my $uvs = $uvs[0] << 16 | $uvs[1] << 8 | $uvs[2];
 
                 # Default UVS Table
                 if (my $j = $pos[0])
@@ -246,9 +250,8 @@ sub read
                     for (1 .. $n)
                     {
                         last if $j >= length $dat;
-                        my @st = unpack("C3", substr($dat, $j, 3)); $j += 3;
+                        my $st = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
                         my $ac = unpack("C1", substr($dat, $j, 1)); $j += 1;
-                        my $st = ($st[0] << 8 | $st[1]) << 8 | $st[2];
                         $s->{'val'}{$st + $_, $uvs} = 0 for 0 .. $ac;
                     }
                 }
@@ -260,10 +263,8 @@ sub read
                     for (1 .. $n)
                     {
                         last if $j >= length $dat;
-                        my @uv = unpack("C3", substr($dat, $j, 3)); $j += 3;
-                        my @id = unpack("C2", substr($dat, $j, 2)); $j += 2;
-                        my $uv = ($uv[0] << 8 | $uv[1]) << 8 | $uv[2];
-                        my $id = ($id[0] << 8 | $id[1]);
+                        my $uv = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
+                        my $id = unpack("n1", substr($dat, $j, 2)); $j += 2;
                         $s->{'val'}{$uv, $uvs} = $id;
                     }
                 }
@@ -345,9 +346,9 @@ sub ms_enc
 
 =head2 $t->uvs_lookup($uni, [$uvs])
 
-Finds $uni with $uvs in a UVS table.  $uni and $uvs can be passed
-individually, but can also be passed as a single argument connected
-with "$;" that is equivalent to key of a $hash{$uni, $uvs}.
+Finds $uni with $uvs in a UVS table. $uni and $uvs can also be passed
+as a single argument connected with $; that is equivalent to key of
+the $hash{$uni, $uvs}.
 
 =cut
 
@@ -425,11 +426,15 @@ sub out
         $s = $self->{'Tables'}[$i];
         if ($s->{'Format'} < 8)
         { @keys = sort {$a <=> $b} grep { $_ <= 0xFFFF} keys %{$s->{'val'}}; }
+        elsif ($s->{'Format'} == 14)
+        { }
         else
         { @keys = sort {$a <=> $b} keys %{$s->{'val'}}; }
         $s->{' outloc'} = $fh->tell();
         if ($s->{'Format'} < 8)
         { $fh->print(pack("n3", $s->{'Format'}, 0, $s->{'Ver'})); }       # come back for length
+        elsif ($s->{'Format'} == 14)
+        { $fh->print(pack("n1N1", $s->{'Format'}, 0)); }
         else
         { $fh->print(pack("n2N2", $s->{'Format'}, 0, 0, $s->{'Ver'})); }
             
@@ -659,6 +664,72 @@ sub out
         {
             $fh->print(pack('N2', $keys[0], $keys[-1] - $keys[0] + 1));
             $fh->print(pack('n*', $s->{'val'}{$keys[0] .. $keys[-1]}));
+        } elsif ($s->{'Format'} == 14)
+        {
+            my %u;
+            while (my ($uv_uvs, $id) = each %{$s->{'val'}}) {
+                my ($uv, $uvs) = split $;, $uv_uvs;
+                push @{$u{$uvs} //= []}, [ $uv + 0, $id ];
+            }
+            my @uvs = sort keys %u;
+            $fh->print(pack("N1", scalar @uvs));
+
+            # make space for VariationSelector Records
+            my $vsr_loc = $fh->tell();
+            $fh->seek((3 + 4 + 4) * @uvs, 1);
+
+            my @vsr = ();
+            for my $uvs (@uvs) {
+                my @u = sort { $a->[0] <=> $b->[0] } @{$u{$uvs}};
+
+                my @dut;                # rows of Default UVS table
+                my @nut;                # rows of Non-Default UVS table
+
+                while (@u) {
+                    my ($uv, $id) = @{shift(@u)};
+                    if ($id == 0) {
+                        if (@dut && $dut[-1]->[0] + $dut[-1]->[1] + 1 == $uv) {
+                            $dut[-1]->[1]++;
+                        } else {
+                            push @dut, [ $uv, 0 ];
+                        }
+                    } else {
+                        push @nut, [ $uv, $id ];
+                    }
+                }
+
+                # Default UVS table
+                my $dut_off = 0;
+                if (@dut) {
+                    $dut_off = $fh->tell() - $s->{' outloc'};
+                    $fh->print(pack("N1", scalar @dut));
+                    for (@dut) {
+                        $fh->print(pack("C3", unpack("x1C3", pack("N1", $_->[0]))));
+                        $fh->print(pack("C1", $_->[1]));
+                    }
+                }
+
+                # Non-Default UVS table
+                my $nut_off = 0;
+                if (@nut) {
+                    $nut_off = $fh->tell() - $s->{' outloc'};
+                    $fh->print(pack("N1", scalar @nut));
+                    for (@nut) {
+                        $fh->print(pack("C3", unpack("x1C3", pack("N1", $_->[0]))));
+                        $fh->print(pack("n1", $_->[1]));
+                    }
+                }
+
+                push @vsr, [ $uvs, $dut_off, $nut_off ];
+            }
+
+            # VariationSelector Records
+            $fh->seek($vsr_loc, 0);
+            for (@vsr) {
+                $fh->print(pack("C3", unpack("x1C3", pack("N1", $_->[0]))));
+                $fh->print(pack("N2", $_->[1], $_->[2]));
+            }
+            $fh->seek(0, 2);
         }
 
         $loc = $fh->tell();
@@ -666,6 +737,10 @@ sub out
         {
             $fh->seek($s->{' outloc'} + 2, 0);
             $fh->print(pack("n", $loc - $s->{' outloc'}));
+        } elsif ($s->{'Format'} == 14)
+        {
+            $fh->seek($s->{' outloc'} + 2, 0);
+            $fh->print(pack("N", $loc - $s->{' outloc'}));
         } else
         {
             $fh->seek($s->{' outloc'} + 4, 0);
