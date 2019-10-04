@@ -13,10 +13,10 @@ a hash against codepoint. Thus for a given table:
 
 Note that C<$code> should be a true value (0x1234) rather than a string representation.
 
-Use code and selector as hash keys in the Format 14 Unicode Variation
-Sequences table:
+In the Unicode Variation Sequences table, format 14, the actual cmap
+is held in hashes of selectors and codepoints as follows:
 
-    $gid = $font->{'cmap'}->{'Tables'}[0]{'val'}{$code, $selector};
+    $gid = $font->{'cmap'}{'Tables'}[0]{'val'}{$selector}{$code};
 
 =head1 INSTANCE VARIABLES
 
@@ -252,7 +252,7 @@ sub read
                         last if $j >= length $dat;
                         my $st = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
                         my $ac = unpack("C1", substr($dat, $j, 1)); $j += 1;
-                        $s->{'val'}{$st + $_, $uvs} = 0 for 0 .. $ac;
+                        $s->{'val'}{$uvs}{$st + $_} = 0 for 0 .. $ac;
                     }
                 }
 
@@ -263,9 +263,9 @@ sub read
                     for (1 .. $n)
                     {
                         last if $j >= length $dat;
-                        my $uv = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
-                        my $id = unpack("n1", substr($dat, $j, 2)); $j += 2;
-                        $s->{'val'}{$uv, $uvs} = $id;
+                        my $uni = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
+                        my $id  = unpack("n1", substr($dat, $j, 2)); $j += 2;
+                        $s->{'val'}{$uvs}{$uni} = $id;
                     }
                 }
             }
@@ -344,30 +344,32 @@ sub ms_enc
 }
 
 
-=head2 $t->uvs_lookup($uni, [$uvs])
+=head2 $t->uvs_lookup($uvs, $uni)
 
-Finds $uni with $uvs in a UVS table. $uni and $uvs can also be passed
-as a single argument connected with $; that is equivalent to key of
-the $hash{$uni, $uvs}.
+Finds a UVS table and looks up the given $uvs and $uni in it to find
+the glyph id.
 
 =cut
 
 sub uvs_lookup
 {
-    my ($self, $uni, $uvs) = @_;
+    my ($self, $uvs, $uni) = @_;
 
     $self->find_uvs || return undef unless (defined $self->{' uvstable'});
-    ($uni, $uvs) = split $;, $uni unless $uvs;
-    if ($uvs) {
-        my $gid = $self->{' uvstable'}{'val'}{$uni, $uvs};
-        return $gid if $gid || !defined $gid;
+
+    if ($uni) {
+        my $id = $self->{' uvstable'}{'val'}{$uvs}{$uni};
+        $id = $self->ms_lookup($uni) if defined $id && $id == 0; # default uvs
+        return $id;
     }
-    # use ms_lookup for default uvs if gid is 0 and gid defined
-    return $self->ms_lookup($uni);
+
+    return $self->{' uvstable'}{'val'}{$uvs};
 }
 
 
 =head2 $t->find_uvs
+
+Finds a UVS table and returns it.
 
 =cut
 
@@ -381,16 +383,11 @@ sub find_uvs
     for ($i = 0; $i < $self->{'Num'}; $i++)
     {
         $s = $self->{'Tables'}[$i];
-        next unless $s->{'Format'} == 14; # uvs
-        if ($s->{'Platform'} == 3)
-        {
-            $self->{' uvstable'} = $s;
-            return $s if ($s->{'Encoding'} == 10);
-            $found = 1 if ($s->{'Encoding'} == 1);
-        } elsif ($s->{'Platform'} == 0 || ($s->{'Platform'} == 2 && $s->{'Encoding'} == 1))
-        { $alt = $s; }
+        if ($s->{'Format'} == 14) {
+            $found = $s, last if ($s->{'Platform'} == 0 && $s->{'Encoding'} == 5);
+        }
     }
-    $self->{' uvstable'} = $alt if ($alt && !$found);
+    $self->{' uvstable'} = $found if ($found);
     $self->{' uvstable'};
 }
 
@@ -666,12 +663,7 @@ sub out
             $fh->print(pack('n*', $s->{'val'}{$keys[0] .. $keys[-1]}));
         } elsif ($s->{'Format'} == 14)
         {
-            my %u;
-            while (my ($uv_uvs, $id) = each %{$s->{'val'}}) {
-                my ($uv, $uvs) = split $;, $uv_uvs;
-                push @{$u{$uvs} //= []}, [ $uv + 0, $id ];
-            }
-            my @uvs = sort keys %u;
+            my @uvs = sort keys %{$s->{'val'}};
             $fh->print(pack("N1", scalar @uvs));
 
             # make space for VariationSelector Records
@@ -680,21 +672,21 @@ sub out
 
             my @vsr = ();
             for my $uvs (@uvs) {
-                my @u = sort { $a->[0] <=> $b->[0] } @{$u{$uvs}};
+                my @uni = sort keys %{$s->{'val'}{$uvs}};
 
                 my @dut;                # rows of Default UVS table
                 my @nut;                # rows of Non-Default UVS table
 
-                while (@u) {
-                    my ($uv, $id) = @{shift(@u)};
+                for my $uni (@uni) {
+                    my $id = $s->{'val'}{$uvs}{$uni};
                     if ($id == 0) {
-                        if (@dut && $dut[-1]->[0] + $dut[-1]->[1] + 1 == $uv) {
+                        if (@dut && $dut[-1]->[0] + $dut[-1]->[1] + 1 == $uni) {
                             $dut[-1]->[1]++;
                         } else {
-                            push @dut, [ $uv, 0 ];
+                            push @dut, [ $uni, 0 ];
                         }
                     } else {
-                        push @nut, [ $uv, $id ];
+                        push @nut, [ $uni, $id ];
                     }
                 }
 
