@@ -13,6 +13,11 @@ a hash against codepoint. Thus for a given table:
 
 Note that C<$code> should be a true value (0x1234) rather than a string representation.
 
+In the Unicode Variation Sequences table, format 14, the actual cmap
+is held in hashes of selectors and codepoints as follows:
+
+    $gid = $font->{'cmap'}{'Tables'}[0]{'val'}{$selector}{$code};
+
 =head1 INSTANCE VARIABLES
 
 The instance variables listed here are not preceded by a space due to their
@@ -225,6 +230,45 @@ sub read
             $fh->read($dat, $num << 1);
             for ($j = 0; $j < $num; $j++)
             { $s->{'val'}{$start + $j} = unpack("n", substr($dat, $j << 1, 2)); }
+        } elsif ($form == 14)
+        {
+            $fh->read($dat, 8);
+            my ($len, $num) = unpack('N2', $dat);
+            my $pos = $fh->tell() - $s->{'LOC'};
+            $fh->seek($s->{'LOC'}, 0);
+            $fh->read($dat, $len);
+            for (1 .. $num)
+            {
+                # VariationSelector Record
+                my $uvs = unpack("N1", "\0".substr($dat, $pos, 3)); $pos += 3;
+                my @pos = unpack("N2", substr($dat, $pos, 8)); $pos += 8;
+
+                # Default UVS Table
+                if (my $j = $pos[0])
+                {
+                    my ($n) = unpack("N1", substr($dat, $j, 4)); $j += 4;
+                    for (1 .. $n)
+                    {
+                        last if $j >= length $dat;
+                        my $st = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
+                        my $ac = unpack("C1", substr($dat, $j, 1)); $j += 1;
+                        $s->{'val'}{$uvs}{$st + $_} = 0 for 0 .. $ac;
+                    }
+                }
+
+                # Non-Default UVS Table
+                if (my $j = $pos[1])
+                {
+                    my ($n) = unpack("N1", substr($dat, $j, 4)); $j += 4;
+                    for (1 .. $n)
+                    {
+                        last if $j >= length $dat;
+                        my $uni = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
+                        my $id  = unpack("n1", substr($dat, $j, 2)); $j += 2;
+                        $s->{'val'}{$uvs}{$uni} = $id;
+                    }
+                }
+            }
         }
     }
     $self;
@@ -300,6 +344,54 @@ sub ms_enc
 }
 
 
+=head2 $t->uvs_lookup($uvs, $uni)
+
+Finds a UVS table and looks up the given $uvs and $uni in it to find
+the glyph id.
+
+=cut
+
+sub uvs_lookup
+{
+    my ($self, $uvs, $uni) = @_;
+
+    $self->find_uvs || return undef unless (defined $self->{' uvstable'});
+
+    if ($uni) {
+        my $id = $self->{' uvstable'}{'val'}{$uvs}{$uni};
+        $id = $self->ms_lookup($uni) if defined $id && $id == 0; # default uvs
+        return $id;
+    }
+
+    return $self->{' uvstable'}{'val'}{$uvs};
+}
+
+
+=head2 $t->find_uvs
+
+Finds a UVS table and returns it.
+
+=cut
+
+sub find_uvs
+{
+    my ($self) = @_;
+    my ($i, $s, $alt, $found);
+
+    return $self->{' uvstable'} if defined $self->{' uvstable'};
+    $self->read;
+    for ($i = 0; $i < $self->{'Num'}; $i++)
+    {
+        $s = $self->{'Tables'}[$i];
+        if ($s->{'Format'} == 14) {
+            $found = $s, last if ($s->{'Platform'} == 0 && $s->{'Encoding'} == 5);
+        }
+    }
+    $self->{' uvstable'} = $found if ($found);
+    $self->{' uvstable'};
+}
+
+
 =head2 $t->out($fh)
 
 Writes out a cmap table to a filehandle. If it has not been read, then
@@ -331,11 +423,15 @@ sub out
         $s = $self->{'Tables'}[$i];
         if ($s->{'Format'} < 8)
         { @keys = sort {$a <=> $b} grep { $_ <= 0xFFFF} keys %{$s->{'val'}}; }
+        elsif ($s->{'Format'} == 14)
+        { }
         else
         { @keys = sort {$a <=> $b} keys %{$s->{'val'}}; }
         $s->{' outloc'} = $fh->tell();
         if ($s->{'Format'} < 8)
         { $fh->print(pack("n3", $s->{'Format'}, 0, $s->{'Ver'})); }       # come back for length
+        elsif ($s->{'Format'} == 14)
+        { $fh->print(pack("n1N1", $s->{'Format'}, 0)); }
         else
         { $fh->print(pack("n2N2", $s->{'Format'}, 0, 0, $s->{'Ver'})); }
             
@@ -565,6 +661,67 @@ sub out
         {
             $fh->print(pack('N2', $keys[0], $keys[-1] - $keys[0] + 1));
             $fh->print(pack('n*', $s->{'val'}{$keys[0] .. $keys[-1]}));
+        } elsif ($s->{'Format'} == 14)
+        {
+            my @uvs = sort keys %{$s->{'val'}};
+            $fh->print(pack("N1", scalar @uvs));
+
+            # make space for VariationSelector Records
+            my $vsr_loc = $fh->tell();
+            $fh->seek((3 + 4 + 4) * @uvs, 1);
+
+            my @vsr = ();
+            for my $uvs (@uvs) {
+                my @uni = sort keys %{$s->{'val'}{$uvs}};
+
+                my @dut;                # rows of Default UVS table
+                my @nut;                # rows of Non-Default UVS table
+
+                for my $uni (@uni) {
+                    my $id = $s->{'val'}{$uvs}{$uni};
+                    if ($id == 0) {
+                        if (@dut && $dut[-1]->[0] + $dut[-1]->[1] + 1 == $uni) {
+                            $dut[-1]->[1]++;
+                        } else {
+                            push @dut, [ $uni, 0 ];
+                        }
+                    } else {
+                        push @nut, [ $uni, $id ];
+                    }
+                }
+
+                # Default UVS table
+                my $dut_off = 0;
+                if (@dut) {
+                    $dut_off = $fh->tell() - $s->{' outloc'};
+                    $fh->print(pack("N1", scalar @dut));
+                    for (@dut) {
+                        $fh->print(pack("C3", unpack("x1C3", pack("N1", $_->[0]))));
+                        $fh->print(pack("C1", $_->[1]));
+                    }
+                }
+
+                # Non-Default UVS table
+                my $nut_off = 0;
+                if (@nut) {
+                    $nut_off = $fh->tell() - $s->{' outloc'};
+                    $fh->print(pack("N1", scalar @nut));
+                    for (@nut) {
+                        $fh->print(pack("C3", unpack("x1C3", pack("N1", $_->[0]))));
+                        $fh->print(pack("n1", $_->[1]));
+                    }
+                }
+
+                push @vsr, [ $uvs, $dut_off, $nut_off ];
+            }
+
+            # VariationSelector Records
+            $fh->seek($vsr_loc, 0);
+            for (@vsr) {
+                $fh->print(pack("C3", unpack("x1C3", pack("N1", $_->[0]))));
+                $fh->print(pack("N2", $_->[1], $_->[2]));
+            }
+            $fh->seek(0, 2);
         }
 
         $loc = $fh->tell();
@@ -572,6 +729,10 @@ sub out
         {
             $fh->seek($s->{' outloc'} + 2, 0);
             $fh->print(pack("n", $loc - $s->{' outloc'}));
+        } elsif ($s->{'Format'} == 14)
+        {
+            $fh->seek($s->{' outloc'} + 2, 0);
+            $fh->print(pack("N", $loc - $s->{' outloc'}));
         } else
         {
             $fh->seek($s->{' outloc'} + 4, 0);
@@ -717,16 +878,6 @@ sub is_unicode
 }
 
 1;
-
-=head1 BUGS
-
-=over 4
-
-=item *
-
-Format 14 (Unicode Variation Sequences) cmaps are not supported.
-
-=back
 
 =head1 AUTHOR
 
