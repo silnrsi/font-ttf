@@ -344,7 +344,7 @@ sub open
 
 =head2 $f->read
 
-Reads a Truetype font directory starting from location C<$self->{' OFFSET'}> in the file.
+Reads a Truetype font directory starting from location C<< $self->{' OFFSET'} >> in the file.
 This has been separated from the C<open> function to allow support for embedded
 TTFs for example in TTCs. Also reads the C<head> and C<maxp> tables immediately.
 
