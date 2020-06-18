@@ -607,7 +607,7 @@ sub update
         for ($i = 0; $i <= $#{$self->{'comps'}}; $i++)
         {
             $comp = $self->{'comps'}[$i];
-            $flag = $comp->{'flag'} & 7158;        # bits 2,10,11,12
+            $flag = $comp->{'flag'} & 0x1C06;   # bits 1,2,10,11,12
             $flag |= 1 unless ($comp->{'args'}[0] > -129 && $comp->{'args'}[0] < 128
                     && $comp->{'args'}[1] > -129 && $comp->{'args'}[1] < 128);
             if (defined $comp->{'scale'})
