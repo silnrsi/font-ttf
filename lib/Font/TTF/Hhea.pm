@@ -137,15 +137,15 @@ sub update
     for ($i = 0; $i < $num; $i++)
     {
         $aw = $hmtx->{'advance'}[$i];
-        $lsb = $hmtx->{'lsb'}[$i];
+        $maw = $aw if (!defined ($maw) or $aw > $maw);
         if (defined $glyphs->[$i])
-        { $ext = $lsb + $glyphs->[$i]->read->{'xMax'} - $glyphs->[$i]{'xMin'}; }
-        else
-        { $ext = $aw; }
-        $maw = $aw if ($aw > $maw);
-        $mlsb = $lsb if ($lsb < $mlsb or $i == 0);
-        $mrsb = $aw - $ext if ($aw - $ext < $mrsb or $i == 0);
-        $mext = $ext if ($ext > $mext);
+        { 
+            $lsb = $hmtx->{'lsb'}[$i];
+            $ext = $lsb + $glyphs->[$i]->read->{'xMax'} - $glyphs->[$i]{'xMin'}; 
+            $mlsb = $lsb if (!defined($mlsb) or $lsb < $mlsb);
+            $mrsb = $aw - $ext if (!defined($mrsb) or $aw - $ext < $mrsb);
+            $mext = $ext if ($ext > $mext);
+        }
     }
     $self->{'advanceWidthMax'} = $maw;
     $self->{'minLeftSideBearing'} = $mlsb;
