@@ -494,7 +494,7 @@ sub out
                         next unless $subHeader_->[4];
                         $d = $subHeader_->[5];
                         if ($subHeader->[5] =~ /\Q$d\E/) {
-                            my $o = length($`)/6;               #`
+                            my $o = $-[0]/6;
                             $subHeader_->[2] +=
                                 $subHeader_->[4]->[$o] - $subHeader->[4]->[0];
                             $subHeader_->[3] = $subHeader->[3] + $o;
