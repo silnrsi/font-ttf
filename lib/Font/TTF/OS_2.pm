@@ -265,7 +265,7 @@ be the negative of Descender.
 sub update
 {
     my ($self) = @_;
-    my ($map, @keys, $table, $i, $avg, $hmtx);
+    my ($map, @keys, $table, $i, $avg, $hmtx, $has_smp);
 
     return undef unless ($self->SUPER::update);
 
@@ -273,10 +273,12 @@ sub update
     $map = $self->{' PARENT'}{'cmap'}->find_ms || return undef;
     $hmtx = $self->{' PARENT'}{'hmtx'}->read;
 
-    @keys = sort {$a <=> $b} grep {$_ < 0x10000} keys %{$map->{'val'}};
-
+    # @keys = sort {$a <=> $b} grep {$_ < 0x10000} keys %{$map->{'val'}};
+    @keys = sort {$a <=> $b} keys %{$map->{'val'}};
+    $has_smp = $keys[-1] >= 0x10000;
+    
+    $self->{'usLastCharIndex'} = $has_smp ? 0xFFFF : $keys[-1] ;
     $self->{'usFirstCharIndex'} = $keys[0];
-    $self->{'usLastCharIndex'} = $keys[-1];
 
     $table = $self->{' PARENT'}{'hhea'}->read;
     
@@ -329,14 +331,7 @@ sub update
     }
 
     $self->{'ulUnicodeRange2'} &= ~0x2000000;
-    foreach $i (keys %{$map->{'val'}})
-    {
-        if ($i >= 0x10000)
-        {
-            $self->{'ulUnicodeRange2'} |= 0x2000000;
-            last;
-        }
-    }
+    $self->{'ulUnicodeRange2'} |= 0x2000000 if $has_smp;
 
     $self->{'Version'} = 1 if (defined $self->{'ulCodePageRange1'} && $self->{'Version'} < 1);
     $self->{'Version'} = 2 if (defined $self->{'maxLookups'} && $self->{'Version'} < 2);
