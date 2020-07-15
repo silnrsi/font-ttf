@@ -781,6 +781,19 @@ sub minsize
     return 4;
 }
 
+=head2 $t->dirty
+
+Setting cmap dirty means that OS/2 may need updating, so set it dirty.
+
+=cut
+
+sub dirty
+{
+    my ($self, $val) = @_;
+    my $res = $self->SUPER::dirty ($val);
+    $self->{' PARENT'}{'OS/2'}->read->dirty($val) if exists $self->{' PARENT'}{'OS/2'};
+    $res;
+}
 
 =head2 $t->update
 
