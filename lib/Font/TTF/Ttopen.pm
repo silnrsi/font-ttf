@@ -353,13 +353,12 @@ sub read
                     { $t =~ s/^|::/:/oig; }
                 else
                     { $t =~ s|::|/|oig; }
-                    require "$t.pm";
-                $l->{$tag}{'PARMS'} = $FType->new( INFILE  => $fh,
-                                                                                     OFFSET => $oFeat+$oParms);
-            $l->{$tag}{'PARMS'}->read;
+                require "$t.pm";
+                $l->{$tag}{'PARMS'} = $FType->new( INFILE  => $fh, OFFSET => $oFeat+$oParms);
+                $l->{$tag}{'PARMS'}->read;
           }
-        }               
-        
+        }
+
     }
 
 # Now the script/lang hierarchy
