@@ -418,6 +418,7 @@ sub out
 
     $self->read unless $self->{' read'};
     $self->update if $self->{' isDirty'};
+    $self->{' DAT'} .= "\000" if length($self->{' DAT'}) % 2;
     $fh->print($self->{' DAT'});
     $self->{' OUTLEN'} = length($self->{' DAT'});
     $self;
