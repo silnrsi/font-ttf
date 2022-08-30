@@ -1096,7 +1096,7 @@ sub read_context
         { push (@subst, $self->read_cover(TTF_Unpack('S', substr($dat, $i << 1, 2)),
                                 $loc, $lookup, $fh, 1)); }
         for ($i = 0; $i < $count; $i++)
-        { push (@srec, [TTF_Unpack('S2', substr($dat, ($count << 1) + ($i << 2), 4))]); }
+        { push (@srec, [TTF_Unpack('S2', substr($dat, ($cover << 1) + ($i << 2), 4))]); }
         $lookup->{'RULES'} = [[{'ACTION' => [@srec], 'MATCH' => [@subst]}]];
         $lookup->{'ACTION_TYPE'} = 'l';
         $lookup->{'MATCH_TYPE'} = 'o';
