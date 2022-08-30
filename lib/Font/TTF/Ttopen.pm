@@ -582,7 +582,7 @@ sub out
     foreach $t (@script)
     {
         $tag = $self->{'SCRIPTS'}{$t};
-        $off = $tag->{' REFTAG'} ? $tag->{$tag->{' REFTAG'}}{' OFFSET'} : $tag->{' OFFSET'};
+        $off = $tag->{' REFTAG'} ? $self->{'SCRIPTS'}{$tag->{' REFTAG'}}{' OFFSET'} : $tag->{' OFFSET'};
         $fh->print(pack("a4n", $t, $off));
     }
 
