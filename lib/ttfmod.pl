@@ -37,7 +37,7 @@
 
 package ttfmod;
 
-sub main'ttfmod {
+sub main::ttfmod {
     local($infile, $outfile, *fns, @must) = @_;
 
     # open files as binary.  Notice OUTFILE is opened for update not just write
@@ -57,7 +57,7 @@ sub main'ttfmod {
         $dir{unpack("a4", $dir_val)} = join(":", $i, unpack("x4NNN", $dir_val));
         print OUTFILE $dir_val;
         printf STDERR "%s %08x\n", unpack("a4", $dir_val), unpack("x8N", $dir_val)
-                if (defined $main'opt_z);
+                if (defined $main::opt_z);
         }
     foreach $n (@must)
     {
@@ -81,7 +81,7 @@ sub main'ttfmod {
         $tab_split[2] = tell(OUTFILE);
         if (defined $fns{$tab})
             {
-            $temp = "main'$fns{$tab}";
+            $temp = "main::$fns{$tab}";
             ($dir_len, $sum) = &$temp(*INFILE, *OUTFILE, $tab_split[3]);
             }
         else
