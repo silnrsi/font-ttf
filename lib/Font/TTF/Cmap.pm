@@ -252,7 +252,7 @@ sub read
                         last if $j >= length $dat;
                         my $st = unpack("N1", "\0".substr($dat, $j, 3)); $j += 3;
                         my $ac = unpack("C1", substr($dat, $j, 1)); $j += 1;
-                        $s->{'val'}{$uvs}{$st + $_} = 0 for 0 .. $ac;
+                        $s->{'val'}{$uvs}{$st + $_} = undef for 0 .. $ac;
                     }
                 }
 
