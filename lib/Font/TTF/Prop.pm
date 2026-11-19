@@ -141,7 +141,7 @@ sub meaning_
         "Segment separator",
         "Whitespace",
         "Other neutral");
-    $res = $types[$val & 0x001f] or ("Undefined [" . ($val & 0x001f) . "]");
+    $res = $types[$val & 0x001f] || ("Undefined [" . ($val & 0x001f) . "]");
     
     $res .= ", floater" if $val & 0x8000;
     $res .= ", hang left" if $val & 0x4000;
