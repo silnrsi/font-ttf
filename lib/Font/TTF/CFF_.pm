@@ -168,9 +168,9 @@ sub subset {
     $cff->$_($self->$_) for qw/debug verbose padding maxpadding/;
 
     if (@_) {
-	$self->gid(@_);
+        $self->gid(@_);
     } elsif (!$self->gid) {
-	$self->gid(1 .. $self->nGlyphs - 1);
+        $self->gid(1 .. $self->nGlyphs - 1);
     }
 
     # The first 5 data of the cff font, the data occupying fixed
@@ -196,30 +196,30 @@ sub subset {
     my @cid = (0);
     my $charset = $self->Charset;
     if ($self->gid_as_cid) {
-	my $cid2gid;
-	for (0 .. $#{$charset->{code}}) {
-	    my $cid = $charset->{code}->[$_];
-	    $cid2gid->{$cid} = $_;
-	}
-	for my $cid ($self->gid) {
-	    if (defined $cid2gid->{$cid}) {
-		push @cid, $cid;
-	    } else {
-		warn "ignore cid $cid (not defined in charset)\n";
-	    }
-	}
-	$self->gid(map $cid2gid->{$_}, @cid[1 .. $#cid]);
+        my $cid2gid;
+        for (0 .. $#{$charset->{code}}) {
+            my $cid = $charset->{code}->[$_];
+            $cid2gid->{$cid} = $_;
+        }
+        for my $cid ($self->gid) {
+            if (defined $cid2gid->{$cid}) {
+                push @cid, $cid;
+            } else {
+                warn "ignore cid $cid (not defined in charset)\n";
+            }
+        }
+        $self->gid(map $cid2gid->{$_}, @cid[1 .. $#cid]);
     } else {
-	my @gid;
-	for my $gid ($self->gid) {
-	    if (defined (my $cid = $charset->{code}->[$gid])) {
-		push @cid, $cid;
-		push @gid, $gid;
-	    } else {
-		warn "ignore gid $gid (not defined in charset)\n";
-	    }
-	}
-	$self->gid(@gid);
+        my @gid;
+        for my $gid ($self->gid) {
+            if (defined (my $cid = $charset->{code}->[$gid])) {
+                push @cid, $cid;
+                push @gid, $gid;
+            } else {
+                warn "ignore gid $gid (not defined in charset)\n";
+            }
+        }
+        $self->gid(@gid);
     }
     $cff->Charset({ code => \@cid });
 
@@ -233,57 +233,57 @@ sub subset {
 
     if ($cff->TopDICT->{ROS}) {
 
-	for my $gid (0, $self->gid) {
+        for my $gid (0, $self->gid) {
 
-	    # FDSelect($gid) gets the FD (Font DICT) index of the $gid.
-	    my $fdindex = $self->FDSelect($gid);
-	    unless (defined $fdindex) {
-		warn "ignoring gid $gid: undefined FD index selected\n";
-		next;
-	    }
+            # FDSelect($gid) gets the FD (Font DICT) index of the $gid.
+            my $fdindex = $self->FDSelect($gid);
+            unless (defined $fdindex) {
+                warn "ignoring gid $gid: undefined FD index selected\n";
+                next;
+            }
 
-	    # FontDICT() sets up PrivateDICT and LocalSubr_INDEX (if present).
-	    $self->FontDICT($fdindex);
+            # FontDICT() sets up PrivateDICT and LocalSubr_INDEX (if present).
+            $self->FontDICT($fdindex);
 
-	    # %fdindex2fdindex maps new FD index (for subset) from original FD index.
-	    my $new_fdindex = $fdindex2fdindex{$fdindex} //= $free_fdindex++;
+            # %fdindex2fdindex maps new FD index (for subset) from original FD index.
+            my $new_fdindex = $fdindex2fdindex{$fdindex} //= $free_fdindex++;
 
-	    # sets up the FDArray
-	    unless (defined $cff->FDArray->[$new_fdindex]) {
-		$cff->FDArray->[$new_fdindex] = clone $self->FDArray->[$fdindex];
-		$cff->FDArray->[$new_fdindex]->{'*Private'} = clone $self->PrivateDICT;
-		$cff->FDArray->[$new_fdindex]->{'*Private'}{'*Subrs'} = $cff->new_subr_index;
-		$cff->FDArray->[$new_fdindex]->{'Private'} = undef;
-		$cff->FDArray->[$new_fdindex]->{'*Private'}{'Subrs'} = undef;
-	    }
-	    $cff->FontDICT($new_fdindex);
+            # sets up the FDArray
+            unless (defined $cff->FDArray->[$new_fdindex]) {
+                $cff->FDArray->[$new_fdindex] = clone $self->FDArray->[$fdindex];
+                $cff->FDArray->[$new_fdindex]->{'*Private'} = clone $self->PrivateDICT;
+                $cff->FDArray->[$new_fdindex]->{'*Private'}{'*Subrs'} = $cff->new_subr_index;
+                $cff->FDArray->[$new_fdindex]->{'Private'} = undef;
+                $cff->FDArray->[$new_fdindex]->{'*Private'}{'Subrs'} = undef;
+            }
+            $cff->FontDICT($new_fdindex);
 
-	    # the subset font is created by the glyphs (CharStrings) specified
-	    # by gids and the subrs (LocalSubr and GlobalSubr) called.
-	    my $class = 'CharStrings_INDEX';
-	    my $code = $self->$class->data($gid);
-	    $code = pack "C*", 14 if !$self->notdef_glyph && $gid == 0; # endchar
-	    my $disasm = $self->disasm({ class => $class, id => $gid }, $code, $cff);
-	    $cff->CharStrings_INDEX->add($disasm);
-	    $gid2fdindex[$new_gid] = $new_fdindex;
-	    $new_gid++;
+            # the subset font is created by the glyphs (CharStrings) specified
+            # by gids and the subrs (LocalSubr and GlobalSubr) called.
+            my $class = 'CharStrings_INDEX';
+            my $code = $self->$class->data($gid);
+            $code = pack "C*", 14 if !$self->notdef_glyph && $gid == 0; # endchar
+            my $disasm = $self->disasm({ class => $class, id => $gid }, $code, $cff);
+            $cff->CharStrings_INDEX->add($disasm);
+            $gid2fdindex[$new_gid] = $new_fdindex;
+            $new_gid++;
 
-	}
+        }
 
     } else {
 
-	$self->setup_PrivateDICT_and_LocalSubr_INDEX("PrivateDICT", $self->TopDICT);
-	$cff->PrivateDICT(clone	$self->PrivateDICT);
-	$cff->LocalSubr_INDEX($cff->new_subr_index);
+        $self->setup_PrivateDICT_and_LocalSubr_INDEX("PrivateDICT", $self->TopDICT);
+        $cff->PrivateDICT(clone $self->PrivateDICT);
+        $cff->LocalSubr_INDEX($cff->new_subr_index);
 
-	for my $gid (0, $self->gid) {
-	    my $class = 'CharStrings_INDEX';
-	    my $code = $self->$class->data($gid);
-	    $code = pack "C*", 14 if !$self->notdef_glyph && $gid == 0; # endchar
-	    my $disasm = $self->disasm({ class => $class, id => $gid }, $code, $cff);
-	    $cff->CharStrings_INDEX->add($disasm);
-	    $new_gid++;
-	}
+        for my $gid (0, $self->gid) {
+            my $class = 'CharStrings_INDEX';
+            my $code = $self->$class->data($gid);
+            $code = pack "C*", 14 if !$self->notdef_glyph && $gid == 0; # endchar
+            my $disasm = $self->disasm({ class => $class, id => $gid }, $code, $cff);
+            $cff->CharStrings_INDEX->add($disasm);
+            $new_gid++;
+        }
 
     }
 
@@ -292,15 +292,15 @@ sub subset {
     $cff->GlobalSubr_INDEX->commit;
     $cff->GlobalSubr_INDEX->remap('hintmask', 'GlobalSubr_INDEX');
     if ($cff->TopDICT->{ROS}) {
-	for my $fdindex (keys %fdindex2fdindex) {
-	    my $new_fdindex = $fdindex2fdindex{$fdindex};
-	    $cff->FontDICT($new_fdindex);
-	    $cff->LocalSubr_INDEX->commit;
-	    $cff->LocalSubr_INDEX->remap('hintmask', 'LocalSubr_INDEX');
-	}
+        for my $fdindex (keys %fdindex2fdindex) {
+            my $new_fdindex = $fdindex2fdindex{$fdindex};
+            $cff->FontDICT($new_fdindex);
+            $cff->LocalSubr_INDEX->commit;
+            $cff->LocalSubr_INDEX->remap('hintmask', 'LocalSubr_INDEX');
+        }
     } else {
-	$cff->LocalSubr_INDEX->commit;
-	$cff->LocalSubr_INDEX->remap('hintmask', 'LocalSubr_INDEX');
+        $cff->LocalSubr_INDEX->commit;
+        $cff->LocalSubr_INDEX->remap('hintmask', 'LocalSubr_INDEX');
     }
     $cff->CharStrings_INDEX->commit;
     $cff->CharStrings_INDEX->remap('hintmask', 'CharStrings_INDEX');
@@ -318,7 +318,7 @@ sub subset {
 
     $self->packing($self->packing + 1);
     $cff->maxpadding($cff->padding + 8)
-	if !defined $cff->maxpadding || $cff->maxpadding <= $cff->padding;
+        if !defined $cff->maxpadding || $cff->maxpadding <= $cff->padding;
 
     $tmp->seek(0, 0);
     $tmp->print($cff->pack_Header);
@@ -346,58 +346,58 @@ sub subset {
     # TopDICT:
 
     if ($cff->TopDICT->{ROS}) {
-	# Since cid fonts do not have encoding data, we store encoding
-	# ID 0 (standard encoding) here.
-	$cff->TopDICT->{Encoding} = 0;
+        # Since cid fonts do not have encoding data, we store encoding
+        # ID 0 (standard encoding) here.
+        $cff->TopDICT->{Encoding} = 0;
     } else {
-	# Otherwise (non-cid font): First, store the offset of the
-	# encoding data in Encoding in TopDICT.
-	$cff->TopDICT->{Encoding} = $tmp->tell;
-	# Next, pack and output the encoding data.  However, if it is
-	# determined to be Standard Encoding or Expert Encoding, do not
-	# output the packed data, and store the encoding ID in TopDICT.
-	for ($cff->pack_Encoding($self->Encoding->{code})) {
-	    $tmp->print($_) if defined;
-	}
+        # Otherwise (non-cid font): First, store the offset of the
+        # encoding data in Encoding in TopDICT.
+        $cff->TopDICT->{Encoding} = $tmp->tell;
+        # Next, pack and output the encoding data.  However, if it is
+        # determined to be Standard Encoding or Expert Encoding, do not
+        # output the packed data, and store the encoding ID in TopDICT.
+        for ($cff->pack_Encoding($self->Encoding->{code})) {
+            $tmp->print($_) if defined;
+        }
     }
 
     # The Charset, FDSelect, FDSelect, and CharStrings data follow.  All
     # of these are the same as the Encoding data.
     $cff->TopDICT->{charset} = $tmp->tell;
     for ($cff->pack_Charset) {
-	$tmp->print($_) if defined;
+        $tmp->print($_) if defined;
     }
 
     $cff->TopDICT->{FDSelect} = $tmp->tell;
     for ($cff->pack_FDSelect) {
-	$tmp->print($_) if defined;
+        $tmp->print($_) if defined;
     }
 
     $cff->TopDICT->{"CharStrings"} = $tmp->tell;
     for ($cff->pack_INDEX($cff->CharStrings_INDEX)) {
-	$tmp->print($_) if defined;
+        $tmp->print($_) if defined;
     }
 
     if ($cff->TopDICT->{ROS}) {
-	if (my $fdict = $cff->FDArray) {
+        if (my $fdict = $cff->FDArray) {
             for my $i (0 .. $#{$fdict}) {
-		$cff->FontDICT($i);
-		$fdict->[$i]->{Private} = [
-		    $cff->output_PrivateDICT_and_LocalSubr_INDEX($tmp, "FontDICT.$i.Private"),
-		];
-	    }
-	    my @fdict_packed;
+                $cff->FontDICT($i);
+                $fdict->[$i]->{Private} = [
+                    $cff->output_PrivateDICT_and_LocalSubr_INDEX($tmp, "FontDICT.$i.Private"),
+                ];
+            }
+            my @fdict_packed;
             for my $i (0 .. $#{$fdict}) {
-		$fdict_packed[$i] = $cff->pack_DICT("FontDICT.$i", $fdict->[$i]);
-	    }
-	    $cff->TopDICT->{FDArray} = $tmp->tell;
-	    my $fdarray_index = $cff->make_INDEX(@fdict_packed);
-	    $tmp->print($cff->pack_INDEX($fdarray_index));
-	}
+                $fdict_packed[$i] = $cff->pack_DICT("FontDICT.$i", $fdict->[$i]);
+            }
+            $cff->TopDICT->{FDArray} = $tmp->tell;
+            my $fdarray_index = $cff->make_INDEX(@fdict_packed);
+            $tmp->print($cff->pack_INDEX($fdarray_index));
+        }
     } else {
-	$cff->TopDICT->{Private} = [
-	    $cff->output_PrivateDICT_and_LocalSubr_INDEX($tmp, "TopDICT.Private"),
-	];
+        $cff->TopDICT->{Private} = [
+            $cff->output_PrivateDICT_and_LocalSubr_INDEX($tmp, "TopDICT.Private"),
+        ];
     }
     $p2end = $tmp->tell;
 
@@ -412,19 +412,19 @@ sub subset {
     $tmp->print($cff->pack_INDEX($cff->GlobalSubr_INDEX));
     my $p1end_updated = $tmp->tell;
     if ($p1end_updated > $p2start) {
-	warn $cff->Name_INDEX->data(0), ": p1 overlaps p2 ",
-	    "(p1 $p1end_updated, p2 $p2start, padding ", $cff->padding, ")\n",
-	    "redo packing...\n" if $self->verbose;
-	$cff->padding(8);
-	goto p1;
+        warn $cff->Name_INDEX->data(0), ": p1 overlaps p2 ",
+            "(p1 $p1end_updated, p2 $p2start, padding ", $cff->padding, ")\n",
+            "redo packing...\n" if $self->verbose;
+        $cff->padding(8);
+        goto p1;
     }
     if ($p2start - $p1end_updated > $cff->maxpadding) {
-	warn $cff->Name_INDEX->data(0), ": gap between p1 and p2: ",
-	    $p2start - $p1end_updated, "\n",
-	    "redo packing...\n" if $self->verbose;
-	$cff->padding(8);
-	$cff->maxpadding(0);	# auto fit
-	goto p1;
+        warn $cff->Name_INDEX->data(0), ": gap between p1 and p2: ",
+            $p2start - $p1end_updated, "\n",
+            "redo packing...\n" if $self->verbose;
+        $cff->padding(8);
+        $cff->maxpadding(0);    # auto fit
+        goto p1;
     }
     $tmp->truncate($p2end);
     $cff->{' LENGTH'} = $p2end;
@@ -443,26 +443,26 @@ sub output_PrivateDICT_and_LocalSubr_INDEX {
   rewrite_pdict:
     my $pdict_packed = $self->pack_DICT($dict_name, $pdict);
     for ($pdict_packed) {
-	$tmp->print($_) if defined;
+        $tmp->print($_) if defined;
     }
     my $lsubrs_pos = $tmp->tell;
     if ($lsubr_index && $lsubr_index->count == 0) {
-	if (defined $pdict->{Subrs}) {
-	    delete $pdict->{Subrs};
-	    $tmp->seek($pdict_pos, 0);
-	    goto rewrite_pdict;
-	}
+        if (defined $pdict->{Subrs}) {
+            delete $pdict->{Subrs};
+            $tmp->seek($pdict_pos, 0);
+            goto rewrite_pdict;
+        }
     } else {
-	# $pdict->{Subrs} is the offset to local subrs
-	if (!defined $pdict->{Subrs} || $pdict->{Subrs} != $lsubrs_pos - $pdict_pos) {
-	    $pdict->{Subrs} = $lsubrs_pos - $pdict_pos;
-	    $tmp->seek($pdict_pos, 0);
-	    goto rewrite_pdict;
-	}
-	my $lsubr_index_packed = $self->pack_INDEX($lsubr_index);
-	for ($lsubr_index_packed) {
-	    $tmp->print($_) if defined;
-	}
+        # $pdict->{Subrs} is the offset to local subrs
+        if (!defined $pdict->{Subrs} || $pdict->{Subrs} != $lsubrs_pos - $pdict_pos) {
+            $pdict->{Subrs} = $lsubrs_pos - $pdict_pos;
+            $tmp->seek($pdict_pos, 0);
+            goto rewrite_pdict;
+        }
+        my $lsubr_index_packed = $self->pack_INDEX($lsubr_index);
+        for ($lsubr_index_packed) {
+            $tmp->print($_) if defined;
+        }
     }
     (length $pdict_packed, $pdict_pos);
 }
@@ -471,21 +471,21 @@ sub output_PrivateDICT_and_LocalSubr_INDEX {
 sub gid {
     my $self = shift;
     if (@_) {
-	if (ref $_[0] eq 'ARRAY') {
-	    $self->gid(@{$_[0]} > 0? @$_[0] : undef);
-	} else {
-	    my %seen;
-	    if (my @gid = grep defined && $_ > 0 && !$seen{$_}++, @_) {
-		$self->{gid} = \@gid;
-	    } else {
-		$self->{gid} = undef;
-	    }
-	}
+        if (ref $_[0] eq 'ARRAY') {
+            $self->gid(@{$_[0]} > 0? @$_[0] : undef);
+        } else {
+            my %seen;
+            if (my @gid = grep defined && $_ > 0 && !$seen{$_}++, @_) {
+                $self->{gid} = \@gid;
+            } else {
+                $self->{gid} = undef;
+            }
+        }
     }
     if (wantarray) {
-	return ref $self->{gid} eq 'ARRAY' ? @{$self->{gid}} : ();
+        return ref $self->{gid} eq 'ARRAY' ? @{$self->{gid}} : ();
     } else {
-	return $self->{gid};
+        return $self->{gid};
     }
 }
 
@@ -523,632 +523,632 @@ sub disasm {
     our $DISASM;
 
     if ($f->{init}) {
-	$f->{init} = 0;
-	$DISASM = [];
-	$self->{transient_array} = [];
-	$self->{v}  = [];
-	$self->{w}  = undef;
-	$self->{hs} = [];
-	$self->{vs} = [];
+        $f->{init} = 0;
+        $DISASM = [];
+        $self->{transient_array} = [];
+        $self->{v}  = [];
+        $self->{w}  = undef;
+        $self->{hs} = [];
+        $self->{vs} = [];
     } else {
-	$self->disasm_print("\n");
+        $self->disasm_print("\n");
     }
 
     my $hstem = sub {
-	my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
-	push @{$self->{hs}}, splice @{$self->{v}}, -($q * 2);
-	$self->{w} = pop @{$self->{v}} unless defined $self->{w} && $r;
+        my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
+        push @{$self->{hs}}, splice @{$self->{v}}, -($q * 2);
+        $self->{w} = pop @{$self->{v}} unless defined $self->{w} && $r;
     };
     my $vstem = sub {
-	my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
-	push @{$self->{vs}}, splice @{$self->{v}}, -($q * 2);
-	$self->{w} = pop @{$self->{v}} unless defined $self->{w} && $r;
+        my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
+        push @{$self->{vs}}, splice @{$self->{v}}, -($q * 2);
+        $self->{w} = pop @{$self->{v}} unless defined $self->{w} && $r;
     };
     my $hintmask = sub {
-	my ($c) = @_;
-	my $n = @{$self->{hs}} + @{$self->{vs}};
-	my $s = int(($n + 1) / 2);
-	my $m = int(($s + 7) / 8);
-	$m;
+        my ($c) = @_;
+        my $n = @{$self->{hs}} + @{$self->{vs}};
+        my $s = int(($n + 1) / 2);
+        my $m = int(($s + 7) / 8);
+        $m;
     };
     my $getmask = sub {
-	my $m = shift;
-	my $mask = 0;
-	if ($m >= 1) {
-	    for (1 .. $m) {
-		$mask <<= 8;
-		$new_code[-1] .= pack "C*", my $c = shift @$code;
-		$mask |= $c;
-	    }
-	}
-	sprintf "%0*b", 8*$m, $mask;
+        my $m = shift;
+        my $mask = 0;
+        if ($m >= 1) {
+            for (1 .. $m) {
+                $mask <<= 8;
+                $new_code[-1] .= pack "C*", my $c = shift @$code;
+                $mask |= $c;
+            }
+        }
+        sprintf "%0*b", 8*$m, $mask;
     };
 
     while (@{$code} > 0) {
-	my $c = shift @{$code};
-	push @new_code, pack "C*", $c;
+        my $c = shift @{$code};
+        push @new_code, pack "C*", $c;
         if ($c >= 32) {
             # 32 - 246: result = v–139
             if ($c >= 32 && $c <= 246) {
                 my $int = $c - 139;
-		$self->disasm_print($int);
-		push @{$self->{v}}, $int;
+                $self->disasm_print($int);
+                push @{$self->{v}}, $int;
             }
             # 247 - 250: with next byte, w, result = (v–247)*256+w+108
             elsif ($c >= 247 && $c <= 250) {
-		$new_code[-1] .= pack "C*", my $c1 = shift @{$code};
+                $new_code[-1] .= pack "C*", my $c1 = shift @{$code};
                 my $int = ($c - 247) * 256 + $c1 + 108;
-		$self->disasm_print($int);
-		push @{$self->{v}}, $int;
+                $self->disasm_print($int);
+                push @{$self->{v}}, $int;
             }
             # 251 - 254: with next byte, w, result = –[(v–251)*256]–w–108.
             elsif ($c >= 251 && $c <= 254) {
-		$new_code[-1] .= pack "C*", my $c1 = shift @{$code};
+                $new_code[-1] .= pack "C*", my $c1 = shift @{$code};
                 my $int = -($c - 251) * 256 - $c1 - 108;
-		$self->disasm_print($int);
-		push @{$self->{v}}, $int;
+                $self->disasm_print($int);
+                push @{$self->{v}}, $int;
             }
             # 255: next 4 bytes interpreted as a 32-bit two's-complement number
             elsif ($c == 255) {
                 my ($c1, $c2, $c3, $c4) = splice @{$code}, 0, 4;
-		$new_code[-1] .= pack "C*", $c1, $c2, $c3, $c4;
+                $new_code[-1] .= pack "C*", $c1, $c2, $c3, $c4;
                 my $int = $c1 << 24 | $c2 << 16 | $c3 << 8 | $c4;
-		# 16-bit signed integer with 16 bits of fraction.
+                # 16-bit signed integer with 16 bits of fraction.
                 $int = -((~$int & 0xffff_ffff) + 1) if $int & 0x8000_0000;
-		$int /= 1 << 16;
-		$self->disasm_print($int);
-		push @{$self->{v}}, $int;
+                $int /= 1 << 16;
+                $self->disasm_print($int);
+                push @{$self->{v}}, $int;
             }
         }
         # 28: following 2 bytes interpreted as a 16-bit two's complement number
         elsif ($c == 28) {
             my ($c1, $c2) = splice @{$code}, 0, 2;
-	    $new_code[-1] .= pack "C*", $c1, $c2;
+            $new_code[-1] .= pack "C*", $c1, $c2;
             my $int = $c1 << 8 | $c2;
             $int = -((~$int & 0xffff) + 1) if $int & 0x8000;
-	    $self->disasm_print($int);
-	    push @{$self->{v}}, $int;
+            $self->disasm_print($int);
+            push @{$self->{v}}, $int;
         } else {
             # 0 - 11: operators
-	    if ($c == 1) {
-		# |- y dy {dya dyb}* hstem (1) |-
-		$self->disasm_print("hstem");
-		&$hstem unless @{$self->{hs}};
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+            if ($c == 1) {
+                # |- y dy {dya dyb}* hstem (1) |-
+                $self->disasm_print("hstem");
+                &$hstem unless @{$self->{hs}};
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 3) {
-		# |- x dx {dxa dxb}* vstem (3) |-
-		$self->disasm_print("vstem");
-		&$vstem unless @{$self->{vs}};
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- x dx {dxa dxb}* vstem (3) |-
+                $self->disasm_print("vstem");
+                &$vstem unless @{$self->{vs}};
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 4) {
-		# |- dy1 vmoveto (4) |-
-		$self->disasm_print("vmoveto");
-		#my @args = pop @{$self->{v}};
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- dy1 vmoveto (4) |-
+                $self->disasm_print("vmoveto");
+                #my @args = pop @{$self->{v}};
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 5) {
-		# |- {dxa dya}+ rlineto (5) |-
-		$self->disasm_print("rlineto");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
-		#my @args = splice @{$self->{v}}, -($q * 2);
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- {dxa dya}+ rlineto (5) |-
+                $self->disasm_print("rlineto");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
+                #my @args = splice @{$self->{v}}, -($q * 2);
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 6) {
-		# |- dx1 {dya dxb}* hlineto (6) |-
-		# |- {dxa dyb}+ hlineto (6) |-
-		$self->disasm_print("hlineto");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
-		#my @args = splice @{$self->{v}}, -($q * 2 + $r);
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- dx1 {dya dxb}* hlineto (6) |-
+                # |- {dxa dyb}+ hlineto (6) |-
+                $self->disasm_print("hlineto");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
+                #my @args = splice @{$self->{v}}, -($q * 2 + $r);
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 7) {
-		# |- dy1 {dxa dyb}* vlineto (7) |-
-		# |- {dya dxb}+ vlineto (7) |-
-		$self->disasm_print("vlineto");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
-		#my @args = splice @{$self->{v}}, -($q * 2 + $r);
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- dy1 {dxa dyb}* vlineto (7) |-
+                # |- {dya dxb}+ vlineto (7) |-
+                $self->disasm_print("vlineto");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 2);
+                #my @args = splice @{$self->{v}}, -($q * 2 + $r);
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 8) {
-		# |- {dxa dya dxb dyb dxc dyc}+ rrcurveto (8) |-
-		$self->disasm_print("rrcurveto");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 6);
-		#my @args = splice @{$self->{v}}, -($q * 6);
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- {dxa dya dxb dyb dxc dyc}+ rrcurveto (8) |-
+                $self->disasm_print("rrcurveto");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 6);
+                #my @args = splice @{$self->{v}}, -($q * 6);
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 10) {
-		# subr# callsubr (10) –
-		$self->disasm_print("callsubr");
-		my $subr = pop @{$self->{v}};
-		my $class = 'LocalSubr_INDEX';
-		my $cs = $self->$class;
-		my $index = $subr + $cs->bias;
-		if ($cff) {
-		    if (defined $f->{id} && defined $f->{class}) {
-			$cff->$class->{hintmask}{$index} = $cff->{$f->{class}}->{hintmask}{$f->{id}};
-		    }
-		    my $new_cs = $cff->$class;
-		    local $DISASM = [];
-		    my $code = $cs->data($index);
-		    my $tmp_code = $self->disasm({ %$f, class => $class, id => $index }, $code, $cff);
-		    $new_cs->subr($index, $tmp_code);
-		    $new_code[-2] = sub {
-			my $new_index = $new_cs->{map}{$index};
-			my $new_subr = $new_index - $new_cs->bias;
-			encode_number($new_subr);
-		    };
-		} else {
-		    local $DISASM = [];
-		    my $code = $cs->data($index);
-		    $self->disasm({ %$f, class => $class, id => $index }, $code);
-		}
-	    }
-	    elsif ($c == 11) {
-		# – return (11) –
-		$self->disasm_print("return");
-		$self->disasm_print("\n");
-		#last;
-	    }
+                # subr# callsubr (10) –
+                $self->disasm_print("callsubr");
+                my $subr = pop @{$self->{v}};
+                my $class = 'LocalSubr_INDEX';
+                my $cs = $self->$class;
+                my $index = $subr + $cs->bias;
+                if ($cff) {
+                    if (defined $f->{id} && defined $f->{class}) {
+                        $cff->$class->{hintmask}{$index} = $cff->{$f->{class}}->{hintmask}{$f->{id}};
+                    }
+                    my $new_cs = $cff->$class;
+                    local $DISASM = [];
+                    my $code = $cs->data($index);
+                    my $tmp_code = $self->disasm({ %$f, class => $class, id => $index }, $code, $cff);
+                    $new_cs->subr($index, $tmp_code);
+                    $new_code[-2] = sub {
+                        my $new_index = $new_cs->{map}{$index};
+                        my $new_subr = $new_index - $new_cs->bias;
+                        encode_number($new_subr);
+                    };
+                } else {
+                    local $DISASM = [];
+                    my $code = $cs->data($index);
+                    $self->disasm({ %$f, class => $class, id => $index }, $code);
+                }
+            }
+            elsif ($c == 11) {
+                # – return (11) –
+                $self->disasm_print("return");
+                $self->disasm_print("\n");
+                #last;
+            }
             elsif ($c == 12) {
                 #last unless @$code >= 1;
-		$new_code[-1] .= pack "C*", my $c2 = shift @$code;
+                $new_code[-1] .= pack "C*", my $c2 = shift @$code;
 
 =begin comment
 
                 if ($c2 == 0) {
-		    $self->disasm_print("dotsection");
-		    # |– dotsection (12 0) |–
+                    $self->disasm_print("dotsection");
+                    # |– dotsection (12 0) |–
 
-		    # This is an obsolete form of hint substitution (actually
-		    # hint suspension) that has always been treated as a no-op
-		    # by Adobe ATM renderers.
+                    # This is an obsolete form of hint substitution (actually
+                    # hint suspension) that has always been treated as a no-op
+                    # by Adobe ATM renderers.
 
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 elsif ($c2 == 1) {
-		    $self->disasm_print("vstem3");
-		    # |- x0 dx0 x1 dx1 x2 dx2 vstem3 (12 1) |- T1_SPEC.pdf
-		    #my ($x0, $dx0, $x1, $dx1, $x2, $dx2) = splice @{$self->{v}}, -6;
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    $self->disasm_print("vstem3");
+                    # |- x0 dx0 x1 dx1 x2 dx2 vstem3 (12 1) |- T1_SPEC.pdf
+                    #my ($x0, $dx0, $x1, $dx1, $x2, $dx2) = splice @{$self->{v}}, -6;
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 elsif ($c2 == 2) {
-		    $self->disasm_print("hstem3");
-		    # |- y0 dy0 y1 dy1 y2 dy2 hstem3 (12 2) |- T1_SPEC.pdf
-		    push @{$self->{hs}}, splice @{$self->{v}}, -6;
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    $self->disasm_print("hstem3");
+                    # |- y0 dy0 y1 dy1 y2 dy2 hstem3 (12 2) |- T1_SPEC.pdf
+                    push @{$self->{hs}}, splice @{$self->{v}}, -6;
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 elsif ($c2 == 3) {
-		    # num1 num2 and (12 3) 1_or_0
-		    $self->disasm_print("and");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $bool = $num1 && $num2;
-		    push @{$self->{v}}, $bool;
-		}
+                    # num1 num2 and (12 3) 1_or_0
+                    $self->disasm_print("and");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $bool = $num1 && $num2;
+                    push @{$self->{v}}, $bool;
+                }
                 elsif ($c2 == 4) {
-		    # num1 num2 or (12 4) 1_or_0
-		    $self->disasm_print("or");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $bool = $num1 || $num2;
-		    push @{$self->{v}}, $bool;
-		}
+                    # num1 num2 or (12 4) 1_or_0
+                    $self->disasm_print("or");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $bool = $num1 || $num2;
+                    push @{$self->{v}}, $bool;
+                }
                 elsif ($c2 == 5) {
-		    # num1 not (12 5) 1_or_0
-		    $self->disasm_print("not");
-		    my $num1 = pop @{$self->{v}};
-		    my $bool = !$num1;
-		    push @{$self->{v}}, $bool;
-		}
+                    # num1 not (12 5) 1_or_0
+                    $self->disasm_print("not");
+                    my $num1 = pop @{$self->{v}};
+                    my $bool = !$num1;
+                    push @{$self->{v}}, $bool;
+                }
                 elsif ($c2 == 6) {
-		    $self->disasm_print("seac");
-		    # |- asb adx ady bchar achar seac (12 6) |-
-		}
+                    $self->disasm_print("seac");
+                    # |- asb adx ady bchar achar seac (12 6) |-
+                }
                 elsif ($c2 == 7) {
-		    $self->disasm_print("sbw");
-		    # |- sbx sby wx wy sbw (12 7) |-
-		}
+                    $self->disasm_print("sbw");
+                    # |- sbx sby wx wy sbw (12 7) |-
+                }
                 elsif ($c2 == 8) {
-		    warn "store ($c $c2) reserved";
-		}
+                    warn "store ($c $c2) reserved";
+                }
                 elsif ($c2 == 9) {
-		    # num abs (12 9) num2
-		    $self->disasm_print("abs");
-		    my $num = pop @{$self->{v}};
-		    my $num2 = $num < 0 ? -$num : $num;
-		    push @{$self->{v}}, $num2;
-		}
+                    # num abs (12 9) num2
+                    $self->disasm_print("abs");
+                    my $num = pop @{$self->{v}};
+                    my $num2 = $num < 0 ? -$num : $num;
+                    push @{$self->{v}}, $num2;
+                }
                 elsif ($c2 == 10) {
-		    # num1 num2 add (12 10) sum
-		    $self->disasm_print("add");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $sum = $num1 + $num2;
-		    push @{$self->{v}}, $sum;
-		}
+                    # num1 num2 add (12 10) sum
+                    $self->disasm_print("add");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $sum = $num1 + $num2;
+                    push @{$self->{v}}, $sum;
+                }
                 elsif ($c2 == 11) {
-		    # num1 num2 sub (12 11) difference
-		    $self->disasm_print("sub");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $difference = $num1 - $num2;
-		    push @{$self->{v}}, $difference;
-		}
+                    # num1 num2 sub (12 11) difference
+                    $self->disasm_print("sub");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $difference = $num1 - $num2;
+                    push @{$self->{v}}, $difference;
+                }
                 elsif ($c2 == 12) {
-		    # num1 num2 div (12 12) quotient
-		    $self->disasm_print("div");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $quotient = $num1 / $num2;
-		    push @{$self->{v}}, $quotient;
-		}
-		elsif ($c2 == 13) {
-		    warn "load ($c $c2) reserved";
-		}
-		elsif ($c2 == 14) {
-		    # num neg (12 14) num2
-		    $self->disasm_print("neg");
-		    my $num = pop @{$self->{v}};
-		    my $num2 = -$num;
-		    push @{$self->{v}}, $num2;
-		}
+                    # num1 num2 div (12 12) quotient
+                    $self->disasm_print("div");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $quotient = $num1 / $num2;
+                    push @{$self->{v}}, $quotient;
+                }
+                elsif ($c2 == 13) {
+                    warn "load ($c $c2) reserved";
+                }
+                elsif ($c2 == 14) {
+                    # num neg (12 14) num2
+                    $self->disasm_print("neg");
+                    my $num = pop @{$self->{v}};
+                    my $num2 = -$num;
+                    push @{$self->{v}}, $num2;
+                }
                 elsif ($c2 == 15) {
-		    # num1 num2 eq (12 15) 1_or_0
-		    $self->disasm_print("eq");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $bool = $num1 == $num2;
-		    push @{$self->{v}}, $bool;
-		}
+                    # num1 num2 eq (12 15) 1_or_0
+                    $self->disasm_print("eq");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $bool = $num1 == $num2;
+                    push @{$self->{v}}, $bool;
+                }
                 elsif ($c2 == 16) {
-		    $self->disasm_print("callothersubr");
-		}
+                    $self->disasm_print("callothersubr");
+                }
                 elsif ($c2 == 17) {
-		    $self->disasm_print("pop");
-		    my $x = pop @{$self->{v}};
-		}
+                    $self->disasm_print("pop");
+                    my $x = pop @{$self->{v}};
+                }
                 elsif ($c2 == 18) {
-		    # num drop (12 18)
-		    $self->disasm_print("drop");
-		    # removes the top element num from the Type 2 argument
-		    # stack.
-		    my $num = pop @{$self->{v}};
-		}
+                    # num drop (12 18)
+                    $self->disasm_print("drop");
+                    # removes the top element num from the Type 2 argument
+                    # stack.
+                    my $num = pop @{$self->{v}};
+                }
                 elsif ($c2 == 20) {
-		    # The storage operators utilize a transient array and
-		    # provide facilities for storing and retrieving transient
-		    # array data. The transient array provides non-persistent
-		    # storage for intermediate values. There is no provision
-		    # to initialize this array, except explicitly using the
-		    # put operator, and values stored in the array do not
-		    # persist beyond the scope of rendering an individual
-		    # character. The number of elements in the transient array
-		    # is specified in Appendix B, “Type 2 Charstring
-		    # Implementation Limits”.
-		    #     val i put (12 20)
-		    # stores val into the transient array at the location given by i.
-		    $self->disasm_print("put");
-		    my $i = pop @{$self->{v}};
-		    my $val = pop @{$self->{v}};
-		    $self->{transient_array}->[$i] = $val;
-		}
+                    # The storage operators utilize a transient array and
+                    # provide facilities for storing and retrieving transient
+                    # array data. The transient array provides non-persistent
+                    # storage for intermediate values. There is no provision
+                    # to initialize this array, except explicitly using the
+                    # put operator, and values stored in the array do not
+                    # persist beyond the scope of rendering an individual
+                    # character. The number of elements in the transient array
+                    # is specified in Appendix B, “Type 2 Charstring
+                    # Implementation Limits”.
+                    #     val i put (12 20)
+                    # stores val into the transient array at the location given by i.
+                    $self->disasm_print("put");
+                    my $i = pop @{$self->{v}};
+                    my $val = pop @{$self->{v}};
+                    $self->{transient_array}->[$i] = $val;
+                }
                 elsif ($c2 == 21) {
-		    #    i get (12 21) val
-		    # retrieves the value stored in the transient array at the
-		    # location given by i and pushes the value onto the
-		    # argument stack. If get is executed prior to put for i
-		    # during execution of the current charstring, the value
-		    # returned is undefined.
-		    $self->disasm_print("get");
-		    my $i = pop @{$self->{v}};
-		    my $val = $self->{transient_array}->[$i];
-		    push @{$self->{v}}, $val;
-		}
+                    #    i get (12 21) val
+                    # retrieves the value stored in the transient array at the
+                    # location given by i and pushes the value onto the
+                    # argument stack. If get is executed prior to put for i
+                    # during execution of the current charstring, the value
+                    # returned is undefined.
+                    $self->disasm_print("get");
+                    my $i = pop @{$self->{v}};
+                    my $val = $self->{transient_array}->[$i];
+                    push @{$self->{v}}, $val;
+                }
                 elsif ($c2 == 22) {
-		    # s1 s2 v1 v2 ifelse (12 22) s1_or_s2
-		    $self->disasm_print("ifelse");
-		    my $v2 = pop @{$self->{v}};
-		    my $v1 = pop @{$self->{v}};
-		    my $s2 = pop @{$self->{v}};
-		    my $s1 = pop @{$self->{v}};
-		    if ($v1 <= $v2) {
-			push @{$self->{v}}, $s1;
-		    } else {
-			push @{$self->{v}}, $s2;
-		    }
-		}
+                    # s1 s2 v1 v2 ifelse (12 22) s1_or_s2
+                    $self->disasm_print("ifelse");
+                    my $v2 = pop @{$self->{v}};
+                    my $v1 = pop @{$self->{v}};
+                    my $s2 = pop @{$self->{v}};
+                    my $s1 = pop @{$self->{v}};
+                    if ($v1 <= $v2) {
+                        push @{$self->{v}}, $s1;
+                    } else {
+                        push @{$self->{v}}, $s2;
+                    }
+                }
                 elsif ($c2 == 23) {
-		    # random (12 23) num2
-		    $self->disasm_print("random");
-		    # a pseudo random number num2 in the range (0,1], that is,
-		    # greater than zero and less than or equal to one.
-		    my $num2 = 1 - rand(1);
-		    push @{$self->{v}}, $num2;
-		}
+                    # random (12 23) num2
+                    $self->disasm_print("random");
+                    # a pseudo random number num2 in the range (0,1], that is,
+                    # greater than zero and less than or equal to one.
+                    my $num2 = 1 - rand(1);
+                    push @{$self->{v}}, $num2;
+                }
                 elsif ($c2 == 24) {
-		    # num1 num2 mul (12 24) product
-		    $self->disasm_print("mul");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    my $product = $num1 * $num2;
-		    push @{$self->{v}}, $product;
-		}
+                    # num1 num2 mul (12 24) product
+                    $self->disasm_print("mul");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    my $product = $num1 * $num2;
+                    push @{$self->{v}}, $product;
+                }
                 elsif ($c2 == 26) {
-		    # num sqrt (12 26) num2
-		    $self->disasm_print("sqrt");
-		    my $num = pop @{$self->{v}};
-		    my $num2 = sqrt($num);
-		    push @{$self->{v}}, $num2;
-		}
+                    # num sqrt (12 26) num2
+                    $self->disasm_print("sqrt");
+                    my $num = pop @{$self->{v}};
+                    my $num2 = sqrt($num);
+                    push @{$self->{v}}, $num2;
+                }
                 elsif ($c2 == 27) {
-		    # any dup (12 27) any any
-		    $self->disasm_print("dup");
-		    my $any = pop @{$self->{v}};
-		    push @{$self->{v}}, $any, $any;
-		}
+                    # any dup (12 27) any any
+                    $self->disasm_print("dup");
+                    my $any = pop @{$self->{v}};
+                    push @{$self->{v}}, $any, $any;
+                }
                 elsif ($c2 == 28) {
-		    # num1 num2 exch (12 28) num2 num1
-		    $self->disasm_print("exch");
-		    my $num2 = pop @{$self->{v}};
-		    my $num1 = pop @{$self->{v}};
-		    push @{$self->{v}}, $num2, $num1;
-		}
+                    # num1 num2 exch (12 28) num2 num1
+                    $self->disasm_print("exch");
+                    my $num2 = pop @{$self->{v}};
+                    my $num1 = pop @{$self->{v}};
+                    push @{$self->{v}}, $num2, $num1;
+                }
                 elsif ($c2 == 29) {
-		    # numX ... num0 i index (12 29) numX ... num0 numi
+                    # numX ... num0 i index (12 29) numX ... num0 numi
 
-		    # retrieves the element i from the top of the argument stack
-		    # and pushes a copy of that element onto that stack.
-		    # If i is negative, the top element is copied.
-		    # If i is greater than X, the operation is undefined.
-		    $self->disasm_print("index");
-		    my $i = pop @{$self->{v}};
-		    my $num_i = $self->{v}->[-($i + 1)];
-		    push @{$self->{v}}, $num_i;
-		}
+                    # retrieves the element i from the top of the argument stack
+                    # and pushes a copy of that element onto that stack.
+                    # If i is negative, the top element is copied.
+                    # If i is greater than X, the operation is undefined.
+                    $self->disasm_print("index");
+                    my $i = pop @{$self->{v}};
+                    my $num_i = $self->{v}->[-($i + 1)];
+                    push @{$self->{v}}, $num_i;
+                }
                 elsif ($c2 == 30) {
-		    # num(N–1) ... num0 N J roll (12 30) num((J–1) mod N) ... num0
-		    # num(N–1) ... num(J mod N)
+                    # num(N–1) ... num0 N J roll (12 30) num((J–1) mod N) ... num0
+                    # num(N–1) ... num(J mod N)
 
-		    # performs a circular shift of the elements num(N–1) ... num0
-		    # on the argument stack by the amount J.
-		    # Positive J indicates upward motion of the stack;
-		    # negative J indicates downward motion.
-		    # The value N must be a non-negative integer,
-		    # otherwise the operation is undefined.
-		    $self->disasm_print("roll");
-		    my $J = pop @{$self->{v}};
-		    my $N = pop @{$self->{v}};
-		    if ($J) {
-			my @tmp = splice @{$self->{v}}, 0, scalar @{$self->{v}} - $N;
-			if ($J > 0) {
-			    my @num = splice @{$self->{v}}, -$J;
-			    unshift @{$self->{v}}, @num;
-			} else {
-			    my @num = splice @{$self->{v}}, 0, -$J;
-			    push @{$self->{v}}, @num;
-			}
-			unshift @{$self->{v}}, @tmp;
-		    }
-		}
+                    # performs a circular shift of the elements num(N–1) ... num0
+                    # on the argument stack by the amount J.
+                    # Positive J indicates upward motion of the stack;
+                    # negative J indicates downward motion.
+                    # The value N must be a non-negative integer,
+                    # otherwise the operation is undefined.
+                    $self->disasm_print("roll");
+                    my $J = pop @{$self->{v}};
+                    my $N = pop @{$self->{v}};
+                    if ($J) {
+                        my @tmp = splice @{$self->{v}}, 0, scalar @{$self->{v}} - $N;
+                        if ($J > 0) {
+                            my @num = splice @{$self->{v}}, -$J;
+                            unshift @{$self->{v}}, @num;
+                        } else {
+                            my @num = splice @{$self->{v}}, 0, -$J;
+                            push @{$self->{v}}, @num;
+                        }
+                        unshift @{$self->{v}}, @tmp;
+                    }
+                }
                 elsif ($c2 == 33) {
-		    $self->disasm_print("setcurrentpoint");
-		}
-		els
+                    $self->disasm_print("setcurrentpoint");
+                }
+                els
 
 =end comment
 
 =cut
 
                 if ($c2 == 34) {
-		    # |- dx1 dx2 dy2 dx3 dx4 dx5 dx6 hflex (12 34) |-
-		    $self->disasm_print("hflex");
-		    #my @args = splice @{$self->{v}}, 0, -7;
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    # |- dx1 dx2 dy2 dx3 dx4 dx5 dx6 hflex (12 34) |-
+                    $self->disasm_print("hflex");
+                    #my @args = splice @{$self->{v}}, 0, -7;
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 elsif ($c2 == 35) {
-		    # |- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 dx6 dy6 fd flex (12 35) |-
-		    $self->disasm_print("flex");
-		    #my @args = splice @{$self->{v}}, 0, -13;
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    # |- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 dx6 dy6 fd flex (12 35) |-
+                    $self->disasm_print("flex");
+                    #my @args = splice @{$self->{v}}, 0, -13;
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 elsif ($c2 == 36) {
-		    # |- dx1 dy1 dx2 dy2 dx3 dx4 dx5 dy5 dx6 hflex1 (12 36) |-
-		    $self->disasm_print("hflex1");
-		    #my @args = splice @{$self->{v}}, 0, -9;
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    # |- dx1 dy1 dx2 dy2 dx3 dx4 dx5 dy5 dx6 hflex1 (12 36) |-
+                    $self->disasm_print("hflex1");
+                    #my @args = splice @{$self->{v}}, 0, -9;
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 elsif ($c2 == 37) {
-		    # |- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 d6 flex1 (12 37) |-
-		    $self->disasm_print("flex1");
-		    #my @args = splice @{$self->{v}}, 0, -11;
-		    #$self->disasm_print("|-") if @{$self->{v}} != 0;
-		    $self->{v} = []; # clear
-		}
+                    # |- dx1 dy1 dx2 dy2 dx3 dy3 dx4 dy4 dx5 dy5 d6 flex1 (12 37) |-
+                    $self->disasm_print("flex1");
+                    #my @args = splice @{$self->{v}}, 0, -11;
+                    #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                    $self->{v} = []; # clear
+                }
                 else {
-		    $self->disasm_print("unknown_$c,$c2");
-		}
+                    $self->disasm_print("unknown_$c,$c2");
+                }
             }
             elsif ($c == 14) {
-		$self->disasm_print("endchar");
-		# – endchar (14) |–
-		$self->{w} = pop @{$self->{v}} unless defined $self->{w};
-		#my $advance = $self->PrivateDICT->{defaultWidthX};
-		#if (defined $self->{w}) {
-		#    $advance = $self->PrivateDICT->{nominalWidthX};
-		#    $advance += $self->{w};
-		#}
-		#$self->disasm_print("#advance $advance\n");
-		$self->{v} = []; # clear
-		$self->disasm_print("\n");
-		#last;
-	    }
-	    elsif ($c == 18) {
-		# |- y dy {dya dyb}* hstemhm (18) |-
-		$self->disasm_print("hstemhm");
-		&$hstem unless @{$self->{hs}};
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    elsif ($c == 19) {
-		# |- hintmask (19 + mask) |-
-		$self->disasm_print("hintmask");
-		&$vstem unless @{$self->{vs}};
-		my $m = do {
-		    my $m;
-		    if (defined (my $class = $f->{class}) && defined (my $id = $f->{id})) {
-			if (my $env = $cff // $self) {
-			    if ($env->can($class)) {
-				$m = $env->$class->{hintmask}{$id} //= &$hintmask;
-			    }
-			}
-		    }
-		    $m //= &$hintmask;
-		};
-		my $bitmask = &$getmask($m);
-		$self->disasm_print($bitmask);
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    elsif ($c == 20) {
-		# |- cntrmask (20 + mask) |-
-		$self->disasm_print("cntrmask");
-		&$vstem unless @{$self->{vs}};
-		my $m = do {
-		    my $m;
-		    if (defined (my $class = $f->{class}) && defined (my $id = $f->{id})) {
-			if (my $env = $cff // $self) {
-			    if ($env->can($class)) {
-				$m = $env->$class->{hintmask}{$id} //= &$hintmask;
-			    }
-			}
-		    }
-		    $m //= &$hintmask;
-		};
-		my $bitmask = &$getmask($m);
-		$self->disasm_print($bitmask);
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                $self->disasm_print("endchar");
+                # – endchar (14) |–
+                $self->{w} = pop @{$self->{v}} unless defined $self->{w};
+                #my $advance = $self->PrivateDICT->{defaultWidthX};
+                #if (defined $self->{w}) {
+                #    $advance = $self->PrivateDICT->{nominalWidthX};
+                #    $advance += $self->{w};
+                #}
+                #$self->disasm_print("#advance $advance\n");
+                $self->{v} = []; # clear
+                $self->disasm_print("\n");
+                #last;
+            }
+            elsif ($c == 18) {
+                # |- y dy {dya dyb}* hstemhm (18) |-
+                $self->disasm_print("hstemhm");
+                &$hstem unless @{$self->{hs}};
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            elsif ($c == 19) {
+                # |- hintmask (19 + mask) |-
+                $self->disasm_print("hintmask");
+                &$vstem unless @{$self->{vs}};
+                my $m = do {
+                    my $m;
+                    if (defined (my $class = $f->{class}) && defined (my $id = $f->{id})) {
+                        if (my $env = $cff // $self) {
+                            if ($env->can($class)) {
+                                $m = $env->$class->{hintmask}{$id} //= &$hintmask;
+                            }
+                        }
+                    }
+                    $m //= &$hintmask;
+                };
+                my $bitmask = &$getmask($m);
+                $self->disasm_print($bitmask);
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            elsif ($c == 20) {
+                # |- cntrmask (20 + mask) |-
+                $self->disasm_print("cntrmask");
+                &$vstem unless @{$self->{vs}};
+                my $m = do {
+                    my $m;
+                    if (defined (my $class = $f->{class}) && defined (my $id = $f->{id})) {
+                        if (my $env = $cff // $self) {
+                            if ($env->can($class)) {
+                                $m = $env->$class->{hintmask}{$id} //= &$hintmask;
+                            }
+                        }
+                    }
+                    $m //= &$hintmask;
+                };
+                my $bitmask = &$getmask($m);
+                $self->disasm_print($bitmask);
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 21) {
-		# |- dx1 dy1 rmoveto (21) |-
-		$self->disasm_print("rmoveto");
-		#my @args = splice @{$self->{v}}, -2 if @{$self->{v}} >= 2;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    elsif ($c == 22) {
-		# |- dx1 hmoveto (22) |-
-		$self->disasm_print("hmoveto");
-		#my @args = pop @{$self->{v}};
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    elsif ($c == 23) {
-		# |- x dx {dxa dxb}* vstemhm (23) |-
-		$self->disasm_print("vstemhm");
-		&$vstem unless @{$self->{vs}};
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    elsif ($c == 24) {
-		# |- {dxa dya dxb dyb dxc dyc}+ dxd dyd rcurveline (24) |-
-		$self->disasm_print("rcurveline");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 6);
-		#my @args = splice @{$self->{v}}, -($q * 6 + $r) if $r == 2;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    elsif ($c == 25) {
-		# |- {dxa dya}+ dxb dyb dxc dyc dxd dyd rlinecurve (25) |-
-		$self->disasm_print("rlinecurve");
-		#my ($q, $r) = idiv(scalar @{$self->{v}} - 6, 2);
-		#my @args = splice @{$self->{v}}, -($q * 2 + 6)  if @{$self->{v}} >= 8;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- dx1 dy1 rmoveto (21) |-
+                $self->disasm_print("rmoveto");
+                #my @args = splice @{$self->{v}}, -2 if @{$self->{v}} >= 2;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            elsif ($c == 22) {
+                # |- dx1 hmoveto (22) |-
+                $self->disasm_print("hmoveto");
+                #my @args = pop @{$self->{v}};
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            elsif ($c == 23) {
+                # |- x dx {dxa dxb}* vstemhm (23) |-
+                $self->disasm_print("vstemhm");
+                &$vstem unless @{$self->{vs}};
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            elsif ($c == 24) {
+                # |- {dxa dya dxb dyb dxc dyc}+ dxd dyd rcurveline (24) |-
+                $self->disasm_print("rcurveline");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 6);
+                #my @args = splice @{$self->{v}}, -($q * 6 + $r) if $r == 2;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            elsif ($c == 25) {
+                # |- {dxa dya}+ dxb dyb dxc dyc dxd dyd rlinecurve (25) |-
+                $self->disasm_print("rlinecurve");
+                #my ($q, $r) = idiv(scalar @{$self->{v}} - 6, 2);
+                #my @args = splice @{$self->{v}}, -($q * 2 + 6)  if @{$self->{v}} >= 8;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 26) {
-		# |- dx1? {dya dxb dyb dyc}+ vvcurveto (26) |-
-		$self->disasm_print("vvcurveto");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 4);
-		#my @args = splice @{$self->{v}}, -($q * 4 + $r) if $r == 0 || $r == 1;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                # |- dx1? {dya dxb dyb dyc}+ vvcurveto (26) |-
+                $self->disasm_print("vvcurveto");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 4);
+                #my @args = splice @{$self->{v}}, -($q * 4 + $r) if $r == 0 || $r == 1;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 27) {
-		# |- dy1? {dxa dxb dyb dxc}+ hhcurveto (27) |-
-		$self->disasm_print("hhcurveto");
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 4);
-		#my @args = splice @{$self->{v}}, -($q * 4 + $r) if $r == 0 || $r == 1;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
-	    # 28: following 2 bytes interpreted as a 16-bit two's complement number
+                # |- dy1? {dxa dxb dyb dxc}+ hhcurveto (27) |-
+                $self->disasm_print("hhcurveto");
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 4);
+                #my @args = splice @{$self->{v}}, -($q * 4 + $r) if $r == 0 || $r == 1;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
+            # 28: following 2 bytes interpreted as a 16-bit two's complement number
             elsif ($c == 29) {
-		# globalsubr# callgsubr (29) –
-		$self->disasm_print("callgsubr");
-		my $subr = pop @{$self->{v}};
-		my $class = 'GlobalSubr_INDEX';
-		my $cs = $self->$class;
-		my $index = $subr + $cs->bias;
-		if ($cff) {
-		    if (defined $f->{id} && defined $f->{class}) {
-			$cff->$class->{hintmask}{$index} = $cff->{$f->{class}}->{hintmask}{$f->{id}};
-		    }
-		    my $new_cs = $cff->$class;
-		    local $DISASM = [];
-		    my $code = $cs->data($index);
-		    my $tmp_code = $self->disasm({ %$f, class => $class, id => $index }, $code, $cff);
-		    $new_cs->subr($index, $tmp_code);
-		    $new_code[-2] = sub {
-			my $new_index = $new_cs->{map}{$index};
-			my $new_subr = $new_index - $new_cs->bias;
-			encode_number($new_subr);
-		    };
-		} else {
-		    local $DISASM = [];
-		    my $code = $cs->data($index);
-		    $self->disasm({ %$f, class => $class, id => $index }, $code);
-		}
-	    }
+                # globalsubr# callgsubr (29) –
+                $self->disasm_print("callgsubr");
+                my $subr = pop @{$self->{v}};
+                my $class = 'GlobalSubr_INDEX';
+                my $cs = $self->$class;
+                my $index = $subr + $cs->bias;
+                if ($cff) {
+                    if (defined $f->{id} && defined $f->{class}) {
+                        $cff->$class->{hintmask}{$index} = $cff->{$f->{class}}->{hintmask}{$f->{id}};
+                    }
+                    my $new_cs = $cff->$class;
+                    local $DISASM = [];
+                    my $code = $cs->data($index);
+                    my $tmp_code = $self->disasm({ %$f, class => $class, id => $index }, $code, $cff);
+                    $new_cs->subr($index, $tmp_code);
+                    $new_code[-2] = sub {
+                        my $new_index = $new_cs->{map}{$index};
+                        my $new_subr = $new_index - $new_cs->bias;
+                        encode_number($new_subr);
+                    };
+                } else {
+                    local $DISASM = [];
+                    my $code = $cs->data($index);
+                    $self->disasm({ %$f, class => $class, id => $index }, $code);
+                }
+            }
             elsif ($c == 30) {
-		$self->disasm_print("vhcurveto");
-		# |- dy1 dx2 dy2 dx3 {dxa dxb dyb dyc dyd dxe dye dxf}* dyf? vhcurveto (30) |-
-		# |- {dya dxb dyb dxc dxd dxe dye dyf}+ dxf? vhcurveto (30) |-
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 8);
-		#my @args = splice @{$self->{v}}, -($q * 8 + $r)
-		#    if $r == 0 || $r == 1 || $r == 4 || $r == 5;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                $self->disasm_print("vhcurveto");
+                # |- dy1 dx2 dy2 dx3 {dxa dxb dyb dyc dyd dxe dye dxf}* dyf? vhcurveto (30) |-
+                # |- {dya dxb dyb dxc dxd dxe dye dyf}+ dxf? vhcurveto (30) |-
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 8);
+                #my @args = splice @{$self->{v}}, -($q * 8 + $r)
+                #    if $r == 0 || $r == 1 || $r == 4 || $r == 5;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             elsif ($c == 31) {
-		$self->disasm_print("hvcurveto");
-		# |- dx1 dx2 dy2 dy3 {dya dxb dyb dxc dxd dxe dye dyf}* dxf? hvcurveto (31) |-
-		# |- {dxa dxb dyb dyc dyd dxe dye dxf}+ dyf? hvcurveto (31) |-
-		#my ($q, $r) = idiv(scalar @{$self->{v}}, 8);
-		#my @args = splice @{$self->{v}}, -($q * 8 + $r)
-		#    if $r == 4 || $r == 5 || $r == 0 || $r == 1;
-		#$self->disasm_print("|-") if @{$self->{v}} != 0;
-		$self->{v} = []; # clear
-	    }
+                $self->disasm_print("hvcurveto");
+                # |- dx1 dx2 dy2 dy3 {dya dxb dyb dxc dxd dxe dye dyf}* dxf? hvcurveto (31) |-
+                # |- {dxa dxb dyb dyc dyd dxe dye dxf}+ dyf? hvcurveto (31) |-
+                #my ($q, $r) = idiv(scalar @{$self->{v}}, 8);
+                #my @args = splice @{$self->{v}}, -($q * 8 + $r)
+                #    if $r == 4 || $r == 5 || $r == 0 || $r == 1;
+                #$self->disasm_print("|-") if @{$self->{v}} != 0;
+                $self->{v} = []; # clear
+            }
             else {
-		$self->disasm_print("unknown_$c");
-	    }
-	    $self->disasm_print("\n");
+                $self->disasm_print("unknown_$c");
+            }
+            $self->disasm_print("\n");
         }
     }
 
@@ -1168,32 +1168,32 @@ sub disasm_print {
     return unless $self->disasm_print_enabled;
     our $DISASM;
     for (@_) {
-	$DISASM = [] if !defined $DISASM;
-	push @{$DISASM}, [] if !defined $DISASM->[-1] || /\n/;
-	my $chunk = $_;
-	unless ($self->verbose) {
-	    $chunk =~ s/\s*#.*$//;
-	    $chunk =~ s/\s*(?:\([^)]*?\)|\|-)\s*$//;
-	}
-	if (my @chunk = split /\n/, $chunk) {
-	    push @{$DISASM->[-1]}, shift @chunk;
-	    if (@chunk) {
-		push @{$DISASM}, [];
-		$self->disasm_print(@chunk);
-	    }
-	}
+        $DISASM = [] if !defined $DISASM;
+        push @{$DISASM}, [] if !defined $DISASM->[-1] || /\n/;
+        my $chunk = $_;
+        unless ($self->verbose) {
+            $chunk =~ s/\s*#.*$//;
+            $chunk =~ s/\s*(?:\([^)]*?\)|\|-)\s*$//;
+        }
+        if (my @chunk = split /\n/, $chunk) {
+            push @{$DISASM->[-1]}, shift @chunk;
+            if (@chunk) {
+                push @{$DISASM}, [];
+                $self->disasm_print(@chunk);
+            }
+        }
     }
     if (defined wantarray) {
-	my $lines;
-	if (ref $DISASM) {
-	    $lines = [ grep { /./ } map { join ' ', @$_ } @{$DISASM} ];
-	    $DISASM = [];
-	} else {
-	    $lines = [];
-	}
-	wantarray ? @$lines : join "\n", @$lines, "";
+        my $lines;
+        if (ref $DISASM) {
+            $lines = [ grep { /./ } map { join ' ', @$_ } @{$DISASM} ];
+            $DISASM = [];
+        } else {
+            $lines = [];
+        }
+        wantarray ? @$lines : join "\n", @$lines, "";
     } else {
-	undef;
+        undef;
     }
 }
 
@@ -1202,12 +1202,12 @@ sub disasm_print {
 
 Table 2 -  CFF Data Types
 
-Name	Range		Description
-Card8	0..255		1-byte unsigned number
-Card16	0..65535	2-byte unsigned number
-Offset	varies		1, 2, 3, or 4 byte offset (specified by OffSize field)
-OffSize	1..4		1-byte unsigned number specifies the size of an Offset field or fields
-SID	0..64999	2-byte string identifier
+Name    Range           Description
+Card8   0..255          1-byte unsigned number
+Card16  0..65535        2-byte unsigned number
+Offset  varies          1, 2, 3, or 4 byte offset (specified by OffSize field)
+OffSize 1..4            1-byte unsigned number specifies the size of an Offset field or fields
+SID     0..64999        2-byte string identifier
 
 =end comment
 
@@ -1219,34 +1219,34 @@ sub decode_number {
     my $data = shift;
     my $b0 = shift @{$data};
     if ($b0 >= 32 && $b0 <= 246) {
-	return $b0 - 139;
+        return $b0 - 139;
     } elsif ($b0 >= 247 && $b0 <= 250) {
-	my $b1 = shift @{$data};
-	return ($b0 - 247) * 256 + $b1 + 108;
+        my $b1 = shift @{$data};
+        return ($b0 - 247) * 256 + $b1 + 108;
     } elsif ($b0 >= 251 && $b0 <= 254) {
-	my $b1 = shift @{$data};
-	return -($b0 - 251) * 256 - $b1 - 108
+        my $b1 = shift @{$data};
+        return -($b0 - 251) * 256 - $b1 - 108
     } elsif ($b0 == 255) {
-	my ($b1, $b2, $b3, $b4) = splice @{$data}, 0, 4;
-	my $int = $b1 << 24 | $b2 << 16 | $b3 << 8 | $b4;
-	$int = -((~$int & 0xffff_ffff) + 1) if $int & 0x8000_0000;
-	#return $int / 0x1_0000 / 0x1_0000;
-	return $int / 1 << 16;
+        my ($b1, $b2, $b3, $b4) = splice @{$data}, 0, 4;
+        my $int = $b1 << 24 | $b2 << 16 | $b3 << 8 | $b4;
+        $int = -((~$int & 0xffff_ffff) + 1) if $int & 0x8000_0000;
+        #return $int / 0x1_0000 / 0x1_0000;
+        return $int / 1 << 16;
     } elsif ($b0 == D_shortint) {
-	my ($b1, $b2) = splice @{$data}, 0, 2;
-	my $int = $b1 << 8 | $b2;
-	$int = -((~$int & 0xffff) + 1) if $int & 0x8000;
-	return $int;
+        my ($b1, $b2) = splice @{$data}, 0, 2;
+        my $int = $b1 << 8 | $b2;
+        $int = -((~$int & 0xffff) + 1) if $int & 0x8000;
+        return $int;
     } elsif ($b0 == D_longint) {
-	my ($b1, $b2, $b3, $b4) = splice @{$data}, 0, 4;
-	my $int = $b1 << 24 | $b2 << 16 | $b3 << 8 | $b4;
-	$int = -((~$int & 0xffff_ffff) + 1) if $int & 0x8000_0000;
-	return $int;
+        my ($b1, $b2, $b3, $b4) = splice @{$data}, 0, 4;
+        my $int = $b1 << 24 | $b2 << 16 | $b3 << 8 | $b4;
+        $int = -((~$int & 0xffff_ffff) + 1) if $int & 0x8000_0000;
+        return $int;
 #    } elsif ($b0 == D_BCD) {
-#	return decode_BCD($data);
+#       return decode_BCD($data);
     } else {
-	unshift @{$data}, $b0;
-	return undef;
+        unshift @{$data}, $b0;
+        return undef;
     }
 }
 
@@ -1257,27 +1257,27 @@ sub encode_number {
     croak "no data" unless defined $data; # xxxxxx
     confess "data = ''" if $data eq '';
     if ($data =~ /E|[.]/) {
-	return encode_BCD($data);
+        return encode_BCD($data);
     } elsif ($data >= -107 && $data <= 107) {
-	return pack "C*", $data + 139;
+        return pack "C*", $data + 139;
     } elsif ($data >= 108 && $data <= 1131) {
-	my $b1 = ($data - 108) % 256;
-	my $b0 = int(($data - $b1 - 108) / 256) + 247;
-	return pack "C*", $b0, $b1;
+        my $b1 = ($data - 108) % 256;
+        my $b0 = int(($data - $b1 - 108) / 256) + 247;
+        return pack "C*", $b0, $b1;
     } elsif ($data >= -1131 && $data <= -108) {
-	my $b1 = (-$data - 108) % 256;
-	my $b0 = int((-$data - $b1 - 108) / 256) + 251;
-	return pack "C*", $b0, $b1;
+        my $b1 = (-$data - 108) % 256;
+        my $b0 = int((-$data - $b1 - 108) / 256) + 251;
+        return pack "C*", $b0, $b1;
     } elsif ($data >= -32768 && $data <= 32767) {
-	my $b1 = $data & 0xff;
-	my $b0 = ($data >> 8) & 0xff;
-	return pack "C*", D_shortint, $b0, $b1;
+        my $b1 = $data & 0xff;
+        my $b0 = ($data >> 8) & 0xff;
+        return pack "C*", D_shortint, $b0, $b1;
     } else {
-	my $b3 = $data & 0xff;
-	my $b2 = ($data >> 8) & 0xff;
-	my $b1 = ($data >> 16) & 0xff;
-	my $b0 = ($data >> 24) & 0xff;
-	return pack "C*", D_longint, $b0, $b1, $b2, $b3;
+        my $b3 = $data & 0xff;
+        my $b2 = ($data >> 8) & 0xff;
+        my $b1 = ($data >> 16) & 0xff;
+        my $b0 = ($data >> 24) & 0xff;
+        return pack "C*", D_longint, $b0, $b1, $b2, $b3;
     }
 }
 
@@ -1286,44 +1286,44 @@ sub test_number_encoding {
 
     # Table 4 - Integer Format Examples
     my @ints = (
-	0 => [0x8b],
-	100 => [0xef],
-	-100 => [0x27],
-	1000 => [0xfa, 0x7c],
-	-1000 => [0xfe, 0x7c],
-	10000 => [0x1c, 0x27, 0x10],
-	-10000 => [0x1c, 0xd8, 0xf0],
-	100000 => [0x1d, 0x00, 0x01, 0x86, 0xa0],
-	-100000 => [0x1d, 0xff, 0xfe, 0x79, 0x60],
+        0 => [0x8b],
+        100 => [0xef],
+        -100 => [0x27],
+        1000 => [0xfa, 0x7c],
+        -1000 => [0xfe, 0x7c],
+        10000 => [0x1c, 0x27, 0x10],
+        -10000 => [0x1c, 0xd8, 0xf0],
+        100000 => [0x1d, 0x00, 0x01, 0x86, 0xa0],
+        -100000 => [0x1d, 0xff, 0xfe, 0x79, 0x60],
     );
     my @floats = (
-	'-2.25' => [0x1e, 0xe2, 0xa2, 0x5f],
-	'0.140541E-3' => [0x1e, 0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff],
+        '-2.25' => [0x1e, 0xe2, 0xa2, 0x5f],
+        '0.140541E-3' => [0x1e, 0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff],
     );
 
     while (my ($v, $e) = splice @ints, 0, 2) {
-	my $h1 = join ', ', map sprintf("0x%02x", $_), @$e;
-	my $e1 = pack "C*", @$e;
-	my $d = decode_number($e) // decode_BCD($e);
-	croak "could not decode_number [ $h1 ] => $d" unless $d == $v;
-	my $r1 = join ', ', map sprintf("0x%02x", $_), @$e;
-	croak "could not finish decode_number [ $h1 ] => [ $r1 ]" unless @{$e} == 0;
-	my $e2 = encode_number($v);
-	my $h2 = join ', ', map sprintf("0x%02x", $_), unpack "C*", $e2;
-	print STDERR "encode_number($v) => [ $h2 ]\n";
-	croak "could not encode_number $v => [ $h2 ]" unless $e1 eq $e2;
+        my $h1 = join ', ', map sprintf("0x%02x", $_), @$e;
+        my $e1 = pack "C*", @$e;
+        my $d = decode_number($e) // decode_BCD($e);
+        croak "could not decode_number [ $h1 ] => $d" unless $d == $v;
+        my $r1 = join ', ', map sprintf("0x%02x", $_), @$e;
+        croak "could not finish decode_number [ $h1 ] => [ $r1 ]" unless @{$e} == 0;
+        my $e2 = encode_number($v);
+        my $h2 = join ', ', map sprintf("0x%02x", $_), unpack "C*", $e2;
+        print STDERR "encode_number($v) => [ $h2 ]\n";
+        croak "could not encode_number $v => [ $h2 ]" unless $e1 eq $e2;
     }
     while (my ($v, $e) = splice @floats, 0, 2) {
-	my $h1 = join ', ', map sprintf("0x%02x", $_), @$e;
-	my $e1 = pack "C*", @$e;
-	my $d = decode_number($e) // decode_BCD($e);
-	croak "could not decode_number [ $h1 ] => $d" unless $d eq $v;
-	my $r1 = join ', ', map sprintf("0x%02x", $_), @$e;
-	croak "could not finish decode_number [ $h1 ] => [ $r1 ]" unless @{$e} == 0;
-	my $e2 = encode_number($v);
-	my $h2 = join ', ', map sprintf("0x%02x", $_), unpack "C*", $e2;
-	print STDERR "encode_number($v) => [ $h2 ]\n";
-	croak "could not encode_number $v => [ $h2 ]" unless $e1 eq $e2;
+        my $h1 = join ', ', map sprintf("0x%02x", $_), @$e;
+        my $e1 = pack "C*", @$e;
+        my $d = decode_number($e) // decode_BCD($e);
+        croak "could not decode_number [ $h1 ] => $d" unless $d eq $v;
+        my $r1 = join ', ', map sprintf("0x%02x", $_), @$e;
+        croak "could not finish decode_number [ $h1 ] => [ $r1 ]" unless @{$e} == 0;
+        my $e2 = encode_number($v);
+        my $h2 = join ', ', map sprintf("0x%02x", $_), unpack "C*", $e2;
+        print STDERR "encode_number($v) => [ $h2 ]\n";
+        croak "could not encode_number $v => [ $h2 ]" unless $e1 eq $e2;
     }
 
     0;
@@ -1335,22 +1335,22 @@ sub decode_BCD {
     my $data = shift;
     my $f = '';
     if ($data->[0] == 30) {
-	shift @{$data};
+        shift @{$data};
     } else {
-	return undef;
+        return undef;
     }
     while (1) {
-	my $b = shift @{$data};
-	last unless defined $b;
-	for ($b >> 4, $b & 15) {
-	    $f .= chr(ord('0') + $_), next if $_ >= 0 && $_ <= 9;
-	    $f .= '.', next                if $_ == 0x0a;
-	    $f .= 'E', next                if $_ == 0x0b;
-	    $f .= 'E-', next               if $_ == 0x0c;
-	    $f = '-'.$f, next              if $_ == 0x0e;
-	    return $f                      if $_ == 0x0f;
-	    croak sprintf "decode_BCD_operand: could not decode; nibble 0x%0x.\n", $_;
-	}
+        my $b = shift @{$data};
+        last unless defined $b;
+        for ($b >> 4, $b & 15) {
+            $f .= chr(ord('0') + $_), next if $_ >= 0 && $_ <= 9;
+            $f .= '.', next                if $_ == 0x0a;
+            $f .= 'E', next                if $_ == 0x0b;
+            $f .= 'E-', next               if $_ == 0x0c;
+            $f = '-'.$f, next              if $_ == 0x0e;
+            return $f                      if $_ == 0x0f;
+            croak sprintf "decode_BCD_operand: could not decode; nibble 0x%0x.\n", $_;
+        }
     }
     die "decode_BCD_operand: missing end of number.\n";
 }
@@ -1366,7 +1366,7 @@ sub encode_BCD {
     push @bcd, 0xf if @bcd & 1;
     my $bcd;
     while (my ($hi, $lo) = splice(@bcd, 0, 2)) {
-	$bcd .= chr($hi << 4 | $lo);
+        $bcd .= chr($hi << 4 | $lo);
     }
     chr(D_BCD) . $bcd;
 }
@@ -1376,21 +1376,21 @@ sub encode_BCD {
 
 # Table 6 - Operand Types
 
-Type	Description
-number	Integer or real number
-boolean	Integer type with the values 0 (false) and 1 (true)
-SID	String id (see section 10)
-array	One or more numbers
-delta	A number or a delta-encoded array of numbers (see below)
+Type    Description
+number  Integer or real number
+boolean Integer type with the values 0 (false) and 1 (true)
+SID     String id (see section 10)
+array   One or more numbers
+delta   A number or a delta-encoded array of numbers (see below)
 
 
 # Table 7 - INDEX Format
 
-Type	Name	Description
-Card16	count	Number of objects stored in INDEX
-OffSize	offSize	Offset array element size
-Offset	offset [count+1]	Offset array (from byte preceding object data)
-Card8	data [<varies>]	Object data
+Type    Name    Description
+Card16  count   Number of objects stored in INDEX
+OffSize offSize Offset array element size
+Offset  offset [count+1]        Offset array (from byte preceding object data)
+Card8   data [<varies>] Object data
 
 =end comment
 
@@ -1401,9 +1401,9 @@ sub read_INDEX {
     my $index = $self->read_INDEX_without_data(@_);
     return undef unless $index;
     if (my $length = $index->offset->[-1] - $index->offset->[0]) {
-	my ($fh) = $self->{' INFILE'};
-	$fh->read(my $dat, $length);
-	$index->{data} = $dat;
+        my ($fh) = $self->{' INFILE'};
+        $fh->read(my $dat, $length);
+        $index->{data} = $dat;
     }
     $index;
 }
@@ -1428,7 +1428,7 @@ sub read_INDEX_without_data {
     my ($count, $offSize) = unpack "nC", $dat;
     return Font::TTF::CFF_::INDEX->new(count => $count, offSize => $offSize) unless $count;
     confess "offSize $offSize is not in [ 1 .. 4 ]"
-	unless $offSize >= 1 && $offSize <= 4;
+        unless $offSize >= 1 && $offSize <= 4;
     $fh->read($dat, $offSize * ($count + 1));
     my @offset;
     my %u = (1 => "C*", 2 => "n*", 4 => "N*");
@@ -1457,16 +1457,16 @@ sub read_INDEX_without_data {
     croak "INDEX: The first offset must be 1." unless $offset[0] == 1;
 
     my $index = Font::TTF::CFF_::INDEX->new(
-	count => $count,
-	offSize => $offSize,
-	offset => \@offset,
-	data => '',
+        count => $count,
+        offSize => $offSize,
+        offset => \@offset,
+        data => '',
     );
 
     #$fh->read($dat, $offset[-1] - $offset[0]);
 
-    # Offset	offset [count+1]	Offset array (from byte preceding object data)
-    # Card8	data [<varies>]	Object data
+    # Offset    offset [count+1]        Offset array (from byte preceding object data)
+    # Card8     data [<varies>] Object data
 
     $index;
 }
@@ -1479,14 +1479,14 @@ sub pack_INDEX {
     $index->commit;
 
     do {
-	my $a = $index->count + 1;
-	my $b = @{$index->offset};
-	confess "check \$index->count + 1 ($a) == \@{\$index->offset} ($b)";
+        my $a = $index->count + 1;
+        my $b = @{$index->offset};
+        confess "check \$index->count + 1 ($a) == \@{\$index->offset} ($b)";
     } unless $index->count +1 == @{$index->offset};
 
     my %u = (1 => "C", 2 => "n", 4 => "N");
     if (my $u = $u{$index->offSize}) {
-	my $h =  pack "n1C1$u*",
+        my $h =  pack "n1C1$u*",
             $index->count,
             $index->offSize,
             @{$index->offset};
@@ -1511,11 +1511,11 @@ sub pack_INDEX {
 
 # Table 8 - Header Format
 
-Type	Name	Description
-Card8	major	Format major version (starting at 1)
-Card8	minor	Format minor version (starting at 0)
-Card8	hdrSize	Header size (bytes)
-OffSize	offSize	Absolute offset (0) size
+Type    Name    Description
+Card8   major   Format major version (starting at 1)
+Card8   minor   Format minor version (starting at 0)
+Card8   hdrSize Header size (bytes)
+OffSize offSize Absolute offset (0) size
 
 =end comment
 
@@ -1555,17 +1555,17 @@ sub get_TopDICT_Entries {
 
     #   [ Name Operand(s) Default notes ],
     for (
-	[ version => T_SID, undef, 'FontInfo' ],
+        [ version => T_SID, undef, 'FontInfo' ],
         [ Notice => T_SID, undef, 'FontInfo' ],
-	[ FullName => T_SID, undef, 'FontInfo' ],
+        [ FullName => T_SID, undef, 'FontInfo' ],
         [ FamilyName => T_SID, undef, 'FontInfo' ],
-	[ Weight => T_SID, undef, 'FontInfo' ],
-	[ UniqueID => T_number, undef, ],
-	[ FontBBox => T_array, [ 0, 0, 0, 0 ] ],
-	[ XUID => T_array,  undef, ],
-	[ charset => T_offset,  0, 'charset offset (0)' ],
-	[ Encoding => T_offset,  0, 'encoding offset (0)' ],
-	[ CharStrings => T_offset, undef, 'CharStrings offset (0)' ],
+        [ Weight => T_SID, undef, 'FontInfo' ],
+        [ UniqueID => T_number, undef, ],
+        [ FontBBox => T_array, [ 0, 0, 0, 0 ] ],
+        [ XUID => T_array,  undef, ],
+        [ charset => T_offset,  0, 'charset offset (0)' ],
+        [ Encoding => T_offset,  0, 'encoding offset (0)' ],
+        [ CharStrings => T_offset, undef, 'CharStrings offset (0)' ],
         [ Private => T_size_and_offset, undef, 'Private DICT size and offset (0)' ],
     ) {
         my $v = eval "D_$_->[0]";
@@ -1655,55 +1655,55 @@ sub DICT_Data {
 
     my $DICT = $self->DICT_defaults($entries);
     while (1) {
-	last if @{$data} == 0;
+        last if @{$data} == 0;
         my @last_data = @{$data};
-	my (@v, $ent);
+        my (@v, $ent);
         my ($k, $k2);
-	while (@$data) {
-	    my $v = decode_number($data) // decode_BCD($data);
-	    if (defined $v) {
-		push @v, $v;
-	    } else {
+        while (@$data) {
+            my $v = decode_number($data) // decode_BCD($data);
+            if (defined $v) {
+                push @v, $v;
+            } else {
                 $k = shift @{$data};
-		$ent = $entries->{$k};
+                $ent = $entries->{$k};
                 confess "unknown ent: $k" unless ref $ent;
-		if (ref $ent eq 'HASH') {
+                if (ref $ent eq 'HASH') {
                     $k2 = shift @{$data};
-		    $ent = $ent->{$k2};
+                    $ent = $ent->{$k2};
                     confess "unknown ent: $k, $k2" unless ref $ent;
-		    die "$dict_name: @v, $k, $k2" unless defined $ent;
-		}
-		last;
-	    }
-	}
+                    die "$dict_name: @v, $k, $k2" unless defined $ent;
+                }
+                last;
+            }
+        }
 
-	my ($name, $operand, $default, $note) = @{$ent};
+        my ($name, $operand, $default, $note) = @{$ent};
         print STDERR "$dict_name: $name, @v = ",
             "[ ", join(', ', map sprintf("0x%02x", $_),
                        @last_data[0..($#last_data - @{$data})]), " ]\n"
             if $self->verbose && $self->verbose >= 2; # xxxx
-	if ($operand == T_SID) {
+        if ($operand == T_SID) {
             $DICT->{$name} = $self->toString($v[0]) // $v[0];
             $DICT->{"_$name"} = $v[0];
-	} elsif ($operand == T_number ||
+        } elsif ($operand == T_number ||
                  $operand == T_offset ||
                  $operand == T_boolean) {
-	    $DICT->{$name} = $v[0];
-	} elsif ($operand == T_delta) {
-	    $DICT->{$name} = [ decode_delta(@v) ];
-	} elsif ($operand == T_array ||
+            $DICT->{$name} = $v[0];
+        } elsif ($operand == T_delta) {
+            $DICT->{$name} = [ decode_delta(@v) ];
+        } elsif ($operand == T_array ||
                  $operand == T_size_and_offset) {
-	    $DICT->{$name} = \@v;
-	} elsif ($operand == T_ROS) {
+            $DICT->{$name} = \@v;
+        } elsif ($operand == T_ROS) {
             $DICT->{$name} = [
                 $self->toString($v[0]) // $v[0],
                 $self->toString($v[1]) // $v[1],
                 $v[2],
             ];
             $DICT->{"_$name"} = \@v;
-	} else {
-	    croak "$dict_name: unknown operand #$operand\n";
-	}
+        } else {
+            croak "$dict_name: unknown operand #$operand\n";
+        }
     }
     $DICT;
 }
@@ -1721,16 +1721,16 @@ sub DICT_defaults {
     my $entries = shift;
     my $defaults;
     for my $i (keys %{$entries}) {
-	my $ent = $entries->{$i};
-	if (ref $ent eq 'HASH') {
-	    for my $j (keys %{$ent}) {
-		my ($name, $operand, $default, $note) = @{$ent->{$j}};
-		$defaults->{$name} = $default;
-	    }
-	} else {
-	    my ($name, $operand, $default, $note) = @{$ent};
-	    $defaults->{$name} = $default;
-	}
+        my $ent = $entries->{$i};
+        if (ref $ent eq 'HASH') {
+            for my $j (keys %{$ent}) {
+                my ($name, $operand, $default, $note) = @{$ent->{$j}};
+                $defaults->{$name} = $default;
+            }
+        } else {
+            my ($name, $operand, $default, $note) = @{$ent};
+            $defaults->{$name} = $default;
+        }
     }
     $defaults;
 }
@@ -1740,24 +1740,24 @@ sub make_INDEX {
     my $self = shift;
     my @data = @_;
     if (@data == 1 && ref $data[0] eq 'ARRAY') {
-	@data = @{$data[0]};
+        @data = @{$data[0]};
     }
 
     my @offset = (1);
     my $data = '';
     for (@data) {
-	if (defined) {
-	    $data .= $_;
-	    push @offset, $offset[-1] + length;
-	} else {
-	    push @offset, $offset[-1] + 0;
-	}
+        if (defined) {
+            $data .= $_;
+            push @offset, $offset[-1] + length;
+        } else {
+            push @offset, $offset[-1] + 0;
+        }
     }
 
     my $index = Font::TTF::CFF_::INDEX->new(
-	count => scalar(@offset) - 1,
-	offset => \@offset,
-	data => $data,
+        count => scalar(@offset) - 1,
+        offset => \@offset,
+        data => $data,
     );
 
 }
@@ -1835,10 +1835,10 @@ sub pack_DICT {
     $order{join $;, D_escape, D_ROS} = $ord++; # 1
     $order{join $;, D_version} = $ord++;
     $order{join $;, D_escape, D_Copyright} = $ord++;
-    $order{join $;, D_Notice} = $ord++;	    # 2
+    $order{join $;, D_Notice} = $ord++;     # 2
     $order{join $;, D_FullName} = $ord++;   # 3
     $order{join $;, D_FamilyName} = $ord++; # 4
-    $order{join $;, D_Weight} = $ord++;	    # 5
+    $order{join $;, D_Weight} = $ord++;     # 5
     $order{join $;, D_escape, D_isFixedPitch} = $ord++;
     $order{join $;, D_escape, D_ItalicAngle} = $ord++;
     $order{join $;, D_escape, D_UnderlinePosition} = $ord++; # 6
@@ -1886,9 +1886,9 @@ sub pack_DICT {
     $order{join $;, D_nominalWidthX} = $ord++;
 
     @keys = sort {
-	my $oa = $order{join $;, @$a};
-	my $ob = $order{join $;, @$b};
-	$oa <=> $ob || $a->[0] <=> $b->[0] || ($a->[1] // '') <=> ($b->[1] // '')
+        my $oa = $order{join $;, @$a};
+        my $ob = $order{join $;, @$b};
+        $oa <=> $ob || $a->[0] <=> $b->[0] || ($a->[1] // '') <=> ($b->[1] // '')
     } @keys;
 
 =end comment
@@ -1931,8 +1931,8 @@ sub pack_dict_item {
     #return undef if defined $v && defined $default && "$v" eq "$default";
 
     if ($operand == T_SID) {
-	#my $v = $_v // $self->toSID($v);
-	my $v = $self->toSID($v);
+        #my $v = $_v // $self->toSID($v);
+        my $v = $self->toSID($v);
         return undef if defined $default && $v == $default;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
         return encode_number($v);
@@ -1940,7 +1940,7 @@ sub pack_dict_item {
              $operand == T_boolean) {
         return undef if defined $default && $v == $default;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
-	return encode_number($v);
+        return encode_number($v);
     } elsif ($operand == T_delta) {
         return undef if cmp_array($v, $default) == 0;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
@@ -1948,13 +1948,13 @@ sub pack_dict_item {
     } elsif ($operand == T_array) {
         return undef if cmp_array($v, $default) == 0;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
-	return join '', encode_array(@$v);
+        return join '', encode_array(@$v);
     } elsif ($operand == T_ROS) {
         #my $v = $_v // [map +($self->toSID($_->[0]), $self->toSID($_->[1]), $_->[2]), $v ];
         my $v = [ map +($self->toSID($_->[0]), $self->toSID($_->[1]), $_->[2]), $v ];
         return undef if cmp_array($v, $default) == 0;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
-	return join '', encode_array(@$v);
+        return join '', encode_array(@$v);
     } elsif ($operand == T_offset) {
         return undef if defined $default && $v == $default;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
@@ -1963,9 +1963,9 @@ sub pack_dict_item {
         return undef if cmp_array($v, $default) == 0;
         print STDERR "pack $dict_name: $name: $s\n" if $self->verbose && $self->verbose == 2;
         my ($size, $offset) = @$v;
-	return join '', encode_number($size), encode_number($offset);
+        return join '', encode_number($size), encode_number($offset);
     } else {
-	croak "pack $dict_name: unknown operand #$operand\n";
+        croak "pack $dict_name: unknown operand #$operand\n";
     }
     undef;
 }
@@ -1975,8 +1975,8 @@ sub encode_offset {
     my ($size, $data) = @_;
     my @data;
     for (1 .. $size) {
-	unshift @data, $data & 0xff;
-	$data >>= 8;
+        unshift @data, $data & 0xff;
+        $data >>= 8;
     }
     return pack "C*", @data;
 }
@@ -2001,17 +2001,17 @@ sub toSID {
     my $string = shift;
     my $nStandardStrings = @{$self->StandardStrings};
     unless ($self->{String}) {
-	for (0 .. $nStandardStrings - 1) {
-	    $self->{String}{$self->StandardStrings->[$_]} = $_;
-	}
-	for (0 .. $self->String_INDEX->count - 1) {
-	    $self->{String}{$self->String_INDEX->data($_)} = $_ + $nStandardStrings;
-	}
+        for (0 .. $nStandardStrings - 1) {
+            $self->{String}{$self->StandardStrings->[$_]} = $_;
+        }
+        for (0 .. $self->String_INDEX->count - 1) {
+            $self->{String}{$self->String_INDEX->data($_)} = $_ + $nStandardStrings;
+        }
     }
     my $sid = $self->{String}{$string};
     unless (defined $sid) {
-	my $i = $self->String_INDEX->add($string);
-	$sid = $self->{String}{$string} = $i + $nStandardStrings;
+        my $i = $self->String_INDEX->add($string);
+        $sid = $self->{String}{$string} = $i + $nStandardStrings;
     }
     $sid;
 }
@@ -2042,77 +2042,77 @@ sub get_Encoding {
 
     # Table 16
     if ($pos == 0) {
-	$encoding = {
-	    format => undef,
-	    Id => $pos,
-	    code => $self->StandardEncoding,
-	};
+        $encoding = {
+            format => undef,
+            Id => $pos,
+            code => $self->StandardEncoding,
+        };
     } elsif ($pos == 1) {
-	$encoding = {
-	    format => undef,
-	    Id => $pos,
-	    code => $self->ExpertEncoding,
-	};
+        $encoding = {
+            format => undef,
+            Id => $pos,
+            code => $self->ExpertEncoding,
+        };
     } elsif (($pos & ~3) == 0) {
-	return undef;
+        return undef;
     } else {
-	my @code = (0); # as SID or CID
+        my @code = (0); # as SID or CID
         my ($dat);
         my ($fh) = $self->{' INFILE'};
-	$fh->seek($self->{' OFFSET'} + $pos, 0) if defined $pos;
+        $fh->seek($self->{' OFFSET'} + $pos, 0) if defined $pos;
         $fh->read($dat, 2);
-	my ($format, $n) = unpack "CC", $dat;
-	my $mask = 15;
-	if (($format & $mask) == 0) {
-	    # Table 11
-	    my $nCodes = $n;
+        my ($format, $n) = unpack "CC", $dat;
+        my $mask = 15;
+        if (($format & $mask) == 0) {
+            # Table 11
+            my $nCodes = $n;
             $fh->read($dat, $n);
-	    push @code, unpack "C*", $dat;
-	    $encoding = {
-		format => $format,
-		nCodes => $n,
-		code => \@code,
-	    };
-	} elsif (($format & $mask) == 1) {
-	    # Table 12
-	    my $nRanges = $n;
+            push @code, unpack "C*", $dat;
+            $encoding = {
+                format => $format,
+                nCodes => $n,
+                code => \@code,
+            };
+        } elsif (($format & $mask) == 1) {
+            # Table 12
+            my $nRanges = $n;
 
-	    # Table 13 - first, nLeft
+            # Table 13 - first, nLeft
             $fh->read($dat, 2 * $n);
-	    my @Range = unpack "CC" x $n, $dat;
-	    while (my ($first, $nLeft) = splice @Range, 0, 2) {
-		push @code, $first;
-		push @code, map $first + $_, 1 .. $nLeft if $nLeft >= 1;
-	    }
-	    $encoding = {
-		format => $format,
-		nRanges => $n, Ranges => \@Range,
-		code => \@code,
-	    };
-	} else {
-	    croak "Encoding: unknown format $format";
-	}
+            my @Range = unpack "CC" x $n, $dat;
+            while (my ($first, $nLeft) = splice @Range, 0, 2) {
+                push @code, $first;
+                push @code, map $first + $_, 1 .. $nLeft if $nLeft >= 1;
+            }
+            $encoding = {
+                format => $format,
+                nRanges => $n, Ranges => \@Range,
+                code => \@code,
+            };
+        } else {
+            croak "Encoding: unknown format $format";
+        }
 
-	# A few fonts have multiply-encoded glyphs which are not
-	# supported directly by any of the above formats (Table 11,
-	# 12, 13). This situation is indicated by setting the
-	# high-order bit in the format byte and supplementing the
-	# encoding, regardless of format type, as shown in #Table 14.
+        # A few fonts have multiply-encoded glyphs which are not
+        # supported directly by any of the above formats (Table 11,
+        # 12, 13). This situation is indicated by setting the
+        # high-order bit in the format byte and supplementing the
+        # encoding, regardless of format type, as shown in #Table 14.
 
-	if ($format & ~$mask) {
-	    # Table 14
+        if ($format & ~$mask) {
+            # Table 14
             $fh->read($dat, 1);
-	    my $nSups = unpack "C", $dat;
+            my $nSups = unpack "C", $dat;
 
-	    # Table 15 - code, glyph
-	    croak "encoding is null" unless $encoding;
-	    $encoding->{nSups} = $nSups;
+            # Table 15 - code, glyph
+            croak "encoding is null" unless $encoding;
+            $encoding->{nSups} = $nSups;
             $fh->read($dat, 3 * $nSups);
-	    my @Supplement = unpack "Cn" x $nSups, $dat;
-	    while (my ($code, $glyph) = splice @Supplement, 0, 2) {
-		$encoding->{code}->[$glyph] = $code;
-	    }
-	}
+            my @Supplement = unpack "Cn" x $nSups, $dat;
+            while (my ($code, $glyph) = splice @Supplement, 0, 2) {
+                $encoding->{code}->[$glyph] = $code;
+            }
+        }
     }
 
     $encoding;
@@ -2122,26 +2122,26 @@ sub get_Encoding {
 sub pack_Encoding {
     my $self = shift;
     for (shift // $self->Encoding) {
-	if (ref eq 'HASH') {
-	    if (defined $_->{Id}) {
-		$self->TopDICT->{Encoding} = $_->{Id};
-		return '';
-	    }
-	    $_ = $_->{code} if defined $_->{code};
-	}
-	if (ref eq 'ARRAY') {
-	    my $enc = pack "n*", @$_;
-	    if ($enc eq pack "n*", @{$self->StandardEncoding}) {
-		print STDERR "pack_Encoding: StandardEncoding\n" if $self->verbose && $self->verbose >= 2;
-		$self->TopDICT->{Encoding} = 0;
-		return '';
-	    }
-	    if ($enc eq pack "n*", @{$self->ExpertEncoding}) {
-		print STDERR "pack_Encoding: ExpertEncoding\n" if $self->verbose && $self->verbose >= 2;
-		$self->TopDICT->{Encoding} = 1;
-		return '';
-	    }
-	    my @range = encode_seqlen($_);
+        if (ref eq 'HASH') {
+            if (defined $_->{Id}) {
+                $self->TopDICT->{Encoding} = $_->{Id};
+                return '';
+            }
+            $_ = $_->{code} if defined $_->{code};
+        }
+        if (ref eq 'ARRAY') {
+            my $enc = pack "n*", @$_;
+            if ($enc eq pack "n*", @{$self->StandardEncoding}) {
+                print STDERR "pack_Encoding: StandardEncoding\n" if $self->verbose && $self->verbose >= 2;
+                $self->TopDICT->{Encoding} = 0;
+                return '';
+            }
+            if ($enc eq pack "n*", @{$self->ExpertEncoding}) {
+                print STDERR "pack_Encoding: ExpertEncoding\n" if $self->verbose && $self->verbose >= 2;
+                $self->TopDICT->{Encoding} = 1;
+                return '';
+            }
+            my @range = encode_seqlen($_);
             if (@range * 2 >= @$_) {
                 # format 0
                 return pack "CCC*", 0, scalar @$_, @$_;
@@ -2160,13 +2160,13 @@ sub encode_seqlen {
     my $i = shift // 0;
     my $m = @{$arr};
     while (!defined $arr->[$m - 1]) {
-	$m--;
+        $m--;
     }
     my $j = $i;
     my @range;
     while ($i < $m) {
         $j = $arr->[$i];
-	#last unless defined $j;
+        #last unless defined $j;
         my $n = 0;
         while (defined $arr->[$i + $n + 1]) {
             last unless $j + $n + 1 == $arr->[$i + $n + 1];
@@ -2196,57 +2196,57 @@ sub get_Charset {
     # Table 22
     my $pos = $self->TopDICT->{charset};
     if ($pos == 0) {
-	$charset = {
-	    format => undef,
-	    Id => $pos,
-	    code => $self->ISOAdobeCharset,
-	};
+        $charset = {
+            format => undef,
+            Id => $pos,
+            code => $self->ISOAdobeCharset,
+        };
     } elsif ($pos == 1) {
-	$charset = {
-	    format => undef,
-	    Id => $pos,
-	    code => $self->ExpertCharset,
-	};
+        $charset = {
+            format => undef,
+            Id => $pos,
+            code => $self->ExpertCharset,
+        };
     } elsif ($pos == 2) {
-	$charset = {
-	    format => undef,
-	    Id => $pos,
-	    code => $self->ExpertSubsetCharset,
-	};
+        $charset = {
+            format => undef,
+            Id => $pos,
+            code => $self->ExpertSubsetCharset,
+        };
     } else {
-	return undef unless my $nGlyphs = $self->nGlyphs;
+        return undef unless my $nGlyphs = $self->nGlyphs;
         my ($dat);
         my ($fh) = $self->{' INFILE'};
         $fh->seek($self->{' OFFSET'} + $pos, 0) if defined $pos;
         $fh->read($dat, 1);
-	my ($format) = unpack "C", $dat;
-	my @code = (0);
-	if ($format == 0) {
-	    # Table 17
+        my ($format) = unpack "C", $dat;
+        my @code = (0);
+        if ($format == 0) {
+            # Table 17
             $fh->read($dat, 2 * ($nGlyphs - 1));
-	    push @code, unpack "n*", $dat;
-	} else {
-	    # Table 18 + Table 19 ... (Format 1)
-	    # Table 20 + Table 21 ... (Format 2)
-	    my %u = (1 => [ "nC", 3, 'Card8' ], 2 => [ "nn", 4, 'Card16' ]);
-	    if (my $u = $u{$format}) {
-		my $count = $nGlyphs - 1;
-		while ($count > 0) {
+            push @code, unpack "n*", $dat;
+        } else {
+            # Table 18 + Table 19 ... (Format 1)
+            # Table 20 + Table 21 ... (Format 2)
+            my %u = (1 => [ "nC", 3, 'Card8' ], 2 => [ "nn", 4, 'Card16' ]);
+            if (my $u = $u{$format}) {
+                my $count = $nGlyphs - 1;
+                while ($count > 0) {
                     $fh->read($dat, $u->[1]);
-		    my ($first, $nLeft) = unpack $u->[0], $dat;
-		    push @code, $first;
-		    push @code, map $first + $_, 1 .. $nLeft if $nLeft >= 1;
-		    $count -= 1 + $nLeft;
-		}
-	    } else {
-		croak "Charset: unknown format #$format";	# xxxxx
+                    my ($first, $nLeft) = unpack $u->[0], $dat;
+                    push @code, $first;
+                    push @code, map $first + $_, 1 .. $nLeft if $nLeft >= 1;
+                    $count -= 1 + $nLeft;
+                }
+            } else {
+                croak "Charset: unknown format #$format";       # xxxxx
                 $format = undef;
-	    }
-	}
-	$charset = {
-	    format => $format,
-	    code => \@code,
-	};
+            }
+        }
+        $charset = {
+            format => $format,
+            code => \@code,
+        };
     }
 
     $charset;
@@ -2256,51 +2256,51 @@ sub get_Charset {
 sub pack_Charset {
     my $self = shift;
     for (shift // $self->Charset) {
-	if (ref eq 'HASH') {
-	    if (defined $_->{Id}) {
-		$self->TopDICT->{charset} = $_->{Id}; # xxxxx
-		return '';
-	    }
-	    $_ = $_->{code} if defined $_->{code};
-	}
-	if (ref eq 'ARRAY') {
-	    # cid 0 .notdef glyph is omitted.
-	    my $start = 0;
-	    $start++ if $_->[$start] == 0;
-	    my $cs = pack "n*", @{$_}[$start..$#{$_}];
-	    if ($cs eq pack "n*", @{$self->ISOAdobeCharset}) {
-		print STDERR "pack_Charset: ISOAdobeCharset\n" if $self->verbose && $self->verbose >= 2;
-		$self->TopDICT->{Charset} = 0;
-		return '';
-	    }
-	    if ($cs eq pack "n*", @{$self->ExpertCharset}) {
-		print STDERR "pack_Charset: ExpertCharset\n" if $self->verbose && $self->verbose >= 2;
-		$self->TopDICT->{Charset} = 1;
-		return '';
-	    }
-	    if ($cs eq pack "n*", @{$self->ExpertSubsetCharset}) {
-		print STDERR "pack_Charset: ExpertSubsetCharset\n" if $self->verbose && $self->verbose >= 2;
-		$self->TopDICT->{Charset} = 2;
-		return '';
-	    }
-	    my @range = encode_seqlen($_, $start);
-	    my $n = scalar @range;
-	    my $m = max map $_->[1], @range;
-	    if ($n && $m <= 255 && $n * 3 <= @{$_}) {
-		# format 1
-		return pack "C(nC)$n", 1, map @$_, @range;
-	    } elsif (@range && $m >= 255 && @range * 4 <= @{$_}) {
-		# format 2
-		return pack "C(nn)$n", 2, map @$_, @range;
-	    } else {
-		my @code;
-		for my $i (1 .. $#{$_}) {
-		    push @code, $_->[$i] // 0;
-		}
-		# format 0
-		return pack "Cn*", 0, @code;
-	    }
-	}
+        if (ref eq 'HASH') {
+            if (defined $_->{Id}) {
+                $self->TopDICT->{charset} = $_->{Id}; # xxxxx
+                return '';
+            }
+            $_ = $_->{code} if defined $_->{code};
+        }
+        if (ref eq 'ARRAY') {
+            # cid 0 .notdef glyph is omitted.
+            my $start = 0;
+            $start++ if $_->[$start] == 0;
+            my $cs = pack "n*", @{$_}[$start..$#{$_}];
+            if ($cs eq pack "n*", @{$self->ISOAdobeCharset}) {
+                print STDERR "pack_Charset: ISOAdobeCharset\n" if $self->verbose && $self->verbose >= 2;
+                $self->TopDICT->{Charset} = 0;
+                return '';
+            }
+            if ($cs eq pack "n*", @{$self->ExpertCharset}) {
+                print STDERR "pack_Charset: ExpertCharset\n" if $self->verbose && $self->verbose >= 2;
+                $self->TopDICT->{Charset} = 1;
+                return '';
+            }
+            if ($cs eq pack "n*", @{$self->ExpertSubsetCharset}) {
+                print STDERR "pack_Charset: ExpertSubsetCharset\n" if $self->verbose && $self->verbose >= 2;
+                $self->TopDICT->{Charset} = 2;
+                return '';
+            }
+            my @range = encode_seqlen($_, $start);
+            my $n = scalar @range;
+            my $m = max map $_->[1], @range;
+            if ($n && $m <= 255 && $n * 3 <= @{$_}) {
+                # format 1
+                return pack "C(nC)$n", 1, map @$_, @range;
+            } elsif (@range && $m >= 255 && @range * 4 <= @{$_}) {
+                # format 2
+                return pack "C(nn)$n", 2, map @$_, @range;
+            } else {
+                my @code;
+                for my $i (1 .. $#{$_}) {
+                    push @code, $_->[$i] // 0;
+                }
+                # format 0
+                return pack "Cn*", 0, @code;
+            }
+        }
     }
     die "cant pack_Charset";
 }
@@ -2318,12 +2318,12 @@ sub get_nGlyphs {
     my ($dat);
     my ($fh) = $self->{' INFILE'};
     if ($self->CharStrings_INDEX) {
-	return $self->CharStrings_INDEX->count;
+        return $self->CharStrings_INDEX->count;
     } else {
-	my $lastpos = $fh->tell;
-	my $index = $self->read_INDEX_without_data($self->TopDICT->{CharStrings});
-	$fh->seek($lastpos, 0);
-	return $index->count;
+        my $lastpos = $fh->tell;
+        my $index = $self->read_INDEX_without_data($self->TopDICT->{CharStrings});
+        $fh->seek($lastpos, 0);
+        return $index->count;
     }
 }
 
@@ -2333,9 +2333,9 @@ sub FDSelect {
     $self->{FDSelect} //= $self->get_FDSelect;
     my $gid = shift;
     if (defined $gid) {
-	$self->{FDSelect}{gid2fdindex}->[$gid];
+        $self->{FDSelect}{gid2fdindex}->[$gid];
     } else {
-	$self->{FDSelect};
+        $self->{FDSelect};
     }
 }
 
@@ -2355,7 +2355,7 @@ sub get_FDSelect {
     my $format = unpack "C", $dat;
     $FDSelect->{format} = $format;
     if ($format == 0) {
-	return undef unless my $nGlyphs = $self->nGlyphs;
+        return undef unless my $nGlyphs = $self->nGlyphs;
         $fh->read($dat, 1 * $nGlyphs);
         my @gid2fdindex = unpack "C*", $dat;
         $FDSelect->{gid2fdindex} = \@gid2fdindex;
@@ -2386,19 +2386,19 @@ sub get_FDSelect {
 sub pack_FDSelect {
     my $self = shift;
     for (shift // $self->FDSelect) {
-	if (ref eq 'HASH') {
-	    if (defined $_->{format} && ref $_->{gid2fdindex} eq 'ARRAY') {
-		return $self->pack_FDS0($_->{gid2fdindex}) if $_->{format} == 0;
-		return $self->pack_FDS3($_->{gid2fdindex}) if $_->{format} == 3;
-	    }
-	    $_ = $_->{gid2fdindex} if defined $_->{gid2fdindex};
-	}
-	if (ref $_ eq 'ARRAY') {
-	    my $fds0 = $self->pack_FDS0($_);
-	    my $fds3 = $self->pack_FDS3($_);
-	    return $fds0 if length $fds0 < length $fds3;
-	    return $fds3;
-	}
+        if (ref eq 'HASH') {
+            if (defined $_->{format} && ref $_->{gid2fdindex} eq 'ARRAY') {
+                return $self->pack_FDS0($_->{gid2fdindex}) if $_->{format} == 0;
+                return $self->pack_FDS3($_->{gid2fdindex}) if $_->{format} == 3;
+            }
+            $_ = $_->{gid2fdindex} if defined $_->{gid2fdindex};
+        }
+        if (ref $_ eq 'ARRAY') {
+            my $fds0 = $self->pack_FDS0($_);
+            my $fds3 = $self->pack_FDS3($_);
+            return $fds0 if length $fds0 < length $fds3;
+            return $fds3;
+        }
     }
     die "cant pack_FDSelect";
 }
@@ -2410,13 +2410,13 @@ sub pack_FDS0 {
     my @fds;
     my $tmp;
     for (@$fds) {
-	next unless defined;
-	$tmp = $_;
-	last;
+        next unless defined;
+        $tmp = $_;
+        last;
     }
     for (@$fds) {
-	$tmp = $_ if defined;
-	push @fds, $tmp;
+        $tmp = $_ if defined;
+        push @fds, $tmp;
     }
     pack "CC*", 0, @fds;
 }
@@ -2429,15 +2429,15 @@ sub pack_FDS3 {
     my $ranges;
     my $i = 0;
     while ($i < @{$gid2fdindex}) {
-	next if !defined $gid2fdindex->[$i];
-	my $j = $i + 1;
-	while ($j < @{$gid2fdindex}) {
-	    last if defined $gid2fdindex->[$j] && $gid2fdindex->[$i] != $gid2fdindex->[$j];
-	    $j++;
-	}
-	$nRanges++;
-	$ranges .= pack "nC", $i, $gid2fdindex->[$i];
-	$i = $j;
+        next if !defined $gid2fdindex->[$i];
+        my $j = $i + 1;
+        while ($j < @{$gid2fdindex}) {
+            last if defined $gid2fdindex->[$j] && $gid2fdindex->[$i] != $gid2fdindex->[$j];
+            $j++;
+        }
+        $nRanges++;
+        $ranges .= pack "nC", $i, $gid2fdindex->[$i];
+        $i = $j;
     }
     my $raw = pack "C", 3;
     $raw .= pack "n", $nRanges;
@@ -2464,16 +2464,16 @@ sub pack_CharStrings {
 sub FontDICT {
     my $self = shift;
     if (@_) {
-	my $index = shift;
-	unless (defined $self->FDArray->[$index]->{'*Private'}) {
-	    $self->setup_PrivateDICT_and_LocalSubr_INDEX("FontDICT.$index", $self->FDArray->[$index]);
-	    $self->FDArray->[$index]->{'*Private'} = $self->PrivateDICT;
-	    $self->FDArray->[$index]->{'*Private'}{'*Subrs'} = $self->LocalSubr_INDEX;
-	}
-	for ($self->{FontDICT} = $self->FDArray->[$index]) {
-	    $self->PrivateDICT($_->{'*Private'});
-	    $self->LocalSubr_INDEX($_->{'*Private'}{'*Subrs'});
-	}
+        my $index = shift;
+        unless (defined $self->FDArray->[$index]->{'*Private'}) {
+            $self->setup_PrivateDICT_and_LocalSubr_INDEX("FontDICT.$index", $self->FDArray->[$index]);
+            $self->FDArray->[$index]->{'*Private'} = $self->PrivateDICT;
+            $self->FDArray->[$index]->{'*Private'}{'*Subrs'} = $self->LocalSubr_INDEX;
+        }
+        for ($self->{FontDICT} = $self->FDArray->[$index]) {
+            $self->PrivateDICT($_->{'*Private'});
+            $self->LocalSubr_INDEX($_->{'*Private'}{'*Subrs'});
+        }
     }
     $self->{FontDICT};
 }
@@ -2487,18 +2487,18 @@ sub setup_PrivateDICT_and_LocalSubr_INDEX {
     if (my $private = $dict->{Private}) {
         my ($size, $offset) = @$private;
         if ($size && $offset) {
-	    my ($fh) = $self->{' INFILE'};
+            my ($fh) = $self->{' INFILE'};
             $fh->seek($self->{' OFFSET'} + $offset, 0);
             $fh->read(my ($dat), $size);
             my @data = unpack "C*", $dat;
-	    my $pdict = $self->DICT_Data($dict_name, $self->DICT_operators, \@data);
-	    $self->PrivateDICT($pdict);
+            my $pdict = $self->DICT_Data($dict_name, $self->DICT_operators, \@data);
+            $self->PrivateDICT($pdict);
             if (my $subrs = $pdict->{Subrs}) {
                 my $lsubr_index = $self->read_SubrINDEX($offset + $subrs);
-		$self->LocalSubr_INDEX($lsubr_index);
-		return ($pdict, $lsubr_index);
+                $self->LocalSubr_INDEX($lsubr_index);
+                return ($pdict, $lsubr_index);
             }
-	    return $pdict;
+            return $pdict;
         }
     }
     undef;
@@ -2520,7 +2520,7 @@ sub get_FDArray {
         for (0 .. $index->count - 1) {
             my @data = unpack "C*", $index->data($_);
             $font_dict[$_] = $self->DICT_Data("FontDICT.$_", $self->DICT_operators, \@data);
-	}
+        }
     }
     \@font_dict;
 }
@@ -3295,10 +3295,10 @@ sub new {
 sub subr {
     my ($self, $index, $code) = @_;
     if (defined $index && defined $code) {
-	#$self->{count} = undef;
-	#$self->{offSize} = undef;
-	$self->{subr}{$index} = $code;
-	$self->{map}{$index} = undef;
+        #$self->{count} = undef;
+        #$self->{offSize} = undef;
+        $self->{subr}{$index} = $code;
+        $self->{map}{$index} = undef;
     }
     $self->{subr};
 }
@@ -3311,14 +3311,14 @@ sub remap {
     my $name = shift;
     my @opt = @_;
     if (defined (my $h = $self->{$name})) {
-	$self->{$name} = {};
-	for my $index (keys %{$self->{map}}) {
-	    my $new_index = $self->{map}{$index};
-	    if (defined (my $m = $h->{$index})) {
-		$self->{$name}{$new_index} = $m;
-		#print STDERR "#remap @opt $name $m, $index => $new_index\n";
-	    }
-	}
+        $self->{$name} = {};
+        for my $index (keys %{$self->{map}}) {
+            my $new_index = $self->{map}{$index};
+            if (defined (my $m = $h->{$index})) {
+                $self->{$name}{$new_index} = $m;
+                #print STDERR "#remap @opt $name $m, $index => $new_index\n";
+            }
+        }
     }
 }
 
@@ -3329,15 +3329,15 @@ sub remap {
 sub add {
     my $self = shift;
     if (@_) {
-	$self->{count} = undef;
-	$self->{offSize} = undef;
-	my $i = $#{$self->offset};
-	$i += @{$self->stage} if $self->stage;
-	my $n = @_;
-	$self->stage(@_);
-	wantarray? ($i .. ($i + $n - 1)) : $i;
+        $self->{count} = undef;
+        $self->{offSize} = undef;
+        my $i = $#{$self->offset};
+        $i += @{$self->stage} if $self->stage;
+        my $n = @_;
+        $self->stage(@_);
+        wantarray? ($i .. ($i + $n - 1)) : $i;
     } else {
-	undef;
+        undef;
     }
 }
 
@@ -3345,8 +3345,8 @@ sub add {
 sub stage {
     my $self = shift;
     if (@_) {
-	$self->{stage} //= [];
-	push @{$self->{stage}}, @_;
+        $self->{stage} //= [];
+        push @{$self->{stage}}, @_;
     }
     $self->{stage};
 }
@@ -3355,32 +3355,32 @@ sub stage {
 sub commit {
     my $self = shift;
     if (defined $self->{subr}) {
-	for (sort { $a <=> $b } keys %{$self->{subr}}) {
-	    if (!defined $self->{map}{$_}) {
-		$self->{map}{$_} = $self->add($self->{subr}{$_});
-	    }
-	}
-	delete $self->{subr};
+        for (sort { $a <=> $b } keys %{$self->{subr}}) {
+            if (!defined $self->{map}{$_}) {
+                $self->{map}{$_} = $self->add($self->{subr}{$_});
+            }
+        }
+        delete $self->{subr};
     }
     if ($self->stage) {
-	for (@{$self->stage}) {
-	    if (ref eq 'ARRAY') {
-		for (@$_) {
-		    if (ref eq 'CODE') {
-			for (&$_) {
-			    $self->{data} .= $_ if defined;
-			}
-		    } else {
-			$self->{data} .= $_ if defined;
-		    }
-		}
-	    } else {
-		$self->{data} .= $_ if defined && length > 0;
-	    }
-	    push @{$self->{offset}}, 1 + length $self->{data};
-	}
-	$self->{count} = $#{$self->offset};
-	delete $self->{stage};
+        for (@{$self->stage}) {
+            if (ref eq 'ARRAY') {
+                for (@$_) {
+                    if (ref eq 'CODE') {
+                        for (&$_) {
+                            $self->{data} .= $_ if defined;
+                        }
+                    } else {
+                        $self->{data} .= $_ if defined;
+                    }
+                }
+            } else {
+                $self->{data} .= $_ if defined && length > 0;
+            }
+            push @{$self->{offset}}, 1 + length $self->{data};
+        }
+        $self->{count} = $#{$self->offset};
+        delete $self->{stage};
     }
 }
 
@@ -3389,25 +3389,25 @@ sub data {
     my $self = shift;
     $self->commit;
     if (@_) {
-	my $i = shift;  # $i = 0: indicates the first element.
-	if ($i >= 0 && $i <= $self->count - 1) {
-	    if ($i >= (my $n = $#{$self->{offset}})) {
-		if ((my $j = $i - $n) < @{$self->stage}) {
-		    return $self->stage->[$j];
-		}
-	    }
-	    my $j0 = $self->{offset}->[$i];
-	    my $j1 = $self->{offset}->[$i + 1];
-	    confess "Perhaps \"out of range\" subscripts are used " .
-		"on \$self->{offset}->[$i + 1]; count is " . $self->count
-		unless (defined $j1);
-	    my $n = $j1 - $j0;
-	    return substr $self->{data}, $j0 - 1, $n;
-	} else {
-	    confess "index $i is out of range [0 .. " . ($self->count - 1) . "]";
-	}
+        my $i = shift;  # $i = 0: indicates the first element.
+        if ($i >= 0 && $i <= $self->count - 1) {
+            if ($i >= (my $n = $#{$self->{offset}})) {
+                if ((my $j = $i - $n) < @{$self->stage}) {
+                    return $self->stage->[$j];
+                }
+            }
+            my $j0 = $self->{offset}->[$i];
+            my $j1 = $self->{offset}->[$i + 1];
+            confess "Perhaps \"out of range\" subscripts are used " .
+                "on \$self->{offset}->[$i + 1]; count is " . $self->count
+                unless (defined $j1);
+            my $n = $j1 - $j0;
+            return substr $self->{data}, $j0 - 1, $n;
+        } else {
+            confess "index $i is out of range [0 .. " . ($self->count - 1) . "]";
+        }
     } else {
-	return $self->{data};
+        return $self->{data};
     }
 }
 
@@ -3423,9 +3423,9 @@ sub count {
     return $self->{count} if defined $self->{count};
     my $count = 0;
     for (keys %{$self->{subr}}) {
-	if (!defined $self->{map}{$_}) {
-	    $count++;
-	}
+        if (!defined $self->{map}{$_}) {
+            $count++;
+        }
     }
     $count += scalar @{$self->stage} if exists $self->{stage} && ref $self->stage;
     $self->{count} = $count;
@@ -3439,13 +3439,13 @@ sub bias {
     my $self = shift;
     my $count = shift // $self->count;
     if (defined $self->TopDICT && $self->TopDICT->{CharstringType} == 1) {
-	return 0;
+        return 0;
     } elsif ($count < 1240) {
-	return 107;
+        return 107;
     } elsif ($count < 33900) {
-	return 1131;
+        return 1131;
     } else {
-	return 32768;
+        return 32768;
     }
 }
 
@@ -3483,66 +3483,66 @@ sub dump_xml {
     $self->_p;
     $self->p(qq<CFF>);
     for (qw/major minor/) {
-	my $value = $cff->Header->{$_};
-	$self->p(qq<$_ value="$value"/>);
+        my $value = $cff->Header->{$_};
+        $self->p(qq<$_ value="$value"/>);
     }
     my $fontname = $cff->Name_INDEX->data(0);
     $self->p(qq<CFFFont name="$fontname">);
     for my $tag (qw/ROS/) {
-	for ($cff->TopDICT->{$tag}) {
-	    $self->p(qq[<$tag Registry="$_->[0]" Order="$_->[1]" Supplement="$_->[2]"/>]);
-	}
+        for ($cff->TopDICT->{$tag}) {
+            $self->p(qq[<$tag Registry="$_->[0]" Order="$_->[1]" Supplement="$_->[2]"/>]);
+        }
     }
     for my $tag (qw( Notice FullName FamilyName Weight isFixedPitch ItalicAngle
-		     UnderlinePosition UnderlineThickness PaintType CharstringType
-		     FontMatrix FontBBox StrokeWidth XUID CIDFontVersion
-		     CIDFontRevision CIDFontType CIDCount )) {
-	for ($cff->TopDICT->{$tag}) {
-	    if (defined) {
-		if (ref) {
-		    $self->p(qq[<$tag value="@$_"/>]);
-		} else {
-		    $self->p(qq[<$tag value="$_"/>]);
-		}
-	    }
-	}
+                     UnderlinePosition UnderlineThickness PaintType CharstringType
+                     FontMatrix FontBBox StrokeWidth XUID CIDFontVersion
+                     CIDFontRevision CIDFontType CIDCount )) {
+        for ($cff->TopDICT->{$tag}) {
+            if (defined) {
+                if (ref) {
+                    $self->p(qq[<$tag value="@$_"/>]);
+                } else {
+                    $self->p(qq[<$tag value="$_"/>]);
+                }
+            }
+        }
     }
 
     $self->p(qq<!-- charset is dumped separately as the 'GlyphOrder' element -->);
     for my $tag (qw/FDSelect/) {
-	for (qw/format/) {
-	    my $value = $cff->{FDSelect}->{$_} // "";
-	    $self->p(qq<$tag $_="$value"/>);
-	}
+        for (qw/format/) {
+            my $value = $cff->{FDSelect}->{$_} // "";
+            $self->p(qq<$tag $_="$value"/>);
+        }
     }
     $self->p(qq<FDArray>);
     for my $index (0 .. $#{$cff->FDArray}) {
-	$self->p(qq<FontDict index="$index">);
-	my $fdict = $cff->FontDICT($index);
-	for (qw/FontName/) {
-	    my $value = $fdict->{$_} // "";
-	    $self->p(qq<$_ value="$value"/>);
-	}
-	if ($cff->PrivateDICT) {
-	    $self->p(qq<Private>);
-	    for my $tag (qw( BlueValues OtherBlues BlueScale BlueShift BlueFuzz
-			     StdHW StdVW StemSnapH StemSnapV ForceBold
-			     LanguageGroup ExpansionFactor initialRandomSeed
-			     defaultWidthX nominalWidthX )) {
-		for ($cff->PrivateDICT->{$tag}) {
-		    if (defined) {
-			if (ref) {
-			    $self->p(qq[<$tag value="@$_"/>]);
-			} else {
-			    $self->p(qq[<$tag value="$_"/>]);
-			}
-		    }
-		}
-	    }
-	    $self->dump_xml_subrs($cff, 'LocalSubr_INDEX', 'Subrs');
-	    $self->p(qq</Private>);
-	}
-	$self->p(qq</FontDict>);
+        $self->p(qq<FontDict index="$index">);
+        my $fdict = $cff->FontDICT($index);
+        for (qw/FontName/) {
+            my $value = $fdict->{$_} // "";
+            $self->p(qq<$_ value="$value"/>);
+        }
+        if ($cff->PrivateDICT) {
+            $self->p(qq<Private>);
+            for my $tag (qw( BlueValues OtherBlues BlueScale BlueShift BlueFuzz
+                             StdHW StdVW StemSnapH StemSnapV ForceBold
+                             LanguageGroup ExpansionFactor initialRandomSeed
+                             defaultWidthX nominalWidthX )) {
+                for ($cff->PrivateDICT->{$tag}) {
+                    if (defined) {
+                        if (ref) {
+                            $self->p(qq[<$tag value="@$_"/>]);
+                        } else {
+                            $self->p(qq[<$tag value="$_"/>]);
+                        }
+                    }
+                }
+            }
+            $self->dump_xml_subrs($cff, 'LocalSubr_INDEX', 'Subrs');
+            $self->p(qq</Private>);
+        }
+        $self->p(qq</FontDict>);
     }
     $self->p(qq</FDArray>);
     $self->dump_xml_charstrings($cff);
@@ -3563,20 +3563,20 @@ sub dump_xml_charstrings {
     my $class = 'CharStrings_INDEX';
     $self->p(qq<CharStrings>);
     for my $gid (0, $cff->gid) {
-	my $index = $cff->{FDSelect}{gid2fdindex}->[$gid];
-	my $cid = $cff->Charset->{code}->[$gid];
-	#my $psname = $cff->toString($cid) // sprintf "cid%05d", $cid;
-	my $psname = $cid == 0 ? ".notdef" : sprintf "cid%05d", $cid;
-	$self->p(qq<CharString name="$psname" fdSelectIndex="$index">);
-	my $fdict = $cff->FontDICT($index);
-	$cff->PrivateDICT($fdict->{'*Private'});
-	if (my $private = $cff->PrivateDICT) {
-	    $cff->LocalSubr_INDEX($private->{'*Subrs'});
-	}
-	my $code = $cff->$class->data($gid);
-	$cff->disasm({ class => $class, id => $gid }, $code);
-	$self->_p($_) for $cff->disasm_print();
-	$self->p(qq</CharString>);
+        my $index = $cff->{FDSelect}{gid2fdindex}->[$gid];
+        my $cid = $cff->Charset->{code}->[$gid];
+        #my $psname = $cff->toString($cid) // sprintf "cid%05d", $cid;
+        my $psname = $cid == 0 ? ".notdef" : sprintf "cid%05d", $cid;
+        $self->p(qq<CharString name="$psname" fdSelectIndex="$index">);
+        my $fdict = $cff->FontDICT($index);
+        $cff->PrivateDICT($fdict->{'*Private'});
+        if (my $private = $cff->PrivateDICT) {
+            $cff->LocalSubr_INDEX($private->{'*Subrs'});
+        }
+        my $code = $cff->$class->data($gid);
+        $cff->disasm({ class => $class, id => $gid }, $code);
+        $self->_p($_) for $cff->disasm_print();
+        $self->p(qq</CharString>);
     }
     $self->p(qq</CharStrings>);
 }
@@ -3589,18 +3589,18 @@ sub dump_xml_subrs {
     my $tag = shift // $class;
     my $subrs = $cff->$class;
     if ($subrs && $subrs->count > 0) {
-	$self->p(qq<$tag>);
-	$self->_p(qq(<!-- The 'index' attribute is only for humans; it is ignored when parsed. -->));
-	for my $i (0 .. $subrs->count - 1) {
-	    #my $subr = $i - $subrs->bias;
-	    #$self->p(qq<CharString index="$i" subr="$subr">);
-	    $self->p(qq<CharString index="$i">);
-	    my $code = $cff->$class->data($i);
-	    $cff->disasm({ class => $class, id => $i }, $code);
-	    $self->_p($_) for $cff->disasm_print();
-	    $self->p(qq</CharString>);
-	}
-	$self->p(qq</$tag>);
+        $self->p(qq<$tag>);
+        $self->_p(qq(<!-- The 'index' attribute is only for humans; it is ignored when parsed. -->));
+        for my $i (0 .. $subrs->count - 1) {
+            #my $subr = $i - $subrs->bias;
+            #$self->p(qq<CharString index="$i" subr="$subr">);
+            $self->p(qq<CharString index="$i">);
+            my $code = $cff->$class->data($i);
+            $cff->disasm({ class => $class, id => $i }, $code);
+            $self->_p($_) for $cff->disasm_print();
+            $self->p(qq</CharString>);
+        }
+        $self->p(qq</$tag>);
     }
 }
 
@@ -3621,8 +3621,8 @@ sub p {
 sub _p {
     my $self = shift;
     if (@_) {
-	my $in = "  " x ($self->{p_indent} // 0);
-	print {$self->{file}} $in, @_;
+        my $in = "  " x ($self->{p_indent} // 0);
+        print {$self->{file}} $in, @_;
     }
     print {$self->{file}} "\n";
 }
