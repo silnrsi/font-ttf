@@ -1,3 +1,18 @@
+1.07  (in development)
+
+* Add support for cmap format 14 subtables (Unicode Variation Sequences)
+* Bux fixes
+*    Format 3 contextual lookups now correclty parsed
+*    CV feature params now correclty parsed
+*    PSNames such as "_four" and "a_zork" were incorrectly identified as Adobe-conformant
+* Improved:
+*    Glyphs in glyf table now word-aligned
+*    Calculation of usLastCharIndex
+*    Calculation of hhea metrics
+*    Composite glyph handling
+*    Glat table support
+*    Handling of scaled components in update_bbox()
+
 1.06  2016-08-17
 
 * Source repo moved from Subversion to Github
