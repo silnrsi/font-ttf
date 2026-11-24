@@ -5,7 +5,7 @@ use strict;
 my $font;
 BEGIN {
     ($font) = grep -f, (
-        #"../noto/SauceHanSansJP-Regular.TTF",
+        "misc/ipaexg.ttf",
         "/usr/share/fonts/opentype/ipaexfont-gothic/ipaexg.ttf", # ubuntu
         "/usr/local/share/fonts/OTF/ipaexg.otf", # freebsd
     );
